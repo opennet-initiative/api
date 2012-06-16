@@ -1,3 +1,4 @@
+# -*- coding: UTF8 -*-
 '''
 Created on 01.05.2012
 
@@ -14,7 +15,7 @@ sys.path.insert(0, BASE_DIR)
 import cherrypy
 import pickle
 import geojson
-#import geronimo
+import geronimo
 from primitives import *
 
 WIKI_CACHE_FILE = os.path.join(BASE_DIR, "wiki_nodes.cache")
@@ -190,9 +191,9 @@ def getJSONProperties(props):
     return remain
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-#config=geronimo.__initConfig()
-#inits=geronimo.__configToDictonary(config,"www")
-#cherrypy.config.update({'environment': inits["environment"], 'log.screen': True})
+config=geronimo.__initConfig() #auskommentieren für server
+inits=geronimo.__configToDictonary(config,"www")
+cherrypy.config.update({'environment': inits["environment"], 'log.screen': True})
 
 conf = {'/www': {'tools.staticdir.on': True, 'tools.staticdir.dir': os.path.join(current_dir, 'www')}}
 
