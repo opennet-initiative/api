@@ -27,7 +27,7 @@ class DBimporter():
         
     def importDB(self,aps=None):
         logging.log(logging.DEBUG, "db: requesting")
-        cur.execute('SELECT mainip,sys_board,sys_os_type,sys_os_name,sys_os_rel,on_wifidog_status,on_vpn_status,on_ugw_enabled FROM nodes')
+        cur.execute('SELECT mainip,sys_board,sys_os_type,sys_os_name,sys_os_rel,on_wifidog_status,on_vpn_status,on_ugw_status FROM nodes')
         for row in cur:
             ip=row[0]
             if aps is not None:

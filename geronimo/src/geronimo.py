@@ -39,6 +39,7 @@ from helpers.lastseen import lastSeenImporter
 from helpers.expDB import DBimporter
 from helpers.olsrdstats import OLSRDimporter
 from helpers.cables import cablesImporter
+from primitives import APstat
 
 global logger
 
@@ -69,7 +70,14 @@ def __initConfig():
     config = SafeConfigParser()
     logging.log(logging.DEBUG, "loading config")
     config.read(CONFIG_FILE)
-    return config        
+    return config      
+
+def __printStats(aps,links):
+    ap_online=0
+    for ap in aps.values():
+        if (ap.state == APstat.ONLINE) :
+            ap_online=ap_online+1
+    print "Finished: %(online)u / %(total)u APs online (%(links)u Links)" % {"online":ap_online,"total":len(aps),"links":len(links)}  
 
 def __saveCache(filename,objects):
     fcache=file(filename,"w")
@@ -100,8 +108,8 @@ if __name__ == '__main__':
     cables=cablesImporter(links)
     links=cables.importCables()
     links=wiki.importBackbones(links)
-    
-    
+    #Finish
+    __printStats(aps,links)    
     __saveCache(WIKI_CACHE_FILE,aps)
     __saveCache(LINK_CACHE_FILE,links)
     '''
@@ -114,4 +122,6 @@ if __name__ == '__main__':
     for p in monitor.getNewAccessPointPages():
         print p
     '''
+    
+    
 

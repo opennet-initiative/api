@@ -11,7 +11,6 @@ by Matthias Meiﬂer, released under GPL
 	<script type="text/javascript" src="OpenStreetMap.js"></script>
 	<script type="text/javascript" src="cloudmade.js"></script>
 	<!--  <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAttEBvEvohslM2ILNmTwbJxQPKwSEMYVQ3izDaG3Nju_GNCI9nhT7SUbfaHxXJyjkky0KCQwOGRERvA'></script>-->
-	<script src="stat.js" charset="utf-8"></script>
 
 
   <style>.pop_heading{font-family: Arial, Helvetica, sans-serif; font-weight: bold;font-size:16px}</style>
@@ -23,8 +22,8 @@ by Matthias Meiﬂer, released under GPL
 	
 	</style>
   <script>
-//	var BASE_URL="http://www.opennet-initiative.de/api"
-	var BASE_URL="http://localhost:8080/api" //for local testing environment
+	var BASE_URL="http://www.opennet-initiative.de/api"
+//	var BASE_URL="http://localhost:8080/api" //for local testing environment
 	var proj4326
 	var projmerc
 	var map
@@ -53,38 +52,18 @@ by Matthias Meiﬂer, released under GPL
 						new OpenLayers.Control.PanZoomBar(),
 						new OpenLayers.Control.MousePosition(),
 						new OpenLayers.Control.Attribution(),
-						new OpenLayers.Control.ScaleLine()],maxExtent:
-								new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34, 20037508.34),
-							numZoomLevels: 18,
-									maxResolution: 156543,
-									units: 'm',
-									projection: projmerc,
-									displayProjection: proj4326
+						new OpenLayers.Control.ScaleLine()],
+							units: 'm',
+							projection: projmerc,
+							displayProjection: proj4326,
+							numZoomLevels:20
 					} );
 		//add base layers			
 		baseLayers.push(new OpenLayers.Layer.XYZ('MapQuest', 'http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png', { lid: 'mapquest',attribution:'Data CC-By-SA by <a href="http://www.openstreetmap.org">OpenStreetMap</a><br>Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'}));
-/* ein paar andere Stile die ganz nett aussehen aber einfach zuviele sind
-		baseLayers.push(new OpenLayers.Layer.CloudMade("Midnight", {
-    key: 'dc74e77645164d3589708d11abf5314b',
-    styleId: 999
-}));
-		baseLayers.push(new OpenLayers.Layer.CloudMade("Orange", {
-    key: 'dc74e77645164d3589708d11abf5314b',
-    styleId: 2172
-}));
-		baseLayers.push(new OpenLayers.Layer.CloudMade("Fresh", {
-    key: 'dc74e77645164d3589708d11abf5314b',
-    styleId: 997
-}));
-		baseLayers.push(new OpenLayers.Layer.CloudMade("Rot", {
-    key: 'dc74e77645164d3589708d11abf5314b',
-    styleId: 8
-})); */
 		osmmap=new OpenLayers.Layer.OSM("OpenStreetMap");
 		osmmap.setOpacity(0.7);
 		baseLayers.push(osmmap);
 		baseLayers.push(new OpenLayers.Layer.WMS( "Amtliche Luftbilder","http://www.geodaten-mv.de/dienste/adv_dop", {layers: 'adv_dop'} ));
-//		baseLayers.push(new OpenLayers.Layer.Google("Google Satellite",{type: G_SATELLITE_MAP, isBaseLayer:true, sphericalMercator:true}));
 		map.addLayers(baseLayers);
 		addOverlays();
 		//init Interaction
@@ -113,7 +92,7 @@ by Matthias Meiﬂer, released under GPL
 		label: "${getLabel}",
 		fontSize: "10px",
 		fontFamily: "Calibri, Verdana, Arial, sans-serif",
-		labelAlign: "mt",
+		labelAlign: "lt",
 		title: "${getTitle}",
 		//shape
 		fill: true,
@@ -134,7 +113,8 @@ by Matthias Meiﬂer, released under GPL
              else return "";
         },
         getTitle: function(feature) {
-			return getID(feature.data.id);
+			return "lol";
+			//return getID(feature.data.id);
         }
 	}});
 	var statesStyles = {
