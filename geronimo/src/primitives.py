@@ -8,6 +8,7 @@ class APstat():
     ONLINE=0
     FLAPPING=1
     DEAD=3
+    UNUSED=4
     
     
 
@@ -29,8 +30,8 @@ class Link():
     def __init__(self,ap1,ap2):
         self.ap1=ap1 #we use IPs only, to shrink down the dunp of the links list
         self.ap2=ap2
-        self.lq=None
-        self.color=None
+        self.etx=None
+        self.etxcolor=None
         self.cable=None
         self.backbone=None
 

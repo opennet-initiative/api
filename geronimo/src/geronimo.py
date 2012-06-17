@@ -74,7 +74,13 @@ def __initConfig():
     conf = SafeConfigParser()
     logging.log(logging.DEBUG, "loading conf")
     conf.read(CONFIG_FILE)
-    return conf      
+    return conf
+
+def __markUnused(aps):
+    '''Identifies APs that are obviously not in use'''
+    for ap in aps.values():
+        if ap.position is None:
+            ap.state=APstat.UNUSED      
 
 def __printStats(aps, links):
     '''prints results in a single line'''
@@ -114,6 +120,7 @@ if __name__ == '__main__':
     links = cables.importCables()
     links = wiki.importBackbones(links)
     #Finish
+    __markUnused(aps)
     __printStats(aps, links)    
     __saveCache(WIKI_CACHE_FILE, aps)
     __saveCache(LINK_CACHE_FILE, links)

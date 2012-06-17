@@ -67,20 +67,19 @@ by Matthias Meiﬂer, released under GPL
 		map.addLayers(baseLayers);
 		addOverlays();
 		//init Interaction
-		var select_online = new OpenLayers.Control.SelectFeature(aps_online, {clickout: true,multiple: false,onSelect: nodeSelect,onUnselect:nodeUnselect});
+		var select_online = new OpenLayers.Control.SelectFeature(aps_online, {clickout: true,toggle:true,multiple: false,onSelect: nodeSelect,onUnselect:nodeUnselect});
 		map.addControl(select_online);
-		var select_offline = new OpenLayers.Control.SelectFeature(aps_offline, {clickout: true,multiple: false,onSelect: nodeSelect,onUnselect:nodeUnselect});
+		var select_offline = new OpenLayers.Control.SelectFeature(aps_offline, {clickout: true,toggle:true,multiple: false,onSelect: nodeSelect,onUnselect:nodeUnselect});
 		map.addControl(select_offline);		
 		select_online.activate();
 		select_offline.activate();
 //		panel=createMeasurePanel();
 //		map.addControl(panel);
 		//center map
-		pos=new OpenLayers.LonLat(12.12,54.08);//wir zoomen auf Rostock
+		pos=new OpenLayers.LonLat(12.12,54.08);//Default: wir zoomen auf Rostock
 		if (!map.getCenter())
 		{
-			map.setCenter(pos.transform(proj4326,projmerc),13)
-			
+			map.setCenter(pos.transform(proj4326,projmerc),13)			
 		}
 	}
 
@@ -166,7 +165,7 @@ by Matthias Meiﬂer, released under GPL
 			url: BASE_URL+'/nodes/offline/',
 			format:new OpenLayers.Format.GeoJSON()
 		}),
-		strategies:[new OpenLayers.Strategy.BBOX()],
+		strategies:[new OpenLayers.Strategy.BBOX(),refreshtimer],
 		styleMap: nodesStyleMap,
 		visibility:false
 	});
@@ -183,7 +182,7 @@ by Matthias Meiﬂer, released under GPL
 				};
 			},			
 			getColor:function(feature) {
-				return feature.data.color;
+				return feature.data.etxcolor;
 			},
 			getWidth:function(feature) {
 				if (feature.data.backbone)
@@ -200,7 +199,7 @@ by Matthias Meiﬂer, released under GPL
 			url: BASE_URL+'/links/online/',
 			format:new OpenLayers.Format.GeoJSON()
 		}),
-		strategies:[new OpenLayers.Strategy.BBOX()],
+		strategies:[new OpenLayers.Strategy.BBOX(),refreshtimer],
 		styleMap: linksStyleMap,
 	});
 	map.addLayers([aps_online,aps_offline,links]);
@@ -219,7 +218,7 @@ by Matthias Meiﬂer, released under GPL
 		feature.popup.minSize=new OpenLayers.Size(250,400);
 		feature.popup.autoSize=true;	
 		map.addPopup(feature.popup);
-        }
+    }
 
 	//close popup
 	function nodeUnselect(feature) {

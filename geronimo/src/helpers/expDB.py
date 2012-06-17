@@ -64,3 +64,7 @@ class DBimporter():
                     "":"WRAP 2E-E"}
         strBoardID=strBoardID.rstrip()
         return board2name[strBoardID]
+    
+    def __importLinks(self, links):
+        'SELECT mainip, if_name,  wlan_essid, wlan_mode, wlan_channel, wlan_freq FROM ifaces WHERE wlan_essid IS not "" ORDER BY wlan_essid'
+        return None

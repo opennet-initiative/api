@@ -73,9 +73,15 @@ class wikiImporter():
                     if item!="\n" and item!="---\n" and len(item)>5:
                         [ip,position]=self.__parseAP(item)
                         try:
+                            #update existing AP
                             self.__aps[ip].position=position
+                            if (position.coordinates==["",""]):
+                                self.__aps[ip].state=APstat.UNUSED
                         except KeyError:
+                            #or create new one
                             n=AccesPoint(ip,position)
+                            if (position.coordinates==["",""]):
+                                n.state=APstat.UNUSED
                             self.__aps[ip]=n
         return self.__aps
     

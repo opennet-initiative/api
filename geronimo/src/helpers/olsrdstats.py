@@ -49,23 +49,21 @@ class OLSRDimporter():
                                     if (line.find("192.168.0.")==-1): #ignore Gateways
                                         logging.log(logging.ERROR, "OLSRD: missing AP geoposition: "+self.__getLinkID(line))       
         return links
-    
+      
     def __importLink(self,line):
         global positions
         cols=line.split("\t")
         start=cols[0]
         end=cols[1]
-        lq=cols[2]
-        lq=float(lq.split("/")[0]) #LQ only stored for one direction
-        if lq<=0.3: state="bad"
+        etx=cols[3]  #ETX only stored for one direction
+        if (etx=="INFINITE"):
+            color=self.__getETXColor(10.0)
         else:
-            if lq>0.3 and lq<=0.6: state=u"medium"
-            else:
-                state=u"good"
-        lqcolor=self.__getLQColor(lq)
+            etx=float(etx)            
+            color=self.__getETXColor(etx)
         link=Link(self.__aps[start].id,self.__aps[end].id)
-        link.lq=lq
-        link.color=lqcolor
+        link.etx=etx
+        link.etxcolor=color
         return link
 
 
@@ -87,8 +85,12 @@ class OLSRDimporter():
         endIP=cols[1]
         return startIP+"-"+endIP
 
-    def __getLQColor(self,lq):
-        hue=lq*0.666 #to shift the pallet like in the original Alfredi colouring
+    def __getETXColor(self,etx):
+        '''ETX 1.0 is optimal (blue), 3.0 is acceptable(yellow), > is unusable'''
+        hue=(10-etx)/10 #limit to 10 and inverse direction
+        hue=hue*0.666 #to become 1.0=blue
+        if (etx>3.0):
+            hue=hue*0.5 #3.0 yellow
         col=colorsys.hsv_to_rgb(hue,0.9,0.9)
         col=hex(int(col[0]*255))+hex(int(col[1]*255))+hex(int(col[2]*255))
         col="#"+col.replace("0x","")

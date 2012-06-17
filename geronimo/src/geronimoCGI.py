@@ -91,12 +91,16 @@ def loadCache(filename):
 def getJSONaps(nodes):
     items=""
     for ap in nodes.values():
-        items=items+getJSONap(ap)+","
+        if ap.state!=APstat.UNUSED:
+            items=items+getJSONap(ap)+","
     items=items[:len(items)-1]
     return '{ "type": "FeatureCollection","features": ['+items+']}'
 
-def getJSONap(ap):        
-    geometry=geojson.dumps(ap.position)
+def getJSONap(ap):
+    try:        
+        geometry=geojson.dumps(ap.position)
+    except:
+        print ap.id
     _tmp=ap.__dict__
     del _tmp["position"]
     properties=str(getJSONProperties(_tmp)).replace("'", '"')
