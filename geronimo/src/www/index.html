@@ -85,6 +85,10 @@ by Matthias Meiﬂer, released under GPL
 
 	function addOverlays()
 	{
+		
+		// allow testing of specific renderers via "?renderer=Canvas", etc
+		var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+		renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
 		//------Nodes----
 	var nodeStyle = new OpenLayers.Style({
 		//text
@@ -151,6 +155,7 @@ by Matthias Meiﬂer, released under GPL
 	nodesStyleMap.addUniqueValueRules("default", "wifidog", wifidogStyles);
 	nodesStyleMap.addUniqueValueRules("default", "ugw", ugwStyles);
 	aps_online=new OpenLayers.Layer.Vector("APs online",{
+		renderers: renderer,
 		projection:proj4326,
 		protocol:new OpenLayers.Protocol.HTTP({
 			url: BASE_URL+'/nodes/online/',
@@ -160,6 +165,7 @@ by Matthias Meiﬂer, released under GPL
 		styleMap: nodesStyleMap
 	});
 	aps_offline=new OpenLayers.Layer.Vector("APs offline",{
+		renderers: renderer,
 		projection:proj4326,
 		protocol:new OpenLayers.Protocol.HTTP({
 			url: BASE_URL+'/nodes/offline/',
