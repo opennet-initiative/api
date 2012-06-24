@@ -123,9 +123,9 @@ by Matthias Meiﬂer, released under GPL
 	var statesStyles = {
 	    3: { //offline
 			fillColor: "grey",
-			fillOpacity: 0.3,
+			fillOpacity: 0.5,
 			strokeColor: "black",
-			strokeOpacity: 0.3
+			strokeOpacity: 0.5
 			},
 		1: { //flapping
 			fillColor: "red",
@@ -248,7 +248,8 @@ by Matthias Meiﬂer, released under GPL
 		text=text+getLine("UGW",data.ugw);
 		text=text+getLine("Wifidog",data.wifidog);
 		text=text+"</table>"
-		text=text+'<br><a href="http://www.opennet-initiative.de/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=day"><img src="http://www.opennet-initiative.de/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=day" alt="Verlauf LQ" width="247" height="137px"/></a>';	
+		text=text+'<br><a href="http://www.opennet-initiative.de/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=week"><img src="http://www.opennet-initiative.de/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=day" alt="Verlauf ETX (klicken f¸r Wochen¸bersicht)" title="Verlauf ETX (klicken f¸r Wochen¸bersicht)" width="247" height="137px"/></a>';
+		text=text+'<br>Zuletzt gesehen:<br>'+data.lastonline;
 		text=text+'<br><br><a href="http://wiki.on-i.de/wiki/AP'+id+'" target="_blank"'+">Wiki</a>"
 		text=text+' <a href="http://'+data.id+'" target="_blank"'+">Webinterface</a>"
 		text=text+' <a href="http://'+data.id+':8080" target="_blank"'+">OLSRd</a>"
