@@ -22,8 +22,8 @@ by Matthias Meiﬂer, released under GPL
 	
 	</style>
   <script>
-	var BASE_URL="http://www.opennet-initiative.de/api"
-//	var BASE_URL="http://localhost:8080/api" //for local testing environment
+//	var BASE_URL="http://www.opennet-initiative.de/api"
+	var BASE_URL="http://localhost:8080/api" //for local testing environment
 	var proj4326
 	var projmerc
 	var map
@@ -90,6 +90,7 @@ by Matthias Meiﬂer, released under GPL
 		var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
 		renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
 		//------Nodes----
+/*		
 	var nodeStyle = new OpenLayers.Style({
 		//text
 		label: "${getLabel}",
@@ -149,11 +150,41 @@ by Matthias Meiﬂer, released under GPL
 			strokeWidth: 3
 			}
 	}
+*/	
+	var debugstyle = new OpenLayers.Style({
+		//text
+		fontSize: "10px",
+		fontFamily: "Calibri, Verdana, Arial, sans-serif",
+		labelAlign: "lt",
+		title: "${getTitle}",
+		//shape
+		fill: true,
+		fillColor: "${getFill}",
+		stroke: true,
+		strokeColor: "#2004dd",
+		strokeOpacity: 0.8,
+		strokeDashstyle: 'solid',
+		pointRadius: 4,
+		strokeWidth: 1
+	},{context: {
+		getFill: function (feature) {
+			if (feature.data.board == null)
+			{
+				return "red";
+			}
+			else return "green";
+		},
+        getTitle: function(feature) {
+			return "lol";
+			//return getID(feature.data.id);
+        }
+	}});
+
 	refreshtimer=new OpenLayers.Strategy.Refresh({interval:60000,force:true});
-	var nodesStyleMap =new OpenLayers.StyleMap({"default": nodeStyle})
-	nodesStyleMap.addUniqueValueRules("default", "state", statesStyles);
-	nodesStyleMap.addUniqueValueRules("default", "wifidog", wifidogStyles);
-	nodesStyleMap.addUniqueValueRules("default", "ugw", ugwStyles);
+	var nodesStyleMap =new OpenLayers.StyleMap({"default": debugstyle})
+//	nodesStyleMap.addUniqueValueRules("default", "state", statesStyles);
+//	nodesStyleMap.addUniqueValueRules("default", "wifidog", wifidogStyles);
+//	nodesStyleMap.addUniqueValueRules("default", "ugw", ugwStyles);
 	aps_online=new OpenLayers.Layer.Vector("APs online",{
 		renderers: renderer,
 		projection:proj4326,

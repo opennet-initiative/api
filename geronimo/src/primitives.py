@@ -5,6 +5,7 @@ Created on 19.10.2011
 '''
 
 class APstat():
+    '''Enumeration of states for a AP'''
     ONLINE=0
     FLAPPING=1
     DEAD=3
