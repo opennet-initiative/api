@@ -27,22 +27,25 @@ class DBimporter():
         
     def importDB(self,aps=None):
         logging.log(logging.DEBUG, "db: requesting")
-        cur.execute('SELECT mainip,sys_board,sys_os_type,sys_os_name,sys_os_rel,on_wifidog_status,on_vpn_status,on_ugw_status FROM nodes')
-        for row in cur:
-            ip=row[0]
-            if aps is not None:
-                try:
-                    ap=aps[ip]
-                except KeyError:
-                    aps[ip]=ap
-            else:
-                ap=primitives.AccesPoint(ip,None)
-            ap.board=self.__parseBoardID(row[1])
-            ap.os=str(row[2]+"("+row[3]+" "+row[4]+")")
-            ap.wifidog=row[5]
-            ap.vpn=row[6]
-            ap.ugw=row[7]
-            aps[ip]=ap
+        try:
+            cur.execute('SELECT mainip,sys_board,sys_os_type,sys_os_name,sys_os_rel,on_wifidog_status,on_vpn_status,on_ugw_status FROM nodes')
+            for row in cur:
+                ip=row[0]
+                if aps is not None:
+                    try:
+                        ap=aps[ip]
+                    except KeyError:
+                        aps[ip]=ap
+                else:
+                    ap=primitives.AccesPoint(ip,None)
+                ap.board=self.__parseBoardID(row[1])
+                ap.os=str(row[2]+"("+row[3]+" "+row[4]+")")
+                ap.wifidog=row[5]
+                ap.vpn=row[6]
+                ap.ugw=row[7]
+                aps[ip]=ap
+        except sqlite3.OperationalError:
+            logging.log(logging.ERROR, "db: importDB() failed")
         return aps
         
     def __parseBoardID(self,strBoardID):
