@@ -77,10 +77,33 @@ class Links:
         return json
     online.exposed = True
     
+class Node(object):
+    '''/node subdomain for one single accesspoint'''
+    def index(self):
+        '''bring up the about page'''
+        cherrypy.response.headers['Content-Type'] = 'text/html'
+        return getAboutPage()
+    index.exposed = True
+    
+    def neighbours(self, ip=None):
+        '''returns all online 1hop neighbours of the node and links '''        
+        aps = loadCache(WIKI_CACHE_FILE)
+        links = loadCache(LINK_CACHE_FILE)
+        try: 
+            ap=aps[ip]
+        except:
+            raise cherrypy.HTTPError("416 Requested range not satisfiable", "Invalid node IP requested")      
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        (reqAps,reqLinks) = getNeighboursNet(aps,links, ip)
+        json = getJSONaps(reqAps)
+        json = fixJSON(json)    
+        return json
+    neighbours.exposed = True
     
 class Root(object):
     '''entry point for HTTP API access.'''       
     nodes = Nodes()
+    node = Node()
     links = Links()
     def index(self):
         '''bring up the about page'''
@@ -214,6 +237,21 @@ def getAPsoffline(aps):
         if ap.state == APstat.DEAD:
             filtered_aps[ap.id] = ap
     return filtered_aps
+
+def getNeighboursNet(aps, links, ip):
+    neighbour_links={}
+    neighbour_aps={}
+    for link in links.values():
+        if (link.ap1 == ip) or (link.ap2 == ip): #add AP and the link
+            LinkID = link.ap1 + "-" + link.ap2
+            neighbour_links[LinkID] = link
+            if (link.ap1 == ip):
+                neighbour_ap = link.ap2
+            else:
+                neighbour_ap = link.ap1
+            neighbour_aps[neighbour_ap]=aps[neighbour_ap]
+    return (neighbour_aps,neighbour_links)
+            
         
 def getJSONProperties(props):
     '''returns JSON string for properties array'''
