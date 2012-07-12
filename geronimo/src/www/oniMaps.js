@@ -143,7 +143,9 @@ function addOverlays()
         }
 	}});
 */
-	refreshtimer=new OpenLayers.Strategy.Refresh({interval:60000,force:true});
+	timer1=new OpenLayers.Strategy.Refresh({interval:60000,force:true}); //#WORKAROUNG with OL 2.12 you can't use only one single timer for n events
+	timer2=new OpenLayers.Strategy.Refresh({interval:60000,force:true});
+	timer3=new OpenLayers.Strategy.Refresh({interval:60000,force:true}); 
 //	var nodesStyleMap =new OpenLayers.StyleMap({"default": debugstyle})
 	var nodesStyleMap =new OpenLayers.StyleMap({"default": nodeStyle})
 	nodesStyleMap.addUniqueValueRules("default", "state", statesStyles);
@@ -156,7 +158,7 @@ function addOverlays()
 			url: BASE_URL+'/nodes/online/',
 			format:new OpenLayers.Format.GeoJSON()
 		}),
-		strategies:[new OpenLayers.Strategy.BBOX(), refreshtimer],
+		strategies:[new OpenLayers.Strategy.BBOX(), timer1],
 		styleMap: nodesStyleMap
 	});
 	aps_offline=new OpenLayers.Layer.Vector("APs offline",{
@@ -166,7 +168,7 @@ function addOverlays()
 			url: BASE_URL+'/nodes/offline/',
 			format:new OpenLayers.Format.GeoJSON()
 		}),
-		strategies:[new OpenLayers.Strategy.BBOX(),refreshtimer],
+		strategies:[new OpenLayers.Strategy.BBOX(),timer2],
 		styleMap: nodesStyleMap,
 		visibility:false
 	});
@@ -200,11 +202,13 @@ function addOverlays()
 			url: BASE_URL+'/links/online/',
 			format:new OpenLayers.Format.GeoJSON()
 		}),
-		strategies:[new OpenLayers.Strategy.BBOX(),refreshtimer],
+		strategies:[new OpenLayers.Strategy.BBOX(),timer3],
 		styleMap: linksStyleMap,
 	});
 	map.addLayers([aps_online,aps_offline,links]);
-	refreshtimer.start();
+	timer1.start();
+	timer2.start();
+	timer3.start();
 	return {
 		'aps_online':aps_online,
 		'aps_offline':aps_online,
