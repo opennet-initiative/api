@@ -77,6 +77,22 @@ class Links:
         return json
     online.exposed = True
     
+    def neighbours(self, ip=None):
+        '''returns all links of 1hop neighbours of the node'''        
+        aps = loadCache(WIKI_CACHE_FILE)
+        links = loadCache(LINK_CACHE_FILE)
+        try: 
+            ap=aps[ip]
+        except:
+            raise cherrypy.HTTPError("416 Requested range not satisfiable", "Invalid node IP requested")      
+        cherrypy.response.headers['Content-Type'] = 'application/json'
+        (reqAps,reqLinks) = getNeighboursNet(aps,links, ip)
+        reqAps[ip]=ap;
+        json = getJSONlinks(reqLinks,reqAps)
+        json = fixJSON(json)    
+        return json
+    neighbours.exposed = True
+    
 class Node(object):
     '''/node subdomain for one single accesspoint'''
     def index(self):
@@ -86,7 +102,7 @@ class Node(object):
     index.exposed = True
     
     def neighbours(self, ip=None):
-        '''returns all online 1hop neighbours of the node and links '''        
+        '''returns all online 1hop neighbours of the node'''        
         aps = loadCache(WIKI_CACHE_FILE)
         links = loadCache(LINK_CACHE_FILE)
         try: 
@@ -95,6 +111,7 @@ class Node(object):
             raise cherrypy.HTTPError("416 Requested range not satisfiable", "Invalid node IP requested")      
         cherrypy.response.headers['Content-Type'] = 'application/json'
         (reqAps,reqLinks) = getNeighboursNet(aps,links, ip)
+        reqAps[ip]=ap;
         json = getJSONaps(reqAps)
         json = fixJSON(json)    
         return json

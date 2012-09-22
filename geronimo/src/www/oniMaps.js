@@ -1,3 +1,6 @@
+/*
+functionality for mapping Opennet stuff
+*/
 <!--  <script src='http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAttEBvEvohslM2ILNmTwbJxQPKwSEMYVQ3izDaG3Nju_GNCI9nhT7SUbfaHxXJyjkky0KCQwOGRERvA'></script>-->	
 
 var map
@@ -299,4 +302,212 @@ centerMap = function(){
 	{
 		map.setCenter(pos.transform(proj4326,projmerc),13)			
 	}
+}
+
+//add basic raster layers
+addBaseLayers = function(){
+	baseLayers.push(new OpenLayers.Layer.XYZ('MapQuest', 'http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png', { lid: 'mapquest',attribution:'Data CC-By-SA by <a href="http://www.openstreetmap.org">OpenStreetMap</a><br>Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'}));
+	osmmap=new OpenLayers.Layer.OSM("OpenStreetMap");
+	osmmap.setOpacity(0.7);
+	baseLayers.push(osmmap);
+	baseLayers.push(new OpenLayers.Layer.WMS( "Amtliche Luftbilder","http://www.geodaten-mv.de/dienste/adv_dop", {layers: 'adv_dop'} ));
+	map.addLayers(baseLayers);
+}
+
+
+/*
+kleinere Karte
+minimale Controls
+minimale Layer
+keine Legende
+kein Autorefresh
+*/
+//add interactive vector layers
+function addNeighbours(ip)
+	{
+		
+		// allow testing of specific renderers via "?renderer=Canvas", etc
+		var renderer = OpenLayers.Util.getParameters(window.location.href).renderer;
+		renderer = (renderer) ? [renderer] : OpenLayers.Layer.Vector.prototype.renderers;
+		//------Nodes----
+		
+	var nodeStyle = new OpenLayers.Style({
+		//text
+		label: "${getLabel}",
+		fontSize: "10px",
+		fontFamily: "Calibri, Verdana, Arial, sans-serif",
+		labelAlign: "lt",
+		title: "${getTitle}",
+		//shape
+		fill: true,
+		fillColor: "#1588eb",
+		fillOpacity: 0.8,
+		stroke: true,
+		strokeColor: "#2004dd",
+		strokeOpacity: 0.8,
+		strokeDashstyle: 'solid',
+		pointRadius: 4,
+		strokeWidth: 1
+	},{context: {
+		getLabel: function(feature) {
+			if (showLabels)
+			{
+                return getID(feature.data.id);
+             }
+             else return "";
+        },
+        getTitle: function(feature) {
+			return getID(feature.data.id);
+        }
+	}});
+	var statesStyles = {
+	    3: { //offline
+			fillColor: "grey",
+			fillOpacity: 0.5,
+			strokeColor: "black",
+			strokeOpacity: 0.5
+			},
+		1: { //flapping
+			fillColor: "red",
+			strokeOpacity: 0.3
+			},
+		0:{						
+			} // online don't override nodestyle detaults
+	}
+	var wifidogStyles = {
+	    "1": {
+			strokeColor: 'green',
+			strokeOpacity: 0.5,
+			strokeWidth: 30
+			}
+	} 
+	
+	var ugwStyles = {
+	    "1": {
+			strokeColor: 'yellow',
+			strokeOpacity: 1.0,
+			strokeWidth: 3
+			}
+	}
+
+/*	//Zeigt APs an, die keine ondataservice Nachrichten per OLSR senden
+ * var debugstyle = new OpenLayers.Style({
+		//text
+		fontSize: "10px",
+		fontFamily: "Calibri, Verdana, Arial, sans-serif",
+		labelAlign: "lt",
+		title: "${getTitle}",
+		//shape
+		fill: true,
+		fillColor: "${getFill}",
+		stroke: true,
+		strokeColor: "#2004dd",
+		strokeOpacity: 0.8,
+		strokeDashstyle: 'solid',
+		pointRadius: 4,
+		strokeWidth: 1
+	},{context: {
+		getFill: function (feature) {
+			if (feature.data.board == null)
+			{
+				return "red";
+			}
+			else return "green";
+		},
+        getTitle: function(feature) {			
+			return getID(feature.data.id);
+        }
+	}});
+*/
+
+	
+	timer1=new OpenLayers.Strategy.Refresh({interval:60000,force:true});
+	var nodesStyleMap =new OpenLayers.StyleMap({"default": nodeStyle})
+	nodesStyleMap.addUniqueValueRules("default", "state", statesStyles);
+	nodesStyleMap.addUniqueValueRules("default", "wifidog", wifidogStyles);
+	nodesStyleMap.addUniqueValueRules("default", "ugw", ugwStyles);
+	aps_online=new OpenLayers.Layer.Vector("APs online",{
+		renderers: renderer,
+		projection:proj4326,
+		protocol:new OpenLayers.Protocol.HTTP({
+			url: BASE_URL+'/node/neighbours?ip='+ip,
+			format:new OpenLayers.Format.GeoJSON()
+		}),
+		strategies:[new OpenLayers.Strategy.Fixed(),timer1],
+		eventListeners: {
+				"featuresadded": dataLoaded
+		},
+		styleMap: nodesStyleMap		
+	});
+
+//Links
+	var linksStyle = new OpenLayers.Style({
+		strokeOpacity: "${getOpacity}",
+		strokeColor: "${getColor}",
+		strokeWidth: "${getWidth}"},{
+		context: {			
+			getOpacity:function(feature) {
+				if(feature.data.cable)
+				{
+						return 0.1;
+				};
+			},			
+			getColor:function(feature) {
+				return feature.data.etxcolor;
+			},
+			getWidth:function(feature) {
+				if (feature.data.backbone)
+				{
+					return 3;
+				}
+			}
+		}
+	});
+	linksStyleMap=new OpenLayers.StyleMap({"default": linksStyle});
+	links=new OpenLayers.Layer.Vector("Links",{
+		projection:proj4326,
+		protocol:new OpenLayers.Protocol.HTTP({
+			url: BASE_URL+'/links/neighbours?ip='+ip,
+			format:new OpenLayers.Format.GeoJSON()
+		}),
+		strategies:[new OpenLayers.Strategy.Fixed()],
+		styleMap: linksStyleMap,
+	});
+	map.addLayers([aps_online,links]);
+	timer1.start();
+	return {
+		'aps_online':aps_online
+	}
+	}
+	
+	function initInteraction(){
+	//init Interaction
+	var select_online = new OpenLayers.Control.SelectFeature(aps_online, {clickout: true,toggle:true,multiple: false,onSelect: nodeSelect,onUnselect:nodeUnselect});
+	map.addControl(select_online);
+	var select_offline = new OpenLayers.Control.SelectFeature(aps_offline, {clickout: true,toggle:true,multiple: false,onSelect: nodeSelect,onUnselect:nodeUnselect});
+	map.addControl(select_offline);		
+	select_online.activate();
+	select_offline.activate();
+}
+
+//autocenter to all APs
+function dataLoaded(event){
+            // 'this' is layer
+            this.map.zoomToExtent(event.object.getDataExtent());
+//            this.map.zoomTo(16);
+        }
+
+//returns URL ?x=abc params as dict
+function getQueryParams(qs) {
+    qs = qs.split("+").join(" ");
+
+    var params = {}, tokens,
+        re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs)) {
+        params[decodeURIComponent(tokens[1])]
+            = decodeURIComponent(tokens[2]);
+    }
+
+    return params;
 }

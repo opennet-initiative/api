@@ -5,9 +5,9 @@ by Matthias Meißer, released under GPL
 -->
 <html>
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<title>Opennet Karte</title>
-	<script type="text/javascript" src="oniMaps.js"></script>
+	<script type="text/javascript" src="oniMaps.js" charset="utf-8"></script>
 	<script type="text/javascript" src="OpenLayers-2.12/OpenLayers_dev.js"></script><!---DEV version for hint support--->
 	<script type="text/javascript" src="OpenStreetMap.js"></script>
 	<script type="text/javascript" src="cloudmade.js"></script>
@@ -22,8 +22,8 @@ by Matthias Meißer, released under GPL
 	
 	</style>
   <script>
-	var BASE_URL="http://www.opennet-initiative.de/api"
-//	var BASE_URL="http://localhost:8080/api" //for local testing environment
+//	var BASE_URL="http://www.opennet-initiative.de/api"
+	var BASE_URL="http://localhost:8080/api" //for local testing environment
 	var proj4326
 	var projmerc
 	var map
@@ -97,7 +97,7 @@ by Matthias Meißer, released under GPL
 		lengthPopup.hide();
 	}
 	
-	
+/*	
 	function toggleLabels(checkbox)
 	{
 		showLabels = checkbox.checked;
@@ -106,7 +106,7 @@ by Matthias Meißer, released under GPL
 		links.redraw();
 //		links_descr=
 	}
-        
+*/        
 </script>
 </head>
 <body onload="init();" style="background-color: #B5D0D0">
