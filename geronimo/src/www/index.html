@@ -38,7 +38,7 @@ by Matthias Meiﬂer, released under GPL
 		projmerc = new OpenLayers.Projection("EPSG:900913");       
 		map=initMap(true);
 		addBaseLayers();
-		layers=addOverlays();
+		layers=addOverlays(true,false,true,"/nodes/online","/nodes/offline","/links/online");
 		aps_offline=layers.aps_offline;
 		aps_online=layers.aps_online;
 		links=layers.links;
@@ -58,9 +58,9 @@ by Matthias Meiﬂer, released under GPL
 		hqStyle.externalGraphic = "oni-logo.png";
 		hqStyle.graphicWidth = 29;
 		hqStyle.graphicHeight = 32;
-		hqStyle.title ="Vereinsraum in der Frieda23"
+		hqStyle.title ="Treffpunkt bei LOHRO"
 		hqLayer=new OpenLayers.Layer.Vector("Vereinsraum", {displayInLayerSwitcher: true,projection: proj4326});
-        var hq = new OpenLayers.Feature.Vector((new OpenLayers.Geometry.Point(12.12292,54.09125)).transform(proj4326,projmerc),null,hqStyle);
+        var hq = new OpenLayers.Feature.Vector((new OpenLayers.Geometry.Point(12.115033,54.087766)).transform(proj4326,projmerc),null,hqStyle);
 		hqLayer.addFeatures([hq]);
 		map.addLayers([hqLayer]);
 	}
