@@ -41,7 +41,8 @@ initMap = function(fullFunctionality){
 
 //add basic raster layers
 addBaseLayers = function(){
-	baseLayers.push(new OpenLayers.Layer.XYZ('MapQuest', 'http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png', { lid: 'mapquest',attribution:'Data CC-By-SA by <a href="http://www.openstreetmap.org">OpenStreetMap</a><br>Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'}));
+	// somehow zoomLevel=19 is not rendered for Rostock (or the world) - thus maxZoomLevel=18
+	baseLayers.push(new OpenLayers.Layer.XYZ('MapQuest', 'http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png', { maxZoomLevel: 18, lid: 'mapquest', attribution:'Data CC-By-SA by <a href="http://www.openstreetmap.org">OpenStreetMap</a><br>Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'}));
 	osmmap=new OpenLayers.Layer.OSM("OpenStreetMap");
 	osmmap.setOpacity(0.7);
 	baseLayers.push(osmmap);
@@ -335,16 +336,6 @@ centerMap = function(){
 	{
 		map.setCenter(pos.transform(proj4326,projmerc),13)			
 	}
-}
-
-//add basic raster layers
-addBaseLayers = function(){
-	baseLayers.push(new OpenLayers.Layer.XYZ('MapQuest', 'http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png', { lid: 'mapquest',attribution:'Data CC-By-SA by <a href="http://www.openstreetmap.org">OpenStreetMap</a><br>Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">'}));
-	osmmap=new OpenLayers.Layer.OSM("OpenStreetMap");
-	osmmap.setOpacity(0.7);
-	baseLayers.push(osmmap);
-	baseLayers.push(new OpenLayers.Layer.WMS( "Amtliche Luftbilder","http://www.geodaten-mv.de/dienste/adv_dop", {layers: 'adv_dop'} ));
-	map.addLayers(baseLayers);
 }
 
 //autocenter to all APs
