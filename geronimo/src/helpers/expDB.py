@@ -54,6 +54,7 @@ class DBimporter():
                     "0x0101/42":"Linksys WRT54GS",
                     "0x0708/42":"Linksys WRT54G",
                     "bcm94710dev/asusX":"Asus WL500",
+                    "Atheros AR7161 rev 2 Ubiquiti RouterStation Pro": "Ubiquiti Routerstation",
                     "Atheros AR7240 (Python)  NanoStation M5": "Ubiquiti NanoStration M5",
                     "Atheros AR7240 (Python)  NanoBridge M5":"Ubiquiti NanoBridge M5",
                     "Atheros AR9132 rev 2 TP-LINK TL-WR1043ND": "TP-LINK TL-WR1043ND",
@@ -66,7 +67,12 @@ class DBimporter():
                     "Broadcom BCM4712 chip rev 2":"Linksys WRT54G",
                     "":"WRAP 2E-E"}
         strBoardID=strBoardID.rstrip()
-        return board2name[strBoardID]
+        try:
+            normStr=board2name[strBoardID]
+        except KeyError:
+            normStr=""
+            logging.log(logging.ERROR, "db: board2name() failed: "+strBoardID)
+        return normStr
     
     def __importLinks(self, links):
         'SELECT mainip, if_name,  wlan_essid, wlan_mode, wlan_channel, wlan_freq FROM ifaces WHERE wlan_essid IS not "" ORDER BY wlan_essid'

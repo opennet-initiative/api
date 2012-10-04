@@ -1,0 +1,12 @@
+cherrypy 3.2.2
+geojson
+wikibot
+
+config.ini Pfade anpassen
+
+/src/www/index.htm BASE_URL anpassen
+
+testen:
+localhost:8080/api/
+localhost:8080/api/nodes/online
+localhost/api/index.htm
