@@ -14,14 +14,17 @@ by Matthias Meiﬂer, released under GPL
   <script>	
 	var proj4326= new OpenLayers.Projection("EPSG:4326");
 	var projmerc= new OpenLayers.Projection("EPSG:900913");  
-	var map
+	var map;
+	var markers = new OpenLayers.Layer.Markers( "Markers" );
+
 	
 	//Init
 	function init(){
 		//add Map
 		map = initMap(false);
 		addBaseLayers();
-		bindClick();
+		map.addLayer(markers);
+		bindClick();		
 		centerMap();
 	}
 
@@ -55,11 +58,14 @@ OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {
                     );
                 }, 
 
+				//callback for click event
                 trigger: function(e) {
                     var lonlat = map.getLonLatFromPixel(e.xy);
                     lonlat=lonlat.transform(projmerc,proj4326);
                     var lat = lonlat.lat.toFixed(6);
                     var lon=lonlat.lon.toFixed(6);
+                    markers.clearMarkers();
+                    markers.addMarker(new OpenLayers.Marker(map.getLonLatFromPixel(e.xy)));
                     document.getElementById('posfield').value="N" +lat+" E" + lon
                 }
 });
