@@ -52,7 +52,7 @@ class Nodes(object):
         reqAps = getAPsinBBOX(reqAps, bbox)        
         json = getJSONaps(reqAps)
         json = fixJSON(json)    
-        return json
+        return str(json)
     offline.exposed = True
     
 
