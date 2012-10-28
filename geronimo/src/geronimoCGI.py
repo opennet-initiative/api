@@ -82,16 +82,27 @@ class Links:
         aps = loadCache(WIKI_CACHE_FILE)
         links = loadCache(LINK_CACHE_FILE)
         try: 
-            ap=aps[ip]
+            accesspoint=aps[ip]
         except:
             raise cherrypy.HTTPError("416 Requested range not satisfiable", "Invalid node IP requested")      
         cherrypy.response.headers['Content-Type'] = 'application/json'
         (reqAps,reqLinks) = getNeighboursNet(aps,links, ip)
-        reqAps[ip]=ap;
+        reqAps[ip]=accesspoint;
         json = getJSONlinks(reqLinks,reqAps)
         json = fixJSON(json)    
         return json
     neighbours.exposed = True
+    
+    def __getIPfromAP(self,ap):
+        """ ap=ap123 ap=1.234 ap=123"""
+        ap=ap.lower()
+        ap=ap.replace("ap","")
+        if ap.find(".")>-1:
+            ip="192.168."+ap
+        else:
+            ip="192.168.1."+ap
+        return ip
+            
     
 class Node(object):
     '''/node subdomain for one single accesspoint'''
@@ -101,21 +112,33 @@ class Node(object):
         return getAboutPage()
     index.exposed = True
     
-    def neighbours(self, ip=None):
+    def neighbours(self, ip=None, ap=None):
         '''returns all online 1hop neighbours of the node'''        
         aps = loadCache(WIKI_CACHE_FILE)
         links = loadCache(LINK_CACHE_FILE)
+        if ap is not None:
+            ip=self.__getIPfromAP(ap)
         try: 
-            ap=aps[ip]
+            accesspoint=aps[ip]
         except:
             raise cherrypy.HTTPError("416 Requested range not satisfiable", "Invalid node IP requested")      
         cherrypy.response.headers['Content-Type'] = 'application/json'
         (reqAps,reqLinks) = getNeighboursNet(aps,links, ip)
-        reqAps[ip]=ap;
+        reqAps[ip]=accesspoint;
         json = getJSONaps(reqAps)
         json = fixJSON(json)    
         return json
     neighbours.exposed = True
+    
+    def __getIPfromAP(self,ap):
+        """ ap=ap123 ap=1.234 ap=123"""
+        ap=ap.lower()
+        ap=ap.replace("ap","")
+        if ap.find(".")>-1:
+            ip="192.168."+ap
+        else:
+            ip="192.168.1."+ap
+        return ip
     
 class Root(object):
     '''entry point for HTTP API access.'''       

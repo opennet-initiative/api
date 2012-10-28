@@ -2,6 +2,8 @@
 <!--
 A map visualizing the OpenNet infrastructure on OpenStreetMap.
 by Matthias Meißer, released under GPL
+
+Invoke for example via /neighbours.html?ip=192.168.1.205
 -->
 <html>
 <head>
@@ -12,8 +14,8 @@ by Matthias Meißer, released under GPL
 	<script type="text/javascript" src="OpenStreetMap.js"></script>
 	<script type="text/javascript" src="cloudmade.js"></script>
   <script>
-	var BASE_URL="http://www.opennet-initiative.de/api"
-	//var BASE_URL="http://localhost:8080/api" //for local testing environment
+	//var BASE_URL="http://www.opennet-initiative.de/api"
+	var BASE_URL="http://localhost:8080/api" //for local testing environment
 	var proj4326
 	var projmerc
 	var map
@@ -28,13 +30,33 @@ by Matthias Meißer, released under GPL
 		projmerc = new OpenLayers.Projection("EPSG:900913");       
 		map=initMap(false);
 		addBaseLayers();
-		ip=getQueryParams().ap;
+		ap=getQueryParams().ap;
+		if (ap!=null)
+		{
+			ip=getIPfromAP(ap);
+		}
+		else
+		{
+			ip=getQueryParams().ip;
+		}
 		addOverlays(false,true,false,"/node/neighbours?ip="+ip,"/node/neighbours?ip=="+ip,"/links/neighbours?ip="+ip);
 	}
+	
+	function getIPfromAP(ap)
+	{
+		ap=ap.toLowerCase();
+		ap=ap.replace("ap","");
+		if (ap.indexOf(".")>-1)
+		{
+			ip="192.168."+ap;
+		}
+		else
+		{
+			ip="192.168.1."+ap;
+		};
+		return ip;		
+	}
 
-	
-	
-        
 </script>
 </head>
 <body onload="init();" style="background-color: #B5D0D0">

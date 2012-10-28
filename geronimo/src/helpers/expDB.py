@@ -40,8 +40,8 @@ class DBimporter():
             else:
                 ap = primitives.AccesPoint(ip, None)
             ap.board = self.__parseBoardID(sys_board)
-            ap.os = sys_os_type.strip()
-            os_details = "%s %s" % (sys_os_name.strip(), sys_os_rel.strip())
+            ap.os = str(sys_os_type.strip())
+            os_details = str("%s %s" % (sys_os_name.strip(), sys_os_rel.strip()))
             # empty strings are removed from start/end via "strip"
             if os_details.strip():
                 ap.os += " (%s)" % os_details.strip()
