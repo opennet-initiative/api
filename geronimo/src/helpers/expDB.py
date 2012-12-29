@@ -45,6 +45,8 @@ class DBimporter():
             # empty strings are removed from start/end via "strip"
             if os_details.strip():
                 ap.os += " (%s)" % os_details.strip()
+            # TODO: using unicode here silently breaks stuff somewhere else! (all nodes disappear from the map)
+            ap.os = str(ap.os)
             ap.wifidog = on_wifidog_status
             ap.vpn = on_vpn_status
             ap.ugw = on_ugw_status
@@ -59,7 +61,7 @@ class DBimporter():
                     "0x0708/42":"Linksys WRT54G",
                     "bcm94710dev/asusX":"Asus WL500",
                     "Atheros AR7161 rev 2 Ubiquiti RouterStation Pro":"Ubiquiti Routerstation",
-                    "Atheros AR7240 (Python)  NanoStation M5": "Ubiquiti NanoStration M5",
+                    "Atheros AR7240 (Python)  NanoStation M5": "Ubiquiti NanoStation M5",
                     "Atheros AR7240 (Python)  NanoBridge M5":"Ubiquiti NanoBridge M5",
                     "Atheros AR7240 rev 2 Ubiquiti Nanostation M":"Ubiquiti Nanostation M",
                     "Atheros AR7241 rev 1 Ubiquiti Bullet M":"Ubiquiti Bullet M",
@@ -70,5 +72,5 @@ class DBimporter():
                     "Broadcom BCM4712 chip rev 1":"Linksys WRT54G",
                     "Broadcom BCM4712 chip rev 2":"Linksys WRT54G",
                     "":"WRAP 2E-E"}
-        return board2name[strBoardID.strip()]
+        return board2name.get(strBoardID.strip(),strBoardID.strip().encode("utf8"))
 
