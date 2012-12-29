@@ -200,6 +200,8 @@ def getJSONlinks(links , aps):
 
 def getJSONlink(link,aps):
     '''returns geoJSON representation of one link'''
+    if aps[link.ap1].position is None or aps[link.ap2].position is None:
+        return None
     c1 = aps[link.ap1].position.coordinates
     c2 = aps[link.ap2].position.coordinates      
     geometry = geojson.LineString([c1, c2])
