@@ -22,8 +22,9 @@ by Matthias Meiﬂer, released under GPL
 	
 	</style>
   <script>
+	var BASE_URL="/api"
 //	var BASE_URL="http://www.opennet-initiative.de/api"
-	var BASE_URL="http://localhost:8080/api" //for local testing environment
+//	var BASE_URL="http://localhost:8080/api" //for local testing environment
 	var proj4326
 	var projmerc
 	var map
@@ -97,7 +98,6 @@ by Matthias Meiﬂer, released under GPL
 		lengthPopup.hide();
 	}
 	
-/*	
 	function toggleLabels(checkbox)
 	{
 		showLabels = checkbox.checked;
@@ -106,7 +106,6 @@ by Matthias Meiﬂer, released under GPL
 		links.redraw();
 //		links_descr=
 	}
-*/        
 </script>
 </head>
 <body onload="init();" style="background-color: #B5D0D0">
