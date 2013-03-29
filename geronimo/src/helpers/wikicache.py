@@ -94,13 +94,14 @@ class wikiImporter():
             ip="192.168.1."+name
         else:
             ip="192.168."+name
+        logging.log(logging.DEBUG, "wiki: import "+ip)
         place=attrs[2]
         antenna_descr=attrs[3]
         device=self.__replaceWikiLinks(attrs[4])
         owner=self.__replaceWikiLinks(attrs[5])
         description=attrs[6]
-        lonlat=attrs[7]
         try:
+            lonlat=attrs[7]
             if not lonlat.isspace():
                 lonlat=lonlat.replace("N","").replace("E","")
                 lonlat=lonlat.split(" ")
