@@ -7,7 +7,8 @@ Created on 17.05.2012
 #identifies cable connections
 class cablesImporter:
     #very simple approach, might become easier with grouping them with wiki templates
-    __cableAPs=["192.168.1.15","192.168.1.25","192.168.1.66","192.168.1.152","192.168.2.8","192.168.2.7","192.168.1.157"]
+    __cableAPs=["192.168.1.15","192.168.1.25","192.168.1.66","192.168.1.152","192.168.2.8","192.168.2.7","192.168.1.157","192.168.1.18",
+    "192.168.1.80","192.168.2.11","192.168.2.17","192.168.2.35","192.168.1.79","192.168.2.36","192.168.2.33","192.168.1.34"]
     def __init__(self,links):
         self.__links=links
     def importCables(self):
