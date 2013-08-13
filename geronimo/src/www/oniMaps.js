@@ -299,7 +299,7 @@ function addOverlays(autoRefresh,autoCenter,dynamicData,apOnlineURLPath,apOfflin
 		text=text+getLine("Gerät",getDeviceLink(data.board));
 		text=text+getLine("OS",data.os);
 		text=text+"</table>"
-		text=text+'<br><a href="http://www.opennet-initiative.de/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=week"><img src="http://www.opennet-initiative.de/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=day" alt="Verlauf ETX (klicken für Wochenübersicht)" title="Verlauf ETX (klicken für Wochenübersicht)" width="247" height="137px"/></a>';
+		text=text+'<br><a href="/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=week"><img src="/graph/ap.php?ap='+id+'&width=150&height=50&color=001eff&low_color=ff1e00&medium_color=00ff1e&style=AREA&low_style=AREA&medium_style=AREA&lowerlimit=1&range=day" alt="Verlauf ETX (klicken für Wochenübersicht)" title="Verlauf ETX (klicken für Wochenübersicht)" width="247" height="137px"/></a>';
 		text=text+'<br>Zuletzt gesehen:<br>'+data.lastonline+"UTC";
 		text=text+'<br><br><a href="http://wiki.on-i.de/wiki/AP'+id+'" target="_blank"'+">Wiki</a>"
 		text=text+' <a href="http://'+data.id+'" target="_blank"'+">Webinterface</a>"
