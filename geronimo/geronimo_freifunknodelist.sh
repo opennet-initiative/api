@@ -1,22 +1,30 @@
 #!/bin/bash
 
-##
-## +++ Geronimo +++ 
-## Opennet Datawarehouse + API
-## geronimo_freifunknodelist.sh
-## Freifunk Nodelist API Generator
-##
+#
+# Opennet Geronimo Scripts
+# Martin Garbe, created 2014/12/31
+# Mathias Mahnke, reworked 2015/01/01
+# Opennet Admin Group <admin@opennet-initiative.de>
+#
 
-# This script generates a list of online node compatible with Freifunk API
-# see http://freifunk.net/en/blog/2014/02/the-freifunk-api/
-# Format to output: https://gist.githubusercontent.com/StilgarBF/c21826994b775787f739/raw/71944597080bd05bb970534afcc1f0c347fab1a8/gistfile1.js
-#
-# In addition a "daily?" cronjob has to create the input file and execute this script.
-#
+# This scripts generates Freifunk Nodelist API JSON
+# see also https://wiki.opennet-initiative.de/wiki/Freifunk_API
+
+# stop on error and unset variables
+set -eu
+
+# config file
+CFG=geronimo_freifunknodelist.cfg
+
+# get current script dir
+HOME="$(dirname $(readlink -f "$0"))"
+
+# read variables
+. "$HOME/$CFG"
 
 # process list of online nodes
-wget -q http://www.opennet-initiative.de/api/nodes/online -O /tmp/freifunk-api-online.json
-cat /tmp/freifunk-api-online.json | jq '[.features[] |
+wget -q "$GERONIMO_API/nodes/online" -O "$TMP_ONLINE" 
+cat "$TMP_ONLINE" | jq '[.features[] |
   {
     id: .properties.id,
     name: .properties.id,
@@ -30,11 +38,11 @@ cat /tmp/freifunk-api-online.json | jq '[.features[] |
         lon: .geometry.coordinates[0]
     }
   }
-]' > /tmp/freifunk-api-output.json
+]' >> "$TMP_OUTPUT"
 
 # process list of offline nodes
-wget -q http://www.opennet-initiative.de/api/nodes/offline -O /tmp/freifunk-api-offline.json
-cat /tmp/freifunk-api-offline.json | jq '[.features[] |
+wget -q "$GERONIMO_API/nodes/offline" -O "$TMP_OFFLINE"
+cat "$TMP_OFFLINE" | jq '[.features[] |
   {
     id: .properties.id,
     name: .properties.id,
@@ -48,7 +56,7 @@ cat /tmp/freifunk-api-offline.json | jq '[.features[] |
         lon: .geometry.coordinates[0]
     }
   }
-]' > /tmp/freifunk-api-output.json
+]' >> "$TMP_OUTPUT"
 
 # output to stdout, add header and trailer
 date=$(date "+%Y-%m-%d %H:%M")
@@ -60,10 +68,12 @@ echo '{
         "name": "Opennet Initiative e.V."
     },
     "nodes": '
-cat /tmp/freifunk-api-output.json
+cat "$TMP_OUTPUT"
 echo "}" 
 
 # clear temporary files
-rm /tmp/freifunk-api-online.json
-rm /tmp/freifunk-api-offline.json
-rm /tmp/freifunk-api-output.json
+rm "$TMP_ONLINE"
+rm "$TMP_OFFLINE"
+rm "$TMP_OUTPUT"
+
+exit 0
