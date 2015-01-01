@@ -39,7 +39,7 @@ echo '{
     "version": "1.0.0",
     "updated_at": "'$date'",
     "community": {
-        "href": "https://www.opennet-initiative.de/freifunk/freifunk-api-nodelist.json",
+        "href": "https://www.opennet-initiative.de/freifunk/api.freifunk.net-nodelist.json",
         "name": "Opennet Initiative e.V."
     },
     "nodes": '
