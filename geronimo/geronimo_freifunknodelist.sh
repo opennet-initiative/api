@@ -15,15 +15,32 @@
 #
 
 # process list of online nodes
-# see http://www.opennet-initiative.de/api/nodes/online
-wget -q http://www.opennet-initiative.de/api/nodes/online -O /tmp/freifunk-api-input.json
-cat /tmp/freifunk-api-input.json | jq '[.features[] |
+wget -q http://www.opennet-initiative.de/api/nodes/online -O /tmp/freifunk-api-online.json
+cat /tmp/freifunk-api-online.json | jq '[.features[] |
   {
     id: .properties.id,
     name: .properties.id,
     node_type: "AccessPoint",
     status: {
         online: "true",
+        lastcontact: .properties.lastonline
+        } ,
+    position: {
+        lat: .geometry.coordinates[1],
+        lon: .geometry.coordinates[0]
+    }
+  }
+]' > /tmp/freifunk-api-output.json
+
+# process list of offline nodes
+wget -q http://www.opennet-initiative.de/api/nodes/offline -O /tmp/freifunk-api-offline.json
+cat /tmp/freifunk-api-offline.json | jq '[.features[] |
+  {
+    id: .properties.id,
+    name: .properties.id,
+    node_type: "AccessPoint",
+    status: {
+        online: "false",
         lastcontact: .properties.lastonline
         } ,
     position: {
@@ -47,5 +64,6 @@ cat /tmp/freifunk-api-output.json
 echo "}" 
 
 # clear temporary files
-rm /tmp/freifunk-api-input.json
+rm /tmp/freifunk-api-online.json
+rm /tmp/freifunk-api-offline.json
 rm /tmp/freifunk-api-output.json
