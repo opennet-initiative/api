@@ -23,16 +23,16 @@ HOME="$(dirname $(readlink -f "$0"))"
 . "$HOME/$CFG"
 
 # process list of online nodes
-wget -q "$GERONIMO_API/nodes/online" -O "$TMP_ONLINE" 
-cat "$TMP_ONLINE" | jq '[.features[] |
-  {
+wget -q "$GERONIMO_API/nodes/online" -O "$TMP_ONLINE"
+echo "{ \"online\": " > "$TMP_OUTPUT" 
+cat "$TMP_ONLINE" | jq '[.features[] | {
     id: .properties.id,
     name: .properties.id,
     node_type: "AccessPoint",
     status: {
         online: "true",
         lastcontact: .properties.lastonline
-        } ,
+    }, 
     position: {
         lat: .geometry.coordinates[1],
         lon: .geometry.coordinates[0]
@@ -42,21 +42,22 @@ cat "$TMP_ONLINE" | jq '[.features[] |
 
 # process list of offline nodes
 wget -q "$GERONIMO_API/nodes/offline" -O "$TMP_OFFLINE"
-cat "$TMP_OFFLINE" | jq '[.features[] |
-  {
+echo ", \"offline\": " >> "$TMP_OUTPUT"
+cat "$TMP_OFFLINE" | jq '[.features[] | {
     id: .properties.id,
     name: .properties.id,
     node_type: "AccessPoint",
     status: {
         online: "false",
         lastcontact: .properties.lastonline
-        } ,
+    }, 
     position: {
         lat: .geometry.coordinates[1],
         lon: .geometry.coordinates[0]
-    }
+    	}
   }
 ]' >> "$TMP_OUTPUT"
+echo "}" >> "$TMP_OUTPUT"
 
 # output to stdout, add header and trailer
 date=$(date "+%Y-%m-%d %H:%M")
@@ -67,13 +68,15 @@ echo '{
         "href": "https://www.opennet-initiative.de/freifunk/api.freifunk.net-nodelist.json",
         "name": "Opennet Initiative e.V."
     },
-    "nodes": '
-cat "$TMP_OUTPUT"
-echo "}" 
+    "nodes": ' > "$TMP_RESULT"
+cat "$TMP_OUTPUT" | jq 'add' >> "$TMP_RESULT"
+echo "}" >> "$TMP_RESULT"
+cat "$TMP_RESULT" | jq '.'
 
 # clear temporary files
 rm "$TMP_ONLINE"
 rm "$TMP_OFFLINE"
 rm "$TMP_OUTPUT"
+rm "$TMP_RESULT"
 
 exit 0
