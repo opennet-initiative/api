@@ -30,7 +30,7 @@ cat "$TMP_ONLINE" | jq '[.features[] | {
     name: .properties.id,
     node_type: "AccessPoint",
     status: {
-        online: "true",
+        online: true,
         lastcontact: .properties.lastonline
     }, 
     position: {
@@ -48,7 +48,7 @@ cat "$TMP_OFFLINE" | jq '[.features[] | {
     name: .properties.id,
     node_type: "AccessPoint",
     status: {
-        online: "false",
+        online: false,
         lastcontact: .properties.lastonline
     }, 
     position: {
