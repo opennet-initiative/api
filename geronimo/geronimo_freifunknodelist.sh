@@ -59,7 +59,7 @@ cat "$TMP_OFFLINE" | jq '[.features[] | {
 ]' >> "$TMP_OUTPUT"
 echo "}" >> "$TMP_OUTPUT"
 
-# output to stdout, add header and trailer
+# add header and trailer
 date=$(date "+%Y-%m-%d %H:%M")
 echo '{
     "version": "1.0.0",
@@ -71,12 +71,27 @@ echo '{
     "nodes": ' > "$TMP_RESULT"
 cat "$TMP_OUTPUT" | jq 'add' >> "$TMP_RESULT"
 echo "}" >> "$TMP_RESULT"
-cat "$TMP_RESULT" | jq '.'
+
+# reformat lastcontact to ISO 8601 date format
+echo "" > "$TMP_ISODATE"
+while read LINE; do
+  if [[ $LINE =~ .*lastcontact.* ]]
+  then
+    declare -a DATE="(${LINE/:/ })"
+    DATEISO=$(strptime -t -i "%d.%m.%Y (%H:%M:%S)" "${DATE[1]}" | date +%FT%T%Z)
+    echo "\"lastcontact\": \"$DATEISO\"" >> "$TMP_ISODATE"
+  else
+    echo "$LINE" >> "$TMP_ISODATE"
+  fi
+done < "$TMP_RESULT"
+
+# output to stdout
+cat "$TMP_ISODATE" | jq '.'
 
 # clear temporary files
 rm "$TMP_ONLINE"
 rm "$TMP_OFFLINE"
 rm "$TMP_OUTPUT"
 rm "$TMP_RESULT"
-
+rm "$TMP_ISODATE"
 exit 0
