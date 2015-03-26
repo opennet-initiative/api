@@ -1,0 +1,214 @@
+swagger: '2.0'
+info:
+  title: Opennet API
+  description: API for getting current informations about the Opennet wifi network
+  version: "2.1"
+  termsOfService: Don't poll for getting bulk data! Get in contact before launching any high traffic application
+  contact:
+    name: Opennet community
+    url: http://www.opennet-initiative.de
+    email: crew@lists.opennet-initiative.de
+host: api.opennet.de
+schemes:
+  - https
+produces:
+  - application/json #TODO: further flavours as geoJSON, graphML, ...
+paths:
+  /dummy:
+    get:
+      summary: fake
+      description: faking to fullfill swagger specs
+      responses:
+        200:
+          description: fake
+        
+definitions:
+  Accesspoint:
+    properties:
+      id:
+        type: string
+        description: Unique identifier following x.y schema
+      lat:
+        type: number
+        description: position latitute in WGS-84
+      lon:
+        type: number
+        description: position longitude in WGS-84
+      houseaddress:
+        $ref: '#/definitions/HouseAddress'
+      operators:
+        type: array
+        items:
+          $ref: '#/definitions/User'
+      owner:
+        $ref: '#/definitions/User'
+      device:
+        $ref: '#/definitions/Device'
+      interfaceswire:
+        type: array
+        items:
+          $ref: '#/definitions/Interface_wire'
+      interfaceswifi:
+        type: array
+        items:
+          $ref: '#/definitions/Interface_wifi'
+      antenna: #TODO: multiple antennas?
+        $ref: '#/definitions/Interface_wire'
+      ismobile:
+        type: boolean
+        description: If this Accesspoint is a mobile one (notebook, ...)
+      istemporary:
+        type: boolean
+        description: If this is a temporary installation
+      photourl:
+        type: string
+        format: uri
+      firstinstallation:
+        type: string
+        format: date-time
+      lastseen:
+        type: string
+        format: date-time
+      lastrestart:
+        type: string
+        format: date-time
+      ispublic:
+        type: boolean
+        description: If wifi is public -> a hotspot fka wifidog
+      isgateway:
+        type: boolean
+        descripton: If internet connection is shared and we can use this uplink
+      
+  
+  Device:
+    properties:
+      manufactor:
+        type: string
+        description: pretty name of hardware manufactor excluding 'Inc.' etc.
+      name:
+        type: string
+        description: Name / type of the router e.g. 1043ND
+      revision:
+        type: string
+        description: Hardware revision e.g. rev 2
+      isoutdoor:
+        type: boolean
+        description: Is a outdoor (waterproof, heat-resistant, ...) device
+      board:
+        type: string
+        description: Atheros AR9132
+      cpu:
+        type: string
+        description: Descripes the CPU and family e.g. MIPS 24Kc V7.4 
+      ram:
+        type: integer
+        description: Amount of RAM installed in bytes (e.g. 29536)
+      flash:
+        type: integer
+        description: Amount of flash mem installed in bytes (e.g. 29536)
+      chipsetwifi:
+        type: string
+        description: Identifier of wifi chipset e.g. nl80211
+
+        
+  #todo: extract general interface definition
+  
+  Firmware:
+    properties:
+      family:
+        type: string
+        description: OS family e.g. OpenWrt
+      release:
+        type: string
+        description: OS release e.g. backfire
+      version:
+        type: string
+        description: OS version string e.g. 43.15-r26741
+      architecture:
+        type: string
+        description: OS build string for cpu family e.g. ar71xx
+  
+  Interface_wire:
+    properties:
+      mac:
+        type: string
+        description: Hardware adress of a NIC following AA:BB:CC:DD schema
+      ip:
+        type: string
+        description: Static IP adress following AA.BB.CC.DD schema
+      ip_net:
+        type: string
+        description: IP network mask following AA.BB.CC.DD schema
+        
+  Interface_wifi:
+    properties:
+      mac:
+        type: string
+        description: Hardware adress of a NIC following AA:BB:CC:DD schema
+      ip:
+        type: string
+        description: Static IP adress following AA.BB.CC.DD schema
+      ip_net:
+        type: string
+        description: IP network mask following AA.BB.CC.DD schema
+      essid:
+        type: string
+      standard:
+        type: string
+        desctiption: ieee wifi standards e.g. 802.11bgn 
+      master:
+        type: boolean
+      channel:
+        type: integer
+      frequency:
+        type: number
+        description: Transmission freq in GHz e.g. 2.437
+        
+  Antenna:
+    description: Antenna configuration of an Accesspoint
+    properties:
+      directionangle:
+        type: integer
+        description: Direction in degree of the beam-center against north. e.g. 90 (towards east)
+      anglebeam:
+        type: integer
+        description: Opening angle of the antenna (e.g. 17)
+  
+  Link:
+    description: A wifi connection between two Accesspoint
+    properties:
+      ap1:
+        type: string #TODO General concept for AP securityDefinitions
+      ap2: 
+        type: string
+      linkquality12:
+        type: number
+      linkquality21:
+        type: number
+  
+  HouseAddress:
+    description: Full houseaddress of a location
+    properties:
+      postcode:
+        type: string
+      streetname:
+        type: string
+      housenumber:
+        type: string
+  User:
+    description: An user at the opennet
+    properties:
+      nickname:
+        type: string
+  
+  Site:
+    description: A project of a certain space that groups different Accesspoint
+    properties:
+      name:
+        type: string
+      address:
+        $ref: '#/definitions/HouseAddress'
+      accesspoints:
+        type: array
+        items:
+          $ref: '#/definitions/Accesspoint'
