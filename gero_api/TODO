@@ -1,0 +1,4 @@
+* migrate import scripts to python 3
+* create django command for import_wiki.py
+* use gismodel for lat_long in oni_model
+* import wiki data to oni_model(Node)
