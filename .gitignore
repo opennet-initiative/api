@@ -1,0 +1,19 @@
+# ignore python binary
+*.pyc
+
+# ignore currently edited files
+.*.swp
+
+# ignore database
+db.sqlite3
+
+# ignore binary translations
+*.mo
+
+# ignore tags
+tags
+
+# ignore grunt/bower/npm-stuff
+media/
+node_modules/
+res/assets/components/
