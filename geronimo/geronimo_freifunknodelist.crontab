@@ -1,1 +1,0 @@
-*/10 *  * * *   root    /var/www/geronimo/geronimo_freifunknodelist.sh > /var/www/htdocs/freifunk/api.freifunk.net-nodelist.json
