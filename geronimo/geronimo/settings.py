@@ -1,5 +1,5 @@
 """
-Django settings for gero_api project.
+Django settings for geronimo project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.7/topics/settings/
@@ -49,9 +49,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'gero_api.urls'
+ROOT_URLCONF = 'geronimo.urls'
 
-WSGI_APPLICATION = 'gero_api.wsgi.application'
+WSGI_APPLICATION = 'geronimo.wsgi.application'
 
 
 # Database
