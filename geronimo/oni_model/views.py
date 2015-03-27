@@ -49,3 +49,6 @@ class AccessPointList(ListView):
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
 
+class AccessPointDetail(DetailView):
+    queryset = AccessPoint.objects.all()
+    serializer_class = AccessPointSerializer
