@@ -58,7 +58,7 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
 
 
 def _get_node_table_rows():
-    html = str(urllib.request.urlopen(URL_NODE_LIST).read())
+    html = urllib.request.urlopen(URL_NODE_LIST).read().decode("utf-8")
     parser = _MediaWikiNodeTableParser()
     parser.feed(html)
     return parser._rows
