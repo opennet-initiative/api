@@ -84,11 +84,11 @@ def import_accesspoints_from_wiki():
                     try:
                         value = float(replace_func(text))
                     except ValueError:
-                        print("Failed to parse position (%s) of node %s: %s" % (key, ip_address, text), file=sys.stderr)
+                        print("Failed to parse position (%s) of node %s: %s" % (key, main_ip, text), file=sys.stderr)
                         continue
                     coordinates.append(value)
             else:
-                print("Failed to parse position of node %s: %s" % (ip_address, latlon), file=sys.stderr)
+                print("Failed to parse position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
             lat, lon = coordinates
             node.position.x = lon
             node.position.y = lat
