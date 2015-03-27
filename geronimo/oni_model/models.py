@@ -14,6 +14,12 @@ class AccessPoint(models.Model):
     sys_os_type = models.TextField()
     sys_os_name = models.TextField()
 
+    def __unicode__(self):
+        return '%s : %s' % (self.main_ip, self.owner)
+    
+    def __str__(self):
+        return self.__unicode__()
+
 
 class EthernetNetworkInterface(models.Model):
     access_point = models.ForeignKey(AccessPoint)
@@ -81,10 +87,4 @@ class WifiNetworkInterface(EthernetNetworkInterface):
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1)
     wifi_iw_crypt = models.TextField(choices=_CHOICES_WIFI_CRYPT)
     wifi_vaps_enabled = models.BooleanField()
-
-    def __unicode__(self):
-        return '%s : %s' % (self.main_ip, self.owner)
-    
-    def __str__(self):
-        return self.__unicode__()
 
