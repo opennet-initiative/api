@@ -12,8 +12,8 @@ class AccessPoint(models.Model):
     owner = models.TextField()
     device_model = models.TextField()
 
-    sys_os_type = models.TextField()
-    sys_os_name = models.TextField()
+    sys_os_type = models.TextField(null=True,default=None)
+    sys_os_name = models.TextField(null=True,default=None)
 
     def __unicode__(self):
         return '%s : %s' % (self.main_ip, self.owner)
