@@ -34,13 +34,13 @@ class EthernetNetworkInterface(models.Model):
     ip_broadcast = models.IPAddressField()
     opennet_networks = models.TextField()
     opennet_firewall_zones = models.TextField()
-    olsr_enabled = models.BooleanField()
+    olsr_enabled = models.BooleanField(default=False)
 
     # DHCP
     dhcp_range_start = models.IntegerField()
     dhcp_range_limit = models.IntegerField()
     dhcp_leasetime = models.IntegerField()
-    dhcp_forward = models.BooleanField()
+    dhcp_forward = models.BooleanField(default=False)
 
     # statistics
     ifstat_collisions = models.IntegerField()
@@ -86,5 +86,5 @@ class WifiNetworkInterface(EthernetNetworkInterface):
     wifi_noise = models.SmallIntegerField()
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1)
     wifi_crypt = StatusField(choices_name='CRYPT_CHOICES')
-    wifi_vaps_enabled = models.BooleanField()
+    wifi_vaps_enabled = models.BooleanField(default=False)
 
