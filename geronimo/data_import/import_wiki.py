@@ -2,7 +2,7 @@ import sys
 import urllib.request, urllib.error, urllib.parse
 import html.parser
 
-import opennet
+import data_import.opennet
 import oni_model.models
 
 
@@ -65,8 +65,8 @@ def import_accesspoints_from_wiki():
     # helper function for retrieving column data
     get_column = lambda row, column_name: row[NODE_TABLE_COLUMNS.index(column_name)]
     for row in _get_node_table_rows():
-        main_ip = opennet.parse_node_ip(get_column(row, "ip_address"))
-        node, created = oni_models.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
+        main_ip = data_import.opennet.parse_node_ip(get_column(row, "ip_address"))
+        node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
         node.post_address = get_column(row, "post_address")
         node.antenna = get_column(row, "antenna")
         node.device_model = get_column(row, "device_model")
@@ -92,13 +92,13 @@ def import_accesspoints_from_wiki():
             lat, lon = coordinates
             node.position.x = lon
             node.position.y = lat
-        node["pretty_name"] = opennet.get_pretty_name(node)
+        node["pretty_name"] = data_import.opennet.get_pretty_name(node)
         node.save()
 
 
 if __name__ == "__main__":
     import_accesspoints_from_wiki()
-    for item in oni_models.models.AccessPoint.objects():
+    for item in oni_model.models.AccessPoint.objects():
         print(repr(item))
     print(len(nodes))
 
