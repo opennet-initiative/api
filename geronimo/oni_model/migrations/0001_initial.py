@@ -14,10 +14,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AccessPoint',
             fields=[
-                ('main_ip', models.IPAddressField(primary_key=True, serialize=False)),
+                ('main_ip', models.IPAddressField(serialize=False, primary_key=True)),
                 ('post_address', models.TextField()),
                 ('antenna', models.TextField()),
-                ('position', django.contrib.gis.db.models.fields.PointField(blank=True, null=True, default=None, srid=4326)),
+                ('position', django.contrib.gis.db.models.fields.PointField(null=True, blank=True, srid=4326)),
                 ('owner', models.TextField()),
                 ('device_model', models.TextField()),
             ],
