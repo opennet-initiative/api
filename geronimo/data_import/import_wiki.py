@@ -2,6 +2,8 @@ import sys
 import urllib.request, urllib.error, urllib.parse
 import html.parser
 
+from django.contrib.gis.geos import Point
+
 import data_import.opennet
 import oni_model.models
 
@@ -32,7 +34,8 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
 
     def handle_endtag(self, tag):
         if tag == "td":
-            column_text = " ".join(self._column_data)
+            # irgendwie landen am Ende der latlon-Daten immer ein "\n" (kein Zeilenumbruch - sondern zwei Zeichen)
+            column_text = " ".join(self._column_data).strip().strip(r"\n")
             self._row_data.append(column_text)
             self._column_data = None
         elif tag == "tr":
@@ -72,27 +75,26 @@ def import_accesspoints_from_wiki():
         node.device_model = get_column(row, "device")
         node.owner = get_column(row, "owner")
         node.notes = get_column(row, "notes")
+        #node.pretty_name = data_import.opennet.get_pretty_name(node)
         # parse the position
         latlon = get_column(row, "latlon")
-        if latlon:
-            splitted = latlon.split()
-            lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
-            lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
-            coordinates = []
-            if len(splitted) == 2:
-                for key, text, replace_func in zip(("lat", "lon"), splitted, (lat_replace, lon_replace)):
-                    try:
-                        value = float(replace_func(text))
-                    except ValueError:
-                        print("Failed to parse position (%s) of node %s: %s" % (key, main_ip, text), file=sys.stderr)
-                        continue
-                    coordinates.append(value)
-            else:
-                print("Failed to parse position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
-            lat, lon = coordinates
-            node.position.x = lon
-            node.position.y = lat
-        node["pretty_name"] = data_import.opennet.get_pretty_name(node)
+        if not latlon:
+            print("Failed to parse position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
+            continue
+        splitted = latlon.strip().split()
+        lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
+        lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
+        coordinates = []
+        if len(splitted) != 2:
+            continue
+        lat, lon = splitted
+        try:
+            lon = float(lon_replace(lon))
+            lat = float(lat_replace(lat))
+        except ValueError:
+            print("Failed to parse position (%s) of node %s" % (latlon, main_ip), file=sys.stderr)
+            continue
+        node.position = Point(lon, lat)
         node.save()
 
 
