@@ -29,7 +29,7 @@ def _get_table_meta(conn, table):
     return [col[1] for col in columns.fetchall()]
 
 
-def _parse_nodes_data(conn):
+def _parse_nodes_data(conn, max_age_seconds=3600):
     nodes_columns = _get_table_meta(conn, "nodes")
     def get_row_dict(row, columns):
         result = {}
@@ -50,7 +50,7 @@ def _parse_nodes_data(conn):
 
 
 # "data" ist ein Dictionary mit den Inhalten aus der ondataservice-sqlite-Datenbank
-def import_accesspoint(data)
+def import_accesspoint(data):
     main_ip = data["on_olsrd_mainip"]
     if not main_ip:
         return
@@ -136,7 +136,7 @@ def import_network_interface(data):
     interface.save()
 
 
-def import_ondataservice(db_file="/var/run/olsrd/ondataservice.db", max_age_seconds=300):
+def import_from_ondataservice(db_file="/var/run/olsrd/ondataservice.db"):
     try:
         conn = sqlite3.connect(db_file)
     except sqlite3.OperationalError as err_msg:
