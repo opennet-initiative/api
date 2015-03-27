@@ -6,7 +6,7 @@ class AccessPoint(models.Model):
     main_ip=models.IPAddressField(primary_key=True)
     post_address=models.TextField()
     antenna=models.TextField()
-    position=gismodels.PointField(default=None)
+    position=gismodels.PointField(default=None, null=True, blank=True)
     objects = gismodels.GeoManager()
     owner=models.TextField()
     device_model=models.TextField()
