@@ -1,4 +1,4 @@
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import ipaddr
 import elements
 
@@ -72,7 +72,7 @@ def parse_mid_for_alternatives(mesh, mid_table):
 
 def parse_olsr_topology(mesh=None, txtinfo_url="http://localhost:2006"):
     url = "%s/%s" % (txtinfo_url.rstrip("/"), "all")
-    topology_lines = urllib.urlopen(url).read().splitlines()
+    topology_lines = urllib.request.urlopen(url).read().splitlines()
     tables = _txtinfo_parser(topology_lines, ("routes", "hna", "topology", "mid", "links"))
     if mesh is None:
         mesh = elements.get_mesh()
@@ -87,5 +87,5 @@ def parse_olsr_topology(mesh=None, txtinfo_url="http://localhost:2006"):
 if __name__ == "__main__":
     mesh = parse_olsr_topology()
     for item in mesh.links:
-        print repr(item)
+        print(repr(item))
 

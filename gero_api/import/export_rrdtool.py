@@ -68,11 +68,11 @@ def _create_rrd(filename, keys):
 
 def _update_rrd(filename, value_dict, timestamp):
     if not os.path.exists(filename):
-        _create_rrd(filename, value_dict.keys())
+        _create_rrd(filename, list(value_dict.keys()))
     # sort the templates and sort the values
     keys = []
     values = [str(timestamp)]
-    for key, value in value_dict.iteritems():
+    for key, value in value_dict.items():
         keys.append(key)
         values.append(str(value))
     key_string = ":".join(keys)

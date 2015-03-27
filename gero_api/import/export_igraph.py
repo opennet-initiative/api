@@ -13,7 +13,7 @@ def generate_igraph(mesh):
         vertex["name"] = str(node.addresses[0])
         node_flags = node.get_flags()
         # apply all flags to the vertex
-        for key, value in node.get_flags().iteritems():
+        for key, value in node.get_flags().items():
             vertex[key] = value
     # import links
     for index, link in enumerate(mesh.links):
@@ -22,7 +22,7 @@ def generate_igraph(mesh):
         edge = graph.es[index]
         node_flags = link.get_flags()
         # apply all flags to the vertex
-        for key, value in link.get_flags().iteritems():
+        for key, value in link.get_flags().items():
             edge[key] = value
     return graph
 
@@ -31,6 +31,6 @@ if __name__ == "__main__":
     import opennet
     mesh = opennet.import_opennet_mesh()
     graph = generate_igraph(mesh)
-    print graph
+    print(graph)
     igraph.plot(graph, "output.png")
 

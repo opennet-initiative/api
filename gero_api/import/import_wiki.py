@@ -1,7 +1,7 @@
 
 import sys
-import urllib2
-import HTMLParser
+import urllib.request, urllib.error, urllib.parse
+import html.parser
 
 import elements
 import opennet
@@ -15,7 +15,7 @@ NODE_TABLE_COLUMNS = ("ip_address", "lastseen", "post_address", "antenna", "devi
 # We need to add 'object' explicitely since HTMLParser.HTMLParser seems to be
 # an old-style class (not inherited from 'object'). This causes the exception
 # 'TypeError: must be type, not classobj' during the 'super' call.
-class _MediaWikiNodeTableParser(HTMLParser.HTMLParser, object):
+class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
 
     def __init__(self):
         super(_MediaWikiNodeTableParser, self).__init__()
@@ -56,7 +56,7 @@ class _MediaWikiNodeTableParser(HTMLParser.HTMLParser, object):
 
 
 def _get_node_table_rows():
-    html = urllib2.urlopen(URL_NODE_LIST).read()
+    html = str(urllib.request.urlopen(URL_NODE_LIST).read())
     parser = _MediaWikiNodeTableParser()
     parser.feed(html)
     return parser._rows
@@ -90,17 +90,17 @@ def parse_wiki_nodelist(mesh=None, create_new=True):
                     try:
                         value = float(replace_func(text))
                     except ValueError:
-                        print >>sys.stderr, "Failed to parse position (%s) of node %s: %s" % (key, ip_address, text)
+                        print("Failed to parse position (%s) of node %s: %s" % (key, ip_address, text), file=sys.stderr)
                         continue
                     setattr(node, key, value)
             else:
-                print >>sys.stderr, "Failed to parse position of node %s: %s" % (ip_address, latlon)
+                print("Failed to parse position of node %s: %s" % (ip_address, latlon), file=sys.stderr)
     return mesh
 
 
 if __name__ == "__main__":
     mesh = parse_wiki_nodelist()
     for item in mesh.nodes:
-        print repr(item)
-    print len(mesh.nodes)
+        print(repr(item))
+    print(len(mesh.nodes))
 

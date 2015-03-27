@@ -1,6 +1,7 @@
-import ipaddr
+import ipaddress as ipaddr
 import calendar
 import datetime
+import collections
 
 
 __MESH_STORE = []
@@ -17,19 +18,19 @@ def get_nodes_key(nodes):
 
 
 def get_address(address):
-    if isinstance(address, ipaddr._BaseIP):
+    if isinstance(address, ipaddr.IPv4Address):
         return address
     # simple address without netmask?
     try:
-        return ipaddr.IPAddress(address)
+        return ipaddr.IPv4Address(address)
     except ValueError as original_exception:
         pass
     # network mask with a single host (.../32)
     try:
-        network = ipaddr.IPNetwork(address)
+        network = ipaddr.IPv4Network(address)
     except ValueError:
         raise original_exception
-    if network.numhosts == 1:
+    if network.num_addresses == 1:
         return network[0]
     else:
         raise original_exception
@@ -52,7 +53,7 @@ class AttributableObject(object):
             if key.startswith("_"):
                 continue
             item = getattr(self, key)
-            if not callable(item):
+            if not isinstance(item, collections.Callable):
                 result[key] = item
         return result
 
@@ -109,8 +110,8 @@ class Node(AttributableObject):
     def __repr__(self):
         main_ip = str(self.addresses[0])
         description = [main_ip]
-        description.extend([("%s='%s'" % (key, value)).decode("UTF-8") for key, value in self.get_flags().iteritems()])
-        description_string = ", ".join(description).encode("UTF-8")
+        description.extend([("%s='%s'" % (key, value)) for key, value in list(self.get_flags().items())])
+        description_string = ", ".join(description)
         return "Node(%s)" % description_string
 
 
@@ -145,7 +146,7 @@ class Link(AttributableObject):
 
     def __repr__(self):
         description = ["(%s, %s)" % self.nodes]
-        description.extend(["%s='%s'" % (key, value) for key, value in self.get_flags().iteritems()])
+        description.extend(["%s='%s'" % (key, value) for key, value in list(self.get_flags().items())])
         description_string = ", ".join(description)
         return "%s(%s)" % (self.__class__.__name__, description_string)
 

@@ -55,7 +55,7 @@ def push_to_api(mesh, api_url=OPENWIFIMAP_API_URL):
             node_id = _get_node_id(node)
             status, text = _send_data("update_node/%s" % node_id, json_text, api_url=api_url)
             if not status:
-                print >> sys.stderr, node.name, text.strip()
+                print(node.name, text.strip(), file=sys.stderr)
 
 
 if __name__ == "__main__":
@@ -68,5 +68,5 @@ if __name__ == "__main__":
             node_id = _get_node_id(node)
             status, text = _send_data("update_node/%s" % node_id, json_text)
             if not status:
-                print node.name, text.strip()
+                print(node.name, text.strip())
 

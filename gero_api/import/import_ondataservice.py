@@ -92,8 +92,8 @@ def parse_ondataservice(mesh=None, db_file="/var/run/olsrd/ondataservice.db", ma
         mesh = elements.get_mesh()
     try:
         conn = sqlite3.connect(db_file)
-    except sqlite3.OperationalError, err_msg:
-        print >> sys.stderr, "Failed to open ondataservice database (%s): %s" % (db_file, err_msg)
+    except sqlite3.OperationalError as err_msg:
+        print("Failed to open ondataservice database (%s): %s" % (db_file, err_msg), file=sys.stderr)
     else:
         _parse_nodes_data(mesh, conn, max_age_seconds=max_age_seconds, create_new=create_new)
         conn.close()
@@ -102,8 +102,8 @@ def parse_ondataservice(mesh=None, db_file="/var/run/olsrd/ondataservice.db", ma
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print >> sys.stderr, "No database given - exit."
+        print("No database given - exit.", file=sys.stderr)
     mesh = parse_ondataservice(db_file=sys.argv[1])
     for a in mesh.nodes:
-        print repr(a)
+        print(repr(a))
     

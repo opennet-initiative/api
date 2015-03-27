@@ -36,5 +36,5 @@ if __name__ == "__main__":
     mesh = opennet.import_opennet_mesh()
     graph = NetworkGraph(self.mesh)
     node1, node2 = mesh.nodes[0], mesh.nodes[4]
-    print graph.get_shortest_path(node1, node2)
+    print(graph.get_shortest_path(node1, node2))
 
