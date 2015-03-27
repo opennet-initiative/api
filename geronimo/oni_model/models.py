@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.gis.db import models as gismodels
-
+from model_utils.fields import StatusField
+from model_utils import Choices
 
 class AccessPoint(models.Model):
     main_ip = models.IPAddressField(primary_key=True)
@@ -24,7 +25,7 @@ class AccessPoint(models.Model):
 class EthernetNetworkInterface(models.Model):
     access_point = models.ForeignKey(AccessPoint)
 
-    if_name = models.TextField()
+    if_name = models.CharField(max_length=128)
     if_is_bridge = models.BooleanField(default=False)
     if_is_bridged = models.BooleanField(default=False)
     if_hwaddress = models.TextField()
@@ -67,24 +68,23 @@ class EthernetNetworkInterface(models.Model):
     ifstat_tx_heart = models.IntegerField()
 
 
-_CHOICES_WIFI_DRIVER = {"nl80211": "nl80211"}.items()
-_CHOICES_WIFI_MODE = {"master": "master", "client": "client", "adhoc": "adhoc"}.items()
-_CHOICES_WIFI_HWMODE = {"802.11bgn": "802.11bgn"}.items()
-_CHOICES_WIFI_CRYPT = {"plain": "Plain", "wep": "WEP", "wpa2_psk": "WPA2-PSK"}.items()
-
-
 class WifiNetworkInterface(EthernetNetworkInterface):
-    wifi_ssid = models.TextField()
-    wifi_bssid = models.TextField()
-    wifi_driver = models.TextField(choices=_CHOICES_WIFI_DRIVER)
-    wifi_hwmode = models.TextField(choices=_CHOICES_WIFI_HWMODE)
-    wifi_mode = models.TextField(choices=_CHOICES_WIFI_MODE)
+    CRYPT_CHOICES = Choices('Plain', 'WEP','WPA2-PSK')
+    MODE_CHOICES = Choices('master','client','adhoc')
+    HWMODE_CHOICES = Choices('802.11bgn')
+    WIFI_DRIVER_CHOICES = Choices('nl80211')
+
+    wifi_ssid = models.CharField(max_length=32)
+    wifi_bssid = models.CharField(max_length=17)
+    wifi_driver = StatusField(choices_name='WIFI_DRIVER_CHOICES')
+    wifi_hwmode = StatusField(choices_name='HWMODE_CHOICES')
+    wifi_mode = StatusField(choices_name='MODE_CHOICES')
     wifi_channel = models.PositiveSmallIntegerField()
     wifi_freq = models.DecimalField(max_digits=6, decimal_places=3)
     wifi_txpower = models.PositiveSmallIntegerField()
     wifi_signal = models.SmallIntegerField()
     wifi_noise = models.SmallIntegerField()
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1)
-    wifi_iw_crypt = models.TextField(choices=_CHOICES_WIFI_CRYPT)
+    wifi_crypt = StatusField(choices_name='CRYPT_CHOICES')
     wifi_vaps_enabled = models.BooleanField()
 
