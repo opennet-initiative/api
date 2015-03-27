@@ -69,7 +69,7 @@ def import_accesspoints_from_wiki():
         node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
         node.post_address = get_column(row, "post_address")
         node.antenna = get_column(row, "antenna")
-        node.device_model = get_column(row, "device_model")
+        node.device_model = get_column(row, "device")
         node.owner = get_column(row, "owner")
         node.notes = get_column(row, "notes")
         # parse the position
