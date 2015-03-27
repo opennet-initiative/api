@@ -21,7 +21,6 @@ def parse_node_ip(address):
     """ Parse strings with full IP address or APx or APx.y values.
         Return ipaddr.IPAddress 
     """
-    print(address)
     if isinstance(address, ipaddr.IPv4Address):
         return address
     elif isinstance(address, ipaddr.IPv4Network):
@@ -67,36 +66,14 @@ def parse_node_ip(address):
         raise ValueError("Failed to parse a node address: %s" % address)
 
 
-def apply_opennet(mesh):
-    removal_list = []
+def get_accesspoint_pretty_name(node):
     # remove nodes which do not contain an address within our networks
     # and add opennet-specific names to remaining nodes
-    for node in mesh.nodes:
-        matching_addresses = [address for address in node.addresses if is_our_network(address)]
-        if matching_addresses:
-            main_ip = str(matching_addresses[0])
-            last_octets = main_ip.split(".")[-2:]
-            name = "AP%s.%s" % tuple(last_octets)
-            node.name = name
-        else:
-            removal_list.append(node)
-    for node in removal_list:
-        mesh.remove_node(node)
- 
-
-def import_opennet_mesh(mesh=None):
-    import import_olsr
-    import import_wiki
-    import import_ondataservice
-    mesh = import_olsr.parse_olsr_topology(mesh)
-    import_wiki.parse_wiki_nodelist(mesh)
-    apply_opennet(mesh)
-    import_ondataservice.parse_ondataservice(mesh)
-    return mesh
-
-
-if __name__ == "__main__":
-    mesh = import_opennet_mesh()
-    for item in mesh.nodes:
-        print(repr(item))
+    matching_addresses = [address for address in node["addresses"] if is_our_network(address)]
+    if matching_addresses:
+        main_ip = str(matching_addresses[0])
+        last_octets = main_ip.split(".")[-2:]
+        return "AP%s.%s" % tuple(last_octets)
+    else:
+        return None
 

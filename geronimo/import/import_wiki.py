@@ -1,10 +1,9 @@
-
 import sys
 import urllib.request, urllib.error, urllib.parse
 import html.parser
 
-import elements
 import opennet
+import oni_model.models
 
 
 URL_NODE_LIST = "http://wiki.opennet-initiative.de/wiki/Opennet_Nodes"
@@ -62,29 +61,24 @@ def _get_node_table_rows():
     return parser._rows
 
 
-def parse_wiki_nodelist(mesh=None, create_new=True):
-    rows = _get_node_table_rows()
-    if mesh is None:
-        mesh = elements.get_mesh()
+def import_accesspoints_from_wiki():
     # helper function for retrieving column data
     get_column = lambda row, column_name: row[NODE_TABLE_COLUMNS.index(column_name)]
-    for row in rows:
-        ip_address = opennet.parse_node_ip(get_column(row, "ip_address"))
-        if not create_new and not mesh.has_node(ip_address):
-            # skip this new node
-            continue
-        node = mesh.get_node(ip_address)
-        # apply attributes
-        for key in ("post_address", "antenna", "device", "owner", "notes"):
-            value = get_column(row, key)
-            if value:
-                setattr(node, key, value)
+    for row in _get_node_table_rows():
+        main_ip = opennet.parse_node_ip(get_column(row, "ip_address"))
+        node, created = oni_models.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
+        node.post_address = get_column(row, "post_address")
+        node.antenna = get_column(row, "antenna")
+        node.device_model = get_column(row, "device_model")
+        node.owner = get_column(row, "owner")
+        node.notes = get_column(row, "notes")
         # parse the position
         latlon = get_column(row, "latlon")
         if latlon:
             splitted = latlon.split()
             lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
             lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
+            coordinates = []
             if len(splitted) == 2:
                 for key, text, replace_func in zip(("lat", "lon"), splitted, (lat_replace, lon_replace)):
                     try:
@@ -92,15 +86,19 @@ def parse_wiki_nodelist(mesh=None, create_new=True):
                     except ValueError:
                         print("Failed to parse position (%s) of node %s: %s" % (key, ip_address, text), file=sys.stderr)
                         continue
-                    setattr(node, key, value)
+                    coordinates.append(value)
             else:
                 print("Failed to parse position of node %s: %s" % (ip_address, latlon), file=sys.stderr)
-    return mesh
+            lat, lon = coordinates
+            node.position.x = lon
+            node.position.y = lat
+        node["pretty_name"] = opennet.get_pretty_name(node)
+        node.save()
 
 
 if __name__ == "__main__":
-    mesh = parse_wiki_nodelist()
-    for item in mesh.nodes:
+    import_accesspoints_from_wiki()
+    for item in oni_models.models.AccessPoint.objects():
         print(repr(item))
-    print(len(mesh.nodes))
+    print(len(nodes))
 
