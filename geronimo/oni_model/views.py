@@ -8,7 +8,6 @@ from rest_framework import filters
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import SessionAuthentication,BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -16,8 +15,6 @@ from rest_framework.permissions import IsAuthenticated
 class ListView(mixins.ListModelMixin,
                mixins.CreateModelMixin,
                generics.GenericAPIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -29,11 +26,10 @@ class ListView(mixins.ListModelMixin,
     class Meta:
         abstract = True
 
+
 class DetailView(mixins.RetrieveModelMixin,
                  mixins.UpdateModelMixin,
                  generics.GenericAPIView):
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
@@ -45,9 +41,11 @@ class DetailView(mixins.RetrieveModelMixin,
     class Meta:
         abstract = True
 
+
 class AccessPointList(ListView):
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
+
 
 class AccessPointDetail(DetailView):
     queryset = AccessPoint.objects.all()
