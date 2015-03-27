@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import django.contrib.gis.db.models.fields
 
 
 class Migration(migrations.Migration):
@@ -11,15 +12,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Node',
+            name='AccessPoint',
             fields=[
-                ('ip', models.IPAddressField(primary_key=True, serialize=False)),
+                ('main_ip', models.IPAddressField(primary_key=True, serialize=False)),
                 ('post_address', models.TextField()),
                 ('antenna', models.TextField()),
-                ('lat', models.FloatField()),
-                ('long', models.FloatField()),
+                ('position', django.contrib.gis.db.models.fields.PointField(blank=True, null=True, default=None, srid=4326)),
                 ('owner', models.TextField()),
-                ('device', models.TextField()),
+                ('device_model', models.TextField()),
             ],
             options={
             },
