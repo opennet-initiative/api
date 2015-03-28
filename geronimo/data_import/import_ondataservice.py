@@ -29,21 +29,21 @@ def _get_table_meta(conn, table):
     return [col[1] for col in columns.fetchall()]
 
 
-def _parse_nodes_data(conn, max_age_seconds=3600):
+def _parse_nodes_data(conn):
     nodes_columns = _get_table_meta(conn, "nodes")
     def get_row_dict(row, columns):
         result = {}
         for key, value in zip(columns, row):
             result[key] = value
         return result
-    min_epoch = time.time() - max_age_seconds
     # add node tags
-    query = conn.execute("SELECT * FROM nodes WHERE db_update >= %d" % min_epoch)
+    query = conn.execute("SELECT * FROM nodes")
     for row in query.fetchall():
         data = get_row_dict(row, nodes_columns)
+        import_accesspoint(data)
     # add network interfaces
     ifaces_columns = _get_table_meta(conn, "ifaces")
-    query = conn.execute("SELECT * FROM ifaces WHERE db_update >= %d" % min_epoch)
+    query = conn.execute("SELECT * FROM ifaces")
     for row in query.fetchall():
         data = get_row_dict(row, ifaces_columns)
         import_network_interface(data)
@@ -60,79 +60,102 @@ def import_accesspoint(data):
         "sys_os_name": "sys_os_name",
     }
     for key_from, key_to in mapping.items():
-        setattr(node, data[key_from])
+        # sicherstellen, dass das Attribut existiert (wir wuenschen im Zweifel eine Exception)
+        getattr(node, key_to)
+        setattr(node, key_to, data[key_from])
     node.save()
 
 
 # "data" ist ein Dictionary mit den Inhalten aus der ondataservice-sqlite-Datenbank
 def import_network_interface(data):
     main_ip = data["mainip"]
-    node = oni_model.models.AccessPoint.objects.get(main_ip=main_ip)
-    if not node:
+    try:
+        node = oni_model.models.AccessPoint.objects.get(main_ip=main_ip)
+    except oni_model.models.AccessPoint.DoesNotExist:
         # wir legen keine Netzwerk-Interfaces fuer APs an, die noch nicht in der Datenbank sind
         return
-    # Uebertragung von sqlite-Eintraegen in unser Modell
-    mapping = {
-        "if_name": "if_name",
-        "if_type_bridge": "if_is_bridge",
-        "if_type_bridgedif": "if_is_bridged",
-        "if_hwaddress": "if_hwaddress",
-        "ip_label": "ip_label",
-        "ip_address": "ip_address",
-        "ip_broadcast": "ip_broadcast",
-        "on_networks": "opennet_networks",
-        "on_zones": "opennet_firewall_zones",
-        "on_olsr": "olsr_enabled",
-        "dhcp_start": "dhcp_start",
-        "dhcp_limit": "dhcp_limit",
-        "dhcp_leasetime": "dhcp_leasetime",
-        "dhcp_fwd": "dhcp_forward",
-        "ifstat_collisions": "ifstat_collisions",
-        "ifstat_rx_compressed": "ifstat_rx_compressed",
-        "ifstat_rx_errors": "ifstat_rx_errors",
-        "ifstat_rx_length_errors": "ifstat_rx_length_errors",
-        "ifstat_rx_packets": "ifstat_rx_packets",
-        "ifstat_tx_carrier_errors": "ifstat_tx_carrier_errors",
-        "ifstat_tx_errors": "ifstat_tx_errors",
-        "ifstat_tx_packets": "ifstat_tx_packets",
-        "ifstat_multicast": "ifstat_multicast",
-        "ifstat_rx_crc_errors": "ifstat_rx_crc_errors",
-        "ifstat_rx_fifo_errors": "ifstat_rx_fifo_errors",
-        "ifstat_rx_missed_errors": "ifstat_rx_missed_errors",
-        "ifstat_tx_aborted_errors": "ifstat_tx_aborted_errors",
-        "ifstat_tx_compressed": "ifstat_tx_compressed",
-        "ifstat_tx_fifo_errors": "ifstat_tx_fifo_errors",
-        "ifstat_tx_window_errors": "ifstat_tx_window_errors",
-        "ifstat_rx_bytes": "ifstat_rx_bytes",
-        "ifstat_rx_dropped": "ifstat_rx_dropped",
-        "ifstat_rx_frame_errors": "ifstat_rx_frame_errors",
-        "ifstat_rx_over_errors": "ifstat_rx_over_errors",
-        "ifstat_tx_bytes": "ifstat_tx_bytes",
-        "ifstat_tx_dropped": "ifstat_tx_dropped",
-        "ifstat_tx_heart": "ifstat_tx_heart",
-    }
     # wir verwenden fuer wlan-Interfaces eine separate Klasse und weitere Attribute fuer wifi-Interfaces
-    if data["ssid"]:
-        interface, created = oni_model.models.WifiNetworkInterface.objects.get_or_create(access_point=node, ifname=data["ifname"])
-        mapping.update({
-            "wlan_essid": "wifi_ssid",
-            "wlan_ap": "wifi_bssid",
-            "wlan_type": "wifi_driver",
-            "wlan_hwmode": "wifi_hwmode",
-            "wlan_mode": "wifi_mode",
-            "wlan_channel": "wifi_channel",
-            "wlan_freq": "wifi_freq",
-            "wlan_txpower": "wifi_signal",
-            "wlan_signal": "wifi_signal",
-            "wlan_noise": "wifi_noise",
-            "wlan_bitrate": "wifi_bitrate",
-            "wlan_crypt": "wifi_crypt",
-            "wlan_vaps": "wifi_vaps_enabled",
-        })
+    if data["wlan_essid"]:
+        base_class = oni_model.models.WifiNetworkInterface
     else:
-        interface, created = oni_model.models.EthernetNetworkInterface.objects.get_or_create(access_point=node, ifname=data["ifname"])
-    for key_from, key_to in mapping.items():
-        setattr(interface, data[key_from])
+        base_class = oni_model.models.EthernetNetworkInterface
+    try:
+       interface = base_class.objects.get(access_point=node, if_name=data["if_name"])
+    except base_class.DoesNotExist:
+       interface = base_class()
+    interface.access_point = node
+    # Uebertragung von sqlite-Eintraegen in unser Modell
+    for key_from, key_to in {
+                "if_name": "if_name",
+                "if_type_bridge": "if_is_bridge",
+                "if_type_bridgedif": "if_is_bridged",
+                "if_hwaddr": "if_hwaddress",
+                "ip_label": "ip_label",
+                "ip_addr": "ip_address",
+                "ip_broadcast": "ip_broadcast",
+                "on_networks": "opennet_networks",
+                "on_zones": "opennet_firewall_zones",
+                "on_olsr": "olsr_enabled",
+                "dhcp_start": "dhcp_range_start",
+                "dhcp_limit": "dhcp_range_limit",
+                "dhcp_fwd": "dhcp_forward",
+                "ifstat_collisions": "ifstat_collisions",
+                "ifstat_rx_compressed": "ifstat_rx_compressed",
+                "ifstat_rx_errors": "ifstat_rx_errors",
+                "ifstat_rx_length_errors": "ifstat_rx_length_errors",
+                "ifstat_rx_packets": "ifstat_rx_packets",
+                "ifstat_tx_carrier_errors": "ifstat_tx_carrier_errors",
+                "ifstat_tx_errors": "ifstat_tx_errors",
+                "ifstat_tx_packets": "ifstat_tx_packets",
+                "ifstat_multicast": "ifstat_multicast",
+                "ifstat_rx_crc_errors": "ifstat_rx_crc_errors",
+                "ifstat_rx_fifo_errors": "ifstat_rx_fifo_errors",
+                "ifstat_rx_missed_errors": "ifstat_rx_missed_errors",
+                "ifstat_tx_aborted_errors": "ifstat_tx_aborted_errors",
+                "ifstat_tx_compressed": "ifstat_tx_compressed",
+                "ifstat_tx_fifo_errors": "ifstat_tx_fifo_errors",
+                "ifstat_tx_window_errors": "ifstat_tx_window_errors",
+                "ifstat_rx_bytes": "ifstat_rx_bytes",
+                "ifstat_rx_dropped": "ifstat_rx_dropped",
+                "ifstat_rx_frame_errors": "ifstat_rx_frame_errors",
+                "ifstat_rx_over_errors": "ifstat_rx_over_errors",
+                "ifstat_tx_bytes": "ifstat_tx_bytes",
+                "ifstat_tx_dropped": "ifstat_tx_dropped",
+                "ifstat_tx_heartbeat_errors": "ifstat_tx_heartbeat_errors",
+            }.items():
+        # sicherstellen, dass das Attribut existiert (wir wuenschen im Zweifel eine Exception)
+        getattr(interface, key_to)
+        setattr(interface, key_to, data[key_from])
+        # TODO: eventuell auch "m" fuer Minuten?
+        interface.dhcp_leasetime = int("0" + data["dhcp_leasetime"].rstrip("h"))
+    if hasattr(interface, "wifi_ssid"):
+        for key_from, key_to in {
+                    "wlan_essid": "wifi_ssid",
+                    "wlan_apmac": "wifi_bssid",
+                    "wlan_type": "wifi_driver",
+                    "wlan_hwmode": "wifi_hwmode",
+                    "wlan_channel": "wifi_channel",
+                    "wlan_freq": "wifi_freq",
+                    "wlan_txpower": "wifi_signal",
+                    "wlan_signal": "wifi_signal",
+                    "wlan_noise": "wifi_noise",
+                    "wlan_bitrate": "wifi_bitrate",
+                    "wlan_vaps": "wifi_vaps_enabled",
+                }.items():
+            # sicherstellen, dass das Attribut existiert (wir wuenschen im Zweifel eine Exception)
+            getattr(interface, key_to)
+            setattr(interface, key_to, data[key_from])
+        # mode
+        interface.wifi_mode = {
+                "Master": "master",
+                "Managed": "client",
+                "Ad-Hoc": "adhoc",
+            }[data["wlan_mode"]]
+        interface.wifi_crypt = {
+                "WEP Open System (NONE)": "WEP",
+                "unknown": "Plain",
+                "open": "Plain",
+            }[data["wlan_crypt"]]
     interface.save()
 
 

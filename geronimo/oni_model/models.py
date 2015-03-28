@@ -65,7 +65,7 @@ class EthernetNetworkInterface(models.Model):
     ifstat_rx_over_errors = models.IntegerField()
     ifstat_tx_bytes = models.IntegerField()
     ifstat_tx_dropped = models.IntegerField()
-    ifstat_tx_heart = models.IntegerField()
+    ifstat_tx_heartbeat_errors = models.IntegerField()
 
 
 class WifiNetworkInterface(EthernetNetworkInterface):
