@@ -10,3 +10,9 @@
 * ./manage.py migrate
 * ./manage.py runserver
 
+
+= Manueller Datenimport =
+
+* ./manage.py import_wiki
+* ./manage.py import_ondataservice SQLITE_DATABASE
+
