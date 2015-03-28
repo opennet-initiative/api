@@ -37,9 +37,9 @@ class EthernetNetworkInterface(models.Model):
     olsr_enabled = models.BooleanField(default=False)
 
     # DHCP
-    dhcp_range_start = models.IntegerField()
-    dhcp_range_limit = models.IntegerField()
-    dhcp_leasetime = models.IntegerField()
+    dhcp_range_start = models.IntegerField(null=True)
+    dhcp_range_limit = models.IntegerField(null=True)
+    dhcp_leasetime_seconds = models.IntegerField(null=True)
     dhcp_forward = models.BooleanField(default=False)
 
     # statistics
@@ -81,7 +81,7 @@ class WifiNetworkInterface(EthernetNetworkInterface):
     wifi_mode = StatusField(choices_name='MODE_CHOICES')
     wifi_channel = models.PositiveSmallIntegerField()
     wifi_freq = models.DecimalField(max_digits=6, decimal_places=3)
-    wifi_txpower = models.PositiveSmallIntegerField()
+    wifi_transmit_power = models.PositiveSmallIntegerField()
     wifi_signal = models.SmallIntegerField()
     wifi_noise = models.SmallIntegerField()
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1)

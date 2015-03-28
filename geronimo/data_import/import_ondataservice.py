@@ -1,6 +1,8 @@
 """ parse the content of an ondataservice database.
     This sqlite database contains two tables: "nodes" and "ifaces".
     The resulting information can be attached to Node objects.
+
+    documentation: https://wiki.opennet-initiative.de/wiki/Ondataservice
 """
 
 import sys
@@ -49,6 +51,35 @@ def _parse_nodes_data(conn):
         import_network_interface(data)
 
 
+def _update_value(target, attribute, raw_value):
+    target_attr = getattr(target, attribute)
+    if attribute.startswith("ifstat_"):
+        # Standard-Wert Null fuer Interface-Statistiken
+        value = int(raw_value) if raw_value else 0
+    elif type(target_attr) is int:
+        # Standard-Wert None fuer Interface-Statistiken
+        value = int(raw_value) if raw_value else None
+    elif attribute in ("dhcp_range_start", "dhcp_range_limit"):
+        # die DHCP-Werte tragen "null=True" - daher sind sie nicht als Integer erkennbar
+        value = int(raw_value) if raw_value else None
+    elif type(target_attr) is bool:
+        value = (raw_value == "1")
+    else:
+        value = str(raw_value)
+    setattr(target, attribute, value)
+
+
+def _parse_dhcp_leasetime_seconds(text):
+    if text.endswith("h"):
+        return int(text[:-1]) * 3600
+    elif text.endswith("m"):
+        return int(text[:-1]) * 60
+    elif text.endswith("s"):
+        return int(text[:-1])
+    else:
+        return None
+
+
 # "data" ist ein Dictionary mit den Inhalten aus der ondataservice-sqlite-Datenbank
 def import_accesspoint(data):
     main_ip = data["on_olsrd_mainip"]
@@ -60,9 +91,7 @@ def import_accesspoint(data):
         "sys_os_name": "sys_os_name",
     }
     for key_from, key_to in mapping.items():
-        # sicherstellen, dass das Attribut existiert (wir wuenschen im Zweifel eine Exception)
-        getattr(node, key_to)
-        setattr(node, key_to, data[key_from])
+        _update_value(node, key_to, data[key_from])
     node.save()
 
 
@@ -123,11 +152,8 @@ def import_network_interface(data):
                 "ifstat_tx_dropped": "ifstat_tx_dropped",
                 "ifstat_tx_heartbeat_errors": "ifstat_tx_heartbeat_errors",
             }.items():
-        # sicherstellen, dass das Attribut existiert (wir wuenschen im Zweifel eine Exception)
-        getattr(interface, key_to)
-        setattr(interface, key_to, data[key_from])
-        # TODO: eventuell auch "m" fuer Minuten?
-        interface.dhcp_leasetime = int("0" + data["dhcp_leasetime"].rstrip("h"))
+        _update_value(interface, key_to, data[key_from])
+        interface.dhcp_leasetime = _parse_dhcp_leasetime_seconds(data["dhcp_leasetime"])
     if hasattr(interface, "wifi_ssid"):
         for key_from, key_to in {
                     "wlan_essid": "wifi_ssid",
@@ -136,26 +162,27 @@ def import_network_interface(data):
                     "wlan_hwmode": "wifi_hwmode",
                     "wlan_channel": "wifi_channel",
                     "wlan_freq": "wifi_freq",
-                    "wlan_txpower": "wifi_signal",
+                    "wlan_txpower": "wifi_transmit_power",
                     "wlan_signal": "wifi_signal",
                     "wlan_noise": "wifi_noise",
                     "wlan_bitrate": "wifi_bitrate",
                     "wlan_vaps": "wifi_vaps_enabled",
                 }.items():
-            # sicherstellen, dass das Attribut existiert (wir wuenschen im Zweifel eine Exception)
-            getattr(interface, key_to)
-            setattr(interface, key_to, data[key_from])
+            _update_value(interface, key_to, data[key_from])
         # mode
         interface.wifi_mode = {
                 "Master": "master",
                 "Managed": "client",
+                "Client": "client",
                 "Ad-Hoc": "adhoc",
             }[data["wlan_mode"]]
         interface.wifi_crypt = {
                 "WEP Open System (NONE)": "WEP",
                 "unknown": "Plain",
                 "open": "Plain",
-            }[data["wlan_crypt"]]
+                "none": "Plain",
+                "None": "Plain",
+            }[data["wlan_crypt"].strip()]
     interface.save()
 
 
