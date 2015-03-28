@@ -9,6 +9,7 @@ import sys
 import re
 import time
 import sqlite3
+import datetime
 
 import oni_model.models
 
@@ -58,11 +59,20 @@ def _update_value(target, attribute, raw_value):
         value = int(raw_value) if raw_value else 0
     elif type(target_attr) is int:
         # Standard-Wert None fuer Interface-Statistiken
-        value = int(raw_value) if raw_value else None
+        value = float(raw_value) if raw_value else None
     elif attribute in ("dhcp_range_start", "dhcp_range_limit"):
         # die DHCP-Werte tragen "null=True" - daher sind sie nicht als Integer erkennbar
         value = int(raw_value) if raw_value else None
-    elif type(target_attr) is bool:
+    elif attribute.endswith("_timestamp"):
+        value = datetime.date.fromtimestamp(int(raw_value)) if raw_value else None
+    elif attribute == "system_uptime":
+        # TODO: ab Django 1.8 gibt es DurationField - fuer timedelta
+        #value = datetime.timedelta(seconds=float(raw_value))
+        value = float(raw_value) if raw_value else None
+    elif (type(target_attr) is bool) \
+            or attribute.endswith("_enabled") \
+            or attribute.endswith("_connected") \
+            or attribute.endswith("_running"):
         value = (raw_value == "1")
     else:
         value = str(raw_value)
@@ -86,12 +96,53 @@ def import_accesspoint(data):
     if not main_ip:
         return
     node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
-    mapping = {
-        "sys_os_type": "sys_os_type",
-        "sys_os_name": "sys_os_name",
-    }
-    for key_from, key_to in mapping.items():
+    for key_from, key_to in {
+                "sys_board": "device_board",
+                "sys_os_arc": "device_architecture",
+                "sys_cpu": "device_cpu",
+                "sys_mem": "device_memory_available",
+                "sys_free": "device_memory_free",
+
+                "sys_ver": "system_kernel",
+                "sys_watchdog": "system_watchdog_enabled",
+                "sys_uptime": "system_uptime",
+
+                "sys_os_type": "firmware_type",
+                "sys_os_name": "firmware_release_name",
+                "sys_os_rel": "firmware_release_version",
+                "sys_os_ver": "firmware_build",
+                "sys_os_insttime": "firmware_install_timestamp",
+
+                "on_core_ver": "opennet_version",
+                "on_core_insttime": "opennet_install_timestamp",
+                "on_packages": "opennet_packages",
+                "on_id": "opennet_id",
+                "on_olsrd_status": "olsrd_running",
+                "on_olsrd_mainip": "olsrd_main_ip",
+
+                "on_wifidog_status": "opennet_wifidog_enabled",
+                "on_wifidog_id": "opennet_wifidog_id",
+
+                "on_vpn_cn": "opennet_certificate_cn",
+                "on_vpn_status": "opennet_vpn_internet_enabled",
+                "on_vpn_gw": "opennet_vpn_internet_connections",
+                "on_vpn_autosearch": "opennet_vpn_internet_autosearch",
+                "on_vpn_sort": "opennet_services_sorting",
+                "on_vpn_gws": "opennet_vpn_internet_gateways",
+                "on_vpn_blist": "opennet_vpn_internet_blacklist",
+
+                "on_ugw_status": "opennet_service_relay_connected",
+                "on_ugw_enabled": "opennet_service_relay_enabled",
+                "on_ugw_tunnel": "opennet_vpn_mesh_connected",
+                "on_ugw_connected": "opennet_vpn_mesh_connections",
+                "on_ugw_presetips": "opennet_vpn_mesh_gateways",
+                "on_ugw_presetnames": "opennet_vpn_mesh_gateway_names",
+            }.items():
         _update_value(node, key_to, data[key_from])
+    # load-Werte
+    if data["sys_load"]:
+        for minutes, value in zip((1, 5, 15), data["sys_load"].split()):
+            setattr(node, "system_load_%dmin" % minutes, float(value))
     node.save()
 
 

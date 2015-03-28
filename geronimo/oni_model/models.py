@@ -4,16 +4,65 @@ from model_utils.fields import StatusField
 from model_utils import Choices
 
 class AccessPoint(models.Model):
+    DISTRIBUTION_CHOICES = Choices("OpenWrt", "AirOS")
+    SERVICES_SORTING_CHOICES = Choices("manuel", "hop", "etx")
+
     main_ip = models.IPAddressField(primary_key=True)
-    post_address = models.TextField()
-    antenna = models.TextField()
+    post_address = models.TextField(null=True)
+    antenna = models.TextField(null=True)
     position = gismodels.PointField(null=True, blank=True)
     objects = gismodels.GeoManager()
-    owner = models.TextField()
-    device_model = models.TextField()
+    owner = models.TextField(null=True)
+    # Geraete-Modell (im Wiki eingetragen)
+    device_model = models.TextField(null=True)
 
-    sys_os_type = models.TextField(null=True,default=None)
-    sys_os_name = models.TextField(null=True,default=None)
+    # ondataservice-Daten
+    device_board = models.TextField(null=True)
+    device_architecture = models.TextField(null=True)
+    device_cpu = models.TextField(null=True)
+    device_memory_available = models.IntegerField(null=True)
+    device_memory_free = models.IntegerField(null=True)
+
+    system_kernel = models.TextField(null=True)
+    system_watchdog_enabled = models.NullBooleanField()
+    # TODO: ab Django 1.8 gibt es DurationField
+    #system_uptime = models.DurationField(null=True)
+    system_uptime = models.IntegerField(null=True)
+    system_load_1min = models.FloatField(null=True)
+    system_load_5min = models.FloatField(null=True)
+    system_load_15min = models.FloatField(null=True)
+
+    firmware_type = StatusField(null=True, choices_name="DISTRIBUTION_CHOICES")
+    firmware_release_name = models.TextField(null=True)
+    firmware_release_version = models.TextField(null=True)
+    firmware_build = models.TextField(null=True)
+    firmware_install_timestamp = models.DateField(null=True)
+
+    opennet_version = models.TextField(null=True)
+    opennet_install_timestamp = models.DateField(null=True)
+    opennet_packages = models.TextField(null=True)
+    opennet_id = models.TextField(null=True)
+    olsrd_running = models.NullBooleanField()
+    olsrd_main_ip = models.TextField(null=True)
+
+    opennet_wifidog_enabled = models.NullBooleanField()
+    opennet_wifidog_id = models.TextField(null=True)
+
+    opennet_certificate_cn = models.TextField(null=True)
+    opennet_vpn_internet_enabled = models.NullBooleanField()
+    opennet_vpn_internet_connections = models.TextField(null=True)
+    opennet_vpn_internet_autosearch = models.TextField(null=True)
+    opennet_services_sorting = StatusField(null=True, choices_name="SERVICES_SORTING_CHOICES")
+    opennet_vpn_internet_gateways = models.TextField(null=True)
+    opennet_vpn_internet_blacklist = models.TextField(null=True)
+
+    opennet_service_relay_connected = models.NullBooleanField()
+    opennet_service_relay_enabled = models.NullBooleanField()
+
+    opennet_vpn_mesh_connected = models.NullBooleanField()
+    opennet_vpn_mesh_connections = models.TextField(null=True)
+    opennet_vpn_mesh_gateways = models.TextField(null=True)
+    opennet_vpn_mesh_gateway_names = models.TextField(null=True)
 
     def __unicode__(self):
         return '%s : %s' % (self.main_ip, self.owner)
