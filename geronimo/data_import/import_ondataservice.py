@@ -11,7 +11,7 @@ import time
 import sqlite3
 import datetime
 
-import oni_model.models
+from oni_model.models import AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes
 
 
 def _get_table_meta(conn, table):
@@ -95,7 +95,7 @@ def import_accesspoint(data):
     main_ip = data["on_olsrd_mainip"]
     if not main_ip:
         return
-    node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
+    node, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
     for key_from, key_to in {
                 "sys_board": "device_board",
                 "sys_os_arc": "device_architecture",
@@ -150,20 +150,15 @@ def import_accesspoint(data):
 def import_network_interface(data):
     main_ip = data["mainip"]
     try:
-        node = oni_model.models.AccessPoint.objects.get(main_ip=main_ip)
-    except oni_model.models.AccessPoint.DoesNotExist:
+        node = AccessPoint.objects.get(main_ip=main_ip)
+    except AccessPoint.DoesNotExist:
         # wir legen keine Netzwerk-Interfaces fuer APs an, die noch nicht in der Datenbank sind
         return
     # wir verwenden fuer wlan-Interfaces eine separate Klasse und weitere Attribute fuer wifi-Interfaces
-    if data["wlan_essid"]:
-        base_class = oni_model.models.WifiNetworkInterface
-    else:
-        base_class = oni_model.models.EthernetNetworkInterface
     try:
-       interface = base_class.objects.get(access_point=node, if_name=data["if_name"])
-    except base_class.DoesNotExist:
-       interface = base_class()
-    interface.access_point = node
+        interface = EthernetNetworkInterface.objects.get(access_point=node, if_name=data["if_name"])
+    except EthernetNetworkInterface.DoesNotExist:
+        interface = EthernetNetworkInterface.objects.create(access_point=node, ip_address=data["ip_addr"])
     # Uebertragung von sqlite-Eintraegen in unser Modell
     for key_from, key_to in {
                 "if_name": "if_name",
@@ -205,7 +200,9 @@ def import_network_interface(data):
             }.items():
         _update_value(interface, key_to, data[key_from])
         interface.dhcp_leasetime = _parse_dhcp_leasetime_seconds(data["dhcp_leasetime"])
-    if hasattr(interface, "wifi_ssid"):
+    interface.save()
+    if data["wlan_essid"]:
+        wifi_attributes, created = WifiNetworkInterfaceAttributes.objects.get_or_create(interface=interface)
         for key_from, key_to in {
                     "wlan_essid": "wifi_ssid",
                     "wlan_apmac": "wifi_bssid",
@@ -219,22 +216,22 @@ def import_network_interface(data):
                     "wlan_bitrate": "wifi_bitrate",
                     "wlan_vaps": "wifi_vaps_enabled",
                 }.items():
-            _update_value(interface, key_to, data[key_from])
+            _update_value(wifi_attributes, key_to, data[key_from])
         # mode
-        interface.wifi_mode = {
+        wifi_attributes.wifi_mode = {
                 "Master": "master",
                 "Managed": "client",
                 "Client": "client",
                 "Ad-Hoc": "adhoc",
             }[data["wlan_mode"]]
-        interface.wifi_crypt = {
+        wifi_attributes.wifi_crypt = {
                 "WEP Open System (NONE)": "WEP",
                 "unknown": "Plain",
                 "open": "Plain",
                 "none": "Plain",
                 "None": "Plain",
             }[data["wlan_crypt"].strip()]
-    interface.save()
+        wifi_attributes.save()
 
 
 def import_from_ondataservice(db_file="/var/run/olsrd/ondataservice.db"):
