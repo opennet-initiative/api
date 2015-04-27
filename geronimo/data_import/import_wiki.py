@@ -79,22 +79,19 @@ def import_accesspoints_from_wiki():
         # parse the position
         latlon = get_column(row, "latlon")
         if not latlon:
-            print("Failed to parse position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
+            print("Ignoring empty position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
             continue
-        splitted = latlon.strip().split()
         lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
         lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
         coordinates = []
-        if len(splitted) != 2:
-            continue
-        lat, lon = splitted
         try:
+            lat, lon = latlon.strip().split()
             lon = float(lon_replace(lon))
             lat = float(lat_replace(lat))
+            node.position = Point(lon, lat)
         except ValueError:
+            # mehr oder weniger als zwei Elemente, bzw. falsches Format
             print("Failed to parse position (%s) of node %s" % (latlon, main_ip), file=sys.stderr)
-            continue
-        node.position = Point(lon, lat)
         node.save()
 
 
