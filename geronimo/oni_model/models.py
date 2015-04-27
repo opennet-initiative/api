@@ -6,7 +6,7 @@ from model_utils import Choices
 
 class AccessPoint(models.Model):
     DISTRIBUTION_CHOICES = Choices("OpenWrt", "AirOS")
-    SERVICES_SORTING_CHOICES = Choices("manuel", "hop", "etx")
+    SERVICES_SORTING_CHOICES = Choices("manual", "hop", "etx")
 
     main_ip = models.IPAddressField(primary_key=True)
     post_address = models.TextField(null=True)
