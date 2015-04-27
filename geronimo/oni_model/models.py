@@ -3,6 +3,7 @@ from django.contrib.gis.db import models as gismodels
 from model_utils.fields import StatusField
 from model_utils import Choices
 
+
 class AccessPoint(models.Model):
     DISTRIBUTION_CHOICES = Choices("OpenWrt", "AirOS")
     SERVICES_SORTING_CHOICES = Choices("manuel", "hop", "etx")
@@ -15,6 +16,7 @@ class AccessPoint(models.Model):
     owner = models.TextField(null=True)
     # Geraete-Modell (im Wiki eingetragen)
     device_model = models.TextField(null=True)
+    timestamp = models.DateField(auto_now=True)
 
     # ondataservice-Daten
     device_board = models.TextField(null=True)
@@ -65,8 +67,8 @@ class AccessPoint(models.Model):
     opennet_vpn_mesh_gateway_names = models.TextField(null=True)
 
     def __unicode__(self):
-        return '%s : %s' % (self.main_ip, self.owner)
-    
+        return 'AP %s owned by %s' % (self.main_ip, self.owner)
+
     def __str__(self):
         return self.__unicode__()
 
@@ -74,15 +76,15 @@ class AccessPoint(models.Model):
 class EthernetNetworkInterface(models.Model):
     access_point = models.ForeignKey(AccessPoint)
 
-    if_name = models.CharField(max_length=128)
+    if_name = models.CharField(max_length=128, null=True)
     if_is_bridge = models.BooleanField(default=False)
     if_is_bridged = models.BooleanField(default=False)
-    if_hwaddress = models.TextField()
-    ip_label = models.TextField()
+    if_hwaddress = models.TextField(null=True)
+    ip_label = models.TextField(null=True)
     ip_address = models.IPAddressField()
-    ip_broadcast = models.IPAddressField()
-    opennet_networks = models.TextField()
-    opennet_firewall_zones = models.TextField()
+    ip_broadcast = models.IPAddressField(null=True)
+    opennet_networks = models.TextField(null=True)
+    opennet_firewall_zones = models.TextField(null=True)
     olsr_enabled = models.BooleanField(default=False)
 
     # DHCP
@@ -92,37 +94,44 @@ class EthernetNetworkInterface(models.Model):
     dhcp_forward = models.BooleanField(default=False)
 
     # statistics
-    ifstat_collisions = models.IntegerField()
-    ifstat_rx_compressed = models.IntegerField()
-    ifstat_rx_errors = models.IntegerField()
-    ifstat_rx_length_errors = models.IntegerField()
-    ifstat_rx_packets = models.IntegerField()
-    ifstat_tx_carrier_errors = models.IntegerField()
-    ifstat_tx_errors = models.IntegerField()
-    ifstat_tx_packets = models.IntegerField()
-    ifstat_multicast = models.IntegerField()
-    ifstat_rx_crc_errors = models.IntegerField()
-    ifstat_rx_fifo_errors = models.IntegerField()
-    ifstat_rx_missed_errors = models.IntegerField()
-    ifstat_tx_aborted_errors = models.IntegerField()
-    ifstat_tx_compressed = models.IntegerField()
-    ifstat_tx_fifo_errors = models.IntegerField()
-    ifstat_tx_window_errors = models.IntegerField()
-    ifstat_rx_bytes = models.IntegerField()
-    ifstat_rx_dropped = models.IntegerField()
-    ifstat_rx_frame_errors = models.IntegerField()
-    ifstat_rx_over_errors = models.IntegerField()
-    ifstat_tx_bytes = models.IntegerField()
-    ifstat_tx_dropped = models.IntegerField()
-    ifstat_tx_heartbeat_errors = models.IntegerField()
+    ifstat_collisions = models.IntegerField(null=True)
+    ifstat_rx_compressed = models.IntegerField(null=True)
+    ifstat_rx_errors = models.IntegerField(null=True)
+    ifstat_rx_length_errors = models.IntegerField(null=True)
+    ifstat_rx_packets = models.IntegerField(null=True)
+    ifstat_tx_carrier_errors = models.IntegerField(null=True)
+    ifstat_tx_errors = models.IntegerField(null=True)
+    ifstat_tx_packets = models.IntegerField(null=True)
+    ifstat_multicast = models.IntegerField(null=True)
+    ifstat_rx_crc_errors = models.IntegerField(null=True)
+    ifstat_rx_fifo_errors = models.IntegerField(null=True)
+    ifstat_rx_missed_errors = models.IntegerField(null=True)
+    ifstat_tx_aborted_errors = models.IntegerField(null=True)
+    ifstat_tx_compressed = models.IntegerField(null=True)
+    ifstat_tx_fifo_errors = models.IntegerField(null=True)
+    ifstat_tx_window_errors = models.IntegerField(null=True)
+    ifstat_rx_bytes = models.IntegerField(null=True)
+    ifstat_rx_dropped = models.IntegerField(null=True)
+    ifstat_rx_frame_errors = models.IntegerField(null=True)
+    ifstat_rx_over_errors = models.IntegerField(null=True)
+    ifstat_tx_bytes = models.IntegerField(null=True)
+    ifstat_tx_dropped = models.IntegerField(null=True)
+    ifstat_tx_heartbeat_errors = models.IntegerField(null=True)
+
+    def __unicode__(self):
+        return 'Interface %s of AP %s' % (self.ip_address, self.access_point.main_ip)
+
+    def __str__(self):
+        return self.__unicode__()
 
 
-class WifiNetworkInterface(EthernetNetworkInterface):
+class WifiNetworkInterfaceAttributes(models.Model):
     CRYPT_CHOICES = Choices('Plain', 'WEP','WPA2-PSK')
     MODE_CHOICES = Choices('master','client','adhoc')
     HWMODE_CHOICES = Choices('802.11bgn')
     WIFI_DRIVER_CHOICES = Choices('nl80211')
 
+    interface = models.ForeignKey(EthernetNetworkInterface)
     wifi_ssid = models.CharField(max_length=32)
     wifi_bssid = models.CharField(max_length=17)
     wifi_driver = StatusField(choices_name='WIFI_DRIVER_CHOICES')
@@ -136,4 +145,14 @@ class WifiNetworkInterface(EthernetNetworkInterface):
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1)
     wifi_crypt = StatusField(choices_name='CRYPT_CHOICES')
     wifi_vaps_enabled = models.BooleanField(default=False)
+
+
+class RoutingLink(models.Model):
+    timestamp = models.DateField(auto_now=True)
+
+
+class InterfaceRoutingLink(models.Model):
+    interface = models.ForeignKey(EthernetNetworkInterface)
+    routing_link = models.ForeignKey(RoutingLink)
+    quality = models.FloatField()
 
