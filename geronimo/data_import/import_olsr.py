@@ -1,6 +1,6 @@
 import urllib.request, urllib.parse, urllib.error
 import ipaddress
-
+from django.db import transaction
 from oni_model.models import AccessPoint, EthernetNetworkInterface, RoutingLink, InterfaceRoutingLink
 
 
@@ -126,7 +126,7 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
                 print("Created new NetworkInterface %s" % ip_address)
                 interface.save()
 
-
+@transaction.atomic
 def import_routes_from_olsr(txtinfo_url="http://192.168.10.4:2006"):
     url = "%s/%s" % (txtinfo_url.rstrip("/"), "all")
     topology_lines = urllib.request.urlopen(url).read().decode("ascii").splitlines()
