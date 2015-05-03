@@ -111,9 +111,10 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
                     print("Discovered duplicate APs: %s and %s" % (found_interface, interface))
                 found_interface = interface
         if not found_interface:
-            ap = AccessPoint.objects.create(main_ip=main_ip)
-            print("Created new AP %s" % main_ip)
-            ap.save()
+            ap, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
+            if created:
+                print("Created new AP %s" % main_ip)
+                ap.save()
             interface = EthernetNetworkInterface.objects.create(ip_address=main_ip, access_point=ap)
             print("Created new NetworkInterface %s" % main_ip)
             interface.save()
