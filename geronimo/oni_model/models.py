@@ -151,12 +151,13 @@ class WifiNetworkInterfaceAttributes(models.Model):
 
 
 class RoutingLink(models.Model):
+    """Eine Online-Verbindung zwischen Interfaces zweier APs"""
     timestamp = models.DateTimeField(auto_now=True)
 
 
 class InterfaceRoutingLink(models.Model):
-    """Eine Online-Verbindung zwischen Interfaces zweier APs"""
+    """Ein Ende eines gerichteten Links""" 
     interface = models.ForeignKey(EthernetNetworkInterface)
-    routing_link = models.ForeignKey(RoutingLink)
-    quality = models.FloatField()
+    routing_link = models.ForeignKey(RoutingLink, related_name="endpoints")
+    quality = models.FloatField() #LQ von diesem Interface zum anderen
 

@@ -4,18 +4,19 @@ from oni_model.models import AccessPoint, InterfaceRoutingLink, RoutingLink, Eth
 class AccessPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccessPoint
-        
-class RoutingLinkSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RoutingLink
 
 class EthernetNetworkInterfaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = EthernetNetworkInterface
         fields = ("ip_address",)
         
-class LinkSerializer(serializers.ModelSerializer):
+class InterfaceRoutingLinkSerializer(serializers.ModelSerializer):
     interface=EthernetNetworkInterfaceSerializer()
-    routing_link=RoutingLinkSerializer()
     class Meta:
         model = InterfaceRoutingLink
+        fields = ("quality","interface",)
+        
+class RoutingLinkSerializer(serializers.ModelSerializer):
+    endpoints = InterfaceRoutingLinkSerializer(many=True, read_only=True)
+    class Meta:
+        model = RoutingLink
