@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
-from oni_model.models import AccessPoint
-from oni_model.serializer import AccessPointSerializer
+from oni_model.models import AccessPoint, InterfaceRoutingLink
+from oni_model.serializer import AccessPointSerializer, LinkSerializer
 
 from rest_framework import mixins
 from rest_framework import filters
@@ -49,3 +49,7 @@ class AccessPointList(ListView):
 class AccessPointDetail(DetailView):
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
+    
+class LinkList(ListView):
+    queryset = InterfaceRoutingLink.objects.all()
+    serializer_class = LinkSerializer
