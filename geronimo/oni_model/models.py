@@ -148,7 +148,7 @@ class WifiNetworkInterfaceAttributes(models.Model):
 
 
 class RoutingLink(models.Model):
-    timestamp = models.DateField(auto_now=True)
+    timestamp = models.DateTimeField(auto_now=True)
 
 
 class InterfaceRoutingLink(models.Model):
