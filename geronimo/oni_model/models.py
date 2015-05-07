@@ -5,6 +5,7 @@ from model_utils import Choices
 
 
 class AccessPoint(models.Model):
+    """Ein einzelner WLAN-Accesspoint im Opennet"""
     DISTRIBUTION_CHOICES = Choices("OpenWrt", "AirOS")
     SERVICES_SORTING_CHOICES = Choices("manual", "hop", "etx")
 
@@ -74,6 +75,7 @@ class AccessPoint(models.Model):
 
 
 class EthernetNetworkInterface(models.Model):
+    """Eine der Kabelschnittstellen eines APs"""
     access_point = models.ForeignKey(AccessPoint)
 
     if_name = models.CharField(max_length=128, null=True)
@@ -126,6 +128,7 @@ class EthernetNetworkInterface(models.Model):
 
 
 class WifiNetworkInterfaceAttributes(models.Model):
+    """Eine der WLAN-Schnittstellen eines APs"""
     CRYPT_CHOICES = Choices('Plain', 'WEP','WPA2-PSK')
     MODE_CHOICES = Choices('master','client','adhoc')
     HWMODE_CHOICES = Choices('802.11bgn')
@@ -152,6 +155,7 @@ class RoutingLink(models.Model):
 
 
 class InterfaceRoutingLink(models.Model):
+    """Eine Online-Verbindung zwischen Interfaces zweier APs"""
     interface = models.ForeignKey(EthernetNetworkInterface)
     routing_link = models.ForeignKey(RoutingLink)
     quality = models.FloatField()

@@ -42,14 +42,17 @@ class DetailView(mixins.RetrieveModelMixin,
 
 
 class AccessPointList(ListView):
+    """Liefert eine Liste aller WLAN Accesspoints des Opennets"""
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
 
 
 class AccessPointDetail(DetailView):
+    """Liefert die Details eines WLAN Accesspoints des Opennets"""
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
     
 class LinkList(ListView):
+    """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
     queryset = InterfaceRoutingLink.objects.all()
     serializer_class = LinkSerializer
