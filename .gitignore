@@ -13,6 +13,10 @@ db.sqlite3
 # ignore tags
 tags
 
+#ignore eclipse stuff
+.metadata/
+
+
 # ignore grunt/bower/npm-stuff
 media/
 node_modules/
