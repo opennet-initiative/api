@@ -5,6 +5,7 @@ v1_urlpatterns = patterns('',
         url(r'^accesspoint/$', views.AccessPointList.as_view()),
         url(r'^accesspoint/(?P<pk>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))$', views.AccessPointDetail.as_view()),
         url(r'^link/$', views.LinkList.as_view()),
+        url(r'^accesspoint/(?P<ip>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))/links/$', views.LinkDetail.as_view()),
         )
 
 urlpatterns = patterns('',
