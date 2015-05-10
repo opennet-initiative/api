@@ -148,10 +148,11 @@ class EthernetNetworkInterface(models.Model):
 
 class WifiNetworkInterfaceAttributes(models.Model):
     """Eine der WLAN-Schnittstellen eines APs"""
-    CRYPT_CHOICES = Choices('Plain', 'WEP','WPA2-PSK')
-    MODE_CHOICES = Choices('master','client','adhoc')
-    HWMODE_CHOICES = Choices('802.11bgn')
-    WIFI_DRIVER_CHOICES = Choices('nl80211')
+    CRYPT_CHOICES = Choices('Plain', 'WEP', 'WPA2-PSK')
+    MODE_CHOICES = Choices('master', 'client', 'adhoc')
+    # die 802.11-Suffixe ("bgn" usw. werden beim Import alphabetisch sortiert)
+    HWMODE_CHOICES = Choices('802.11bgn', '802.11an', '802.11bg')
+    WIFI_DRIVER_CHOICES = Choices('nl80211', 'wl')
 
     interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True, related_name="wifi_attributes")
     wifi_ssid = models.CharField(max_length=32, null=True)
