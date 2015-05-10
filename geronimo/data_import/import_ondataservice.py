@@ -97,6 +97,9 @@ def import_accesspoint(data):
     if not main_ip:
         return
     node, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
+    # wir nennen diese Sortierung heute "hop"
+    if data["on_vpn_sort"] == "metric":
+        data["on_vpn_sort"] = "hop"
     for key_from, key_to in {
                 "sys_board": "device_board",
                 "sys_os_arc": "device_architecture",
@@ -208,7 +211,6 @@ def import_network_interface(data):
                     "wlan_essid": "wifi_ssid",
                     "wlan_apmac": "wifi_bssid",
                     "wlan_type": "wifi_driver",
-                    "wlan_hwmode": "wifi_hwmode",
                     "wlan_channel": "wifi_channel",
                     "wlan_freq": "wifi_freq",
                     "wlan_txpower": "wifi_transmit_power",
@@ -232,6 +234,13 @@ def import_network_interface(data):
                 "none": "Plain",
                 "None": "Plain",
             }[data["wlan_crypt"].strip()]
+        # beim hwmode sortieren verschiedene APs die Suffixe in unterschiedlicher Reihenfolge
+        hwmode = data["wlan_hwmode"]
+        if hwmode.startswith("802.11"):
+            # verwandle "802.11na" in "802.11an"
+            sorted_suffix = sorted(hwmode[6:])
+            hwmode = "802.11" + "".join(sorted_suffix)
+        _update_value(wifi_attributes, "wifi_hwmode", hwmode)
         wifi_attributes.save()
 
 
