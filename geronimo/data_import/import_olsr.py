@@ -60,7 +60,7 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
                 ap.save()
                 interface.save()
             interfaces.append(interface)
-        all_linkers = RoutingLink.objects.filter(interfaceroutinglink__interface=interfaces[0]).filter(interfaceroutinglink__interface=interfaces[1])
+        all_linkers = RoutingLink.objects.filter(endpoints__interface=interfaces[0]).filter(endpoints__interface=interfaces[1])
         if all_linkers.count() == 1:
             linker = all_linkers[0]
         else:
