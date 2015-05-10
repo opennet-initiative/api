@@ -153,7 +153,7 @@ class WifiNetworkInterfaceAttributes(models.Model):
     HWMODE_CHOICES = Choices('802.11bgn')
     WIFI_DRIVER_CHOICES = Choices('nl80211')
 
-    interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True)
+    interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True, related_name="wifi_attributes")
     wifi_ssid = models.CharField(max_length=32, null=True)
     wifi_bssid = models.CharField(max_length=17, null=True)
     wifi_driver = StatusField(choices_name='WIFI_DRIVER_CHOICES', null=True)
@@ -182,5 +182,5 @@ class InterfaceRoutingLink(models.Model):
     """Ein Ende eines gerichteten Links""" 
     interface = models.ForeignKey(EthernetNetworkInterface)
     routing_link = models.ForeignKey(RoutingLink, related_name="endpoints")
-    quality = models.FloatField(default=0.0) #LQ von diesem Interface zum anderen
-
+    # Link quality von diesem Interface zum anderen
+    quality = models.FloatField(default=0.0)
