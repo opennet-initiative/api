@@ -68,7 +68,7 @@ class AccessPoint(models.Model):
     opennet_vpn_mesh_gateway_names = models.TextField(null=True)
 
     def get_links(self):
-        return RoutingLink.objects.filter(endpoints__interface=self.interfaces)
+        return RoutingLink.objects.filter(endpoints__interface__access_point=self)
 
     def __unicode__(self):
         return 'AP %s owned by %s' % (self.main_ip, self.owner)

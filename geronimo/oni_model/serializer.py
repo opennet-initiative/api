@@ -8,13 +8,13 @@ class AccessPointSerializer(serializers.ModelSerializer):
 class EthernetNetworkInterfaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = EthernetNetworkInterface
-        fields = ("ip_address",)
+        fields = ("ip_address", "if_name")
         
 class InterfaceRoutingLinkSerializer(serializers.ModelSerializer):
-    interface=EthernetNetworkInterfaceSerializer()
+    interface = EthernetNetworkInterfaceSerializer()
     class Meta:
         model = InterfaceRoutingLink
-        fields = ("quality","interface",)
+        fields = ("quality", "interface")
         
 class RoutingLinkSerializer(serializers.ModelSerializer):
     endpoints = InterfaceRoutingLinkSerializer(many=True, read_only=True)

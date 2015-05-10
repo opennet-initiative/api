@@ -62,10 +62,8 @@ class LinkDetail(ListView):
     """Alle Links zu diesem WLAN Accesspoints des Opennets"""
     
     def get_queryset(self):
-        print(self.args)
         ip=self.kwargs["ip"]
         ap = AccessPoint.objects.get(main_ip=ip)
         return ap.get_links()
     
-    #queryset = AccessPoint.objects.all()
-    serializer_class = InterfaceRoutingLinkSerializer
+    serializer_class = RoutingLinkSerializer
