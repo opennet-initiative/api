@@ -155,6 +155,10 @@ class RoutingLink(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
     @staticmethod
+    def get_accesspoint_links(ap):
+        return RoutingLink.objects.filter(endpoints__interface=ap.interfaces)
+
+    @staticmethod
     def get_link_between_interfaces(iface1, iface2):
         return RoutingLink.objects.filter(endpoints__interface=iface1).filter(endpoints__interface=iface2)[0]
 
