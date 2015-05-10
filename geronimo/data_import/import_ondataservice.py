@@ -12,6 +12,7 @@ import sqlite3
 import datetime
 
 from oni_model.models import AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes
+from django.db import transaction
 
 
 def _get_table_meta(conn, table):
@@ -234,6 +235,7 @@ def import_network_interface(data):
         wifi_attributes.save()
 
 
+@transaction.atomic
 def import_from_ondataservice(db_file="/var/run/olsrd/ondataservice.db"):
     try:
         conn = sqlite3.connect(db_file)

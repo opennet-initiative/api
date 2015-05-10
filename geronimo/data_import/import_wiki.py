@@ -3,6 +3,7 @@ import urllib.request, urllib.error, urllib.parse
 import html.parser
 
 from django.contrib.gis.geos import Point
+from django.db import transaction
 
 import data_import.opennet
 import oni_model.models
@@ -64,6 +65,7 @@ def _get_node_table_rows():
     return parser._rows
 
 
+@transaction.atomic
 def import_accesspoints_from_wiki():
     # helper function for retrieving column data
     get_column = lambda row, column_name: row[NODE_TABLE_COLUMNS.index(column_name)]
