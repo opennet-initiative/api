@@ -76,7 +76,7 @@ class AccessPoint(models.Model):
 
 class EthernetNetworkInterface(models.Model):
     """Eine der Kabelschnittstellen eines APs"""
-    access_point = models.ForeignKey(AccessPoint)
+    access_point = models.ForeignKey(AccessPoint, related_name="interfaces")
 
     if_name = models.CharField(max_length=128, null=True)
     if_is_bridge = models.BooleanField(default=False)
