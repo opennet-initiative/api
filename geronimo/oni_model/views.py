@@ -65,7 +65,7 @@ class LinkDetail(ListView):
         print(self.args)
         ip=self.kwargs["ip"]
         ap = AccessPoint.objects.get(main_ip=ip)
-        return RoutingLink.get_accesspoint_links(ap)
+        return ap.get_links()
     
     #queryset = AccessPoint.objects.all()
     serializer_class = InterfaceRoutingLinkSerializer

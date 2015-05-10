@@ -67,6 +67,9 @@ class AccessPoint(models.Model):
     opennet_vpn_mesh_gateways = models.TextField(null=True)
     opennet_vpn_mesh_gateway_names = models.TextField(null=True)
 
+    def get_links(self):
+        return RoutingLink.objects.filter(endpoints__interface=self.interfaces)
+
     def __unicode__(self):
         return 'AP %s owned by %s' % (self.main_ip, self.owner)
 
@@ -120,6 +123,22 @@ class EthernetNetworkInterface(models.Model):
     ifstat_tx_dropped = models.IntegerField(null=True)
     ifstat_tx_heartbeat_errors = models.IntegerField(null=True)
 
+    def get_link_to(self, other):
+        return RoutingLink.objects.filter(endpoints__interface=self).filter(endpoints__interface=other)[0]
+
+    def get_or_create_link_to(self, other):
+        try:
+            linker = self.get_link_to(other)
+            return linker, False
+        except IndexError:
+            pass
+        # erstelle neues Objekt und seine Verbindungen zu den beiden Interfaces
+        linker = RoutingLink.objects.create()
+        for iface in (self, other):
+            link_info = InterfaceRoutingLink.objects.create(routing_link=linker, interface=iface)
+            link_info.save()
+        return linker, True
+
     def __unicode__(self):
         return 'Interface %s of AP %s' % (self.ip_address, self.access_point.main_ip)
 
@@ -153,28 +172,6 @@ class WifiNetworkInterfaceAttributes(models.Model):
 class RoutingLink(models.Model):
     """Eine Online-Verbindung zwischen Interfaces zweier APs"""
     timestamp = models.DateTimeField(auto_now=True)
-
-    @staticmethod
-    def get_accesspoint_links(ap):
-        return RoutingLink.objects.filter(endpoints__interface=ap.interfaces)
-
-    @staticmethod
-    def get_link_between_interfaces(iface1, iface2):
-        return RoutingLink.objects.filter(endpoints__interface=iface1).filter(endpoints__interface=iface2)[0]
-
-    @staticmethod
-    def get_or_create_link_between_interfaces(iface1, iface2):
-        try:
-            linker = RoutingLink.get_link_between_interfaces(iface1, iface2)
-            return linker, False
-        except IndexError:
-            pass
-        # erstelle neues Objekt und seine Verbindungen zu den beiden Interfaces
-        linker = RoutingLink.objects.create()
-        for iface in (iface1, iface2):
-            link_info = InterfaceRoutingLink.objects.create(routing_link=linker, interface=iface)
-            link_info.save()
-        return linker, True
 
     def __str__(self):
         ip_addrs = [iface_link.interface.ip_address for iface_link in self.endpoints.all()][:2]

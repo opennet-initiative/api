@@ -60,7 +60,7 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
                 ap.save()
                 interface.save()
             interfaces.append(interface)
-        linker, created = RoutingLink.get_or_create_link_between_interfaces(interfaces[0], interfaces[1])
+        linker, created = interfaces[0].get_or_create_link_to(interfaces[1])
         if created:
             print("Created new RoutingLink %s <-> %s" % (last_hop_ip, destination_ip))
         for interface, qual in zip(interfaces, qualities):
