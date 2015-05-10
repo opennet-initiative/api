@@ -154,10 +154,28 @@ class RoutingLink(models.Model):
     """Eine Online-Verbindung zwischen Interfaces zweier APs"""
     timestamp = models.DateTimeField(auto_now=True)
 
+    @staticmethod
+    def get_link_between_interfaces(iface1, iface2):
+        return RoutingLink.objects.filter(endpoints__interface=iface1).filter(endpoints__interface=iface2)[0]
+
+    @staticmethod
+    def get_or_create_link_between_interfaces(iface1, iface2):
+        try:
+            linker = RoutingLink.get_link_between_interfaces(iface1, iface2)
+            return linker, False
+        except IndexError:
+            pass
+        # erstelle neues Objekt und seine Verbindungen zu den beiden Interfaces
+        linker = RoutingLink.objects.create()
+        for iface in (iface1, iface2):
+            link_info = InterfaceRoutingLink.objects.create(routing_link=linker, interface=iface)
+            link_info.save()
+        return linker, True
+
 
 class InterfaceRoutingLink(models.Model):
     """Ein Ende eines gerichteten Links""" 
     interface = models.ForeignKey(EthernetNetworkInterface)
     routing_link = models.ForeignKey(RoutingLink, related_name="endpoints")
-    quality = models.FloatField() #LQ von diesem Interface zum anderen
+    quality = models.FloatField(default=0.0) #LQ von diesem Interface zum anderen
 

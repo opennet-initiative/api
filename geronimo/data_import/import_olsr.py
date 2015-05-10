@@ -60,26 +60,12 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
                 ap.save()
                 interface.save()
             interfaces.append(interface)
-        all_linkers = RoutingLink.objects.filter(endpoints__interface=interfaces[0]).filter(endpoints__interface=interfaces[1])
-        if all_linkers.count() == 1:
-            linker = all_linkers[0]
-        else:
-            if all_linkers.count() > 1:
-                all_linkers.delete()
-            linker = RoutingLink.objects.create()
+        linker, created = RoutingLink.get_or_create_link_between_interfaces(interfaces[0], interfaces[1])
+        if created:
             print("Created new RoutingLink %s <-> %s" % (last_hop_ip, destination_ip))
         for interface, qual in zip(interfaces, qualities):
-            current_link_info = InterfaceRoutingLink.objects.filter(routing_link=linker, interface=interface)
-            if current_link_info.count() > 1:
-                # im Zweifel loeschen wir alle LinkRouting-Informationen, da wir aktuelle von alten nicht unterscheiden koennen
-                print("Cleaning up superfluous InterfaceRoutingLink objects (%s)" % str(interface.ip_address))
-                current_link_info.delete()
-            try:
-                link_info = InterfaceRoutingLink.objects.filter(routing_link=linker, interface=interface)[0]
-                link_info.quality = qual
-            except IndexError:
-                link_info = InterfaceRoutingLink.objects.create(routing_link=linker, interface=interface, quality=qual)
-                print("Created new InterfaceRoutingLink from %s" % interface.ip_address)
+            link_info = InterfaceRoutingLink.objects.filter(routing_link=linker, interface=interface)[0]
+            link_info.quality = qual
             link_info.save()
         linker.save()
 
