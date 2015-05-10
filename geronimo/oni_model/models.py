@@ -172,6 +172,10 @@ class RoutingLink(models.Model):
             link_info.save()
         return linker, True
 
+    def __str__(self):
+        ip_addrs = [iface_link.interface.ip_address for iface_link in self.endpoints.all()][:2]
+        return "RoutingLink: %s <-> %s" % tuple(ip_addrs)
+
 
 class InterfaceRoutingLink(models.Model):
     """Ein Ende eines gerichteten Links""" 
