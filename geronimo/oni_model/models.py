@@ -17,7 +17,7 @@ class AccessPoint(models.Model):
     owner = models.TextField(null=True)
     # Geraete-Modell (im Wiki eingetragen)
     device_model = models.TextField(null=True)
-    lastseen_timestamp = models.DateTimeField(auto_now=True)
+    lastseen_timestamp = models.DateTimeField(null=True)
 
     # ondataservice-Daten
     device_board = models.TextField(null=True)
@@ -48,8 +48,8 @@ class AccessPoint(models.Model):
     olsrd_running = models.NullBooleanField()
     olsrd_main_ip = models.TextField(null=True)
 
-    opennet_wifidog_enabled = models.NullBooleanField()
-    opennet_wifidog_id = models.TextField(null=True)
+    opennet_captive_portal_enabled = models.NullBooleanField()
+    opennet_captive_portal_name = models.TextField(null=True)
 
     opennet_certificate_cn = models.TextField(null=True)
     opennet_vpn_internet_enabled = models.NullBooleanField()
