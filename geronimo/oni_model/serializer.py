@@ -1,9 +1,8 @@
-from rest_framework import serializers
-from oni_model.models import AccessPoint, InterfaceRoutingLink, RoutingLink, \
-        EthernetNetworkInterface, WifiNetworkInterfaceAttributes
+from rest_framework_gis import serializers 
+from oni_model.models import AccessPoint
 
 
-class AccessPointSerializer(serializers.ModelSerializer):
+class AccessPointSerializer(serializers.GeoModelSerializer):
     class Meta:
         model = AccessPoint
 
