@@ -48,8 +48,8 @@ class AccessPoint(models.Model):
     olsrd_running = models.NullBooleanField()
     olsrd_main_ip = models.TextField(null=True)
 
-    opennet_wifidog_enabled = models.NullBooleanField()
-    opennet_wifidog_id = models.TextField(null=True)
+    opennet_captive_portal_enabled = models.NullBooleanField()
+    opennet_captive_portal_name = models.TextField(null=True)
 
     opennet_certificate_cn = models.TextField(null=True)
     opennet_vpn_internet_enabled = models.NullBooleanField()
