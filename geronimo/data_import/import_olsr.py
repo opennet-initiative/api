@@ -35,19 +35,6 @@ def _parse_olsr_float(text):
     return float(text.replace("INFINITE", "inf"))
 
 
-def parse_topology_for_links(mesh, topology_table, neighbour_link_table):
-    # remove the 3rd column from the neighbour link table ("Hysteresis")
-    combined_table = topology_table + [item[:2] + item[3:] for item in neighbour_link_table]
-    for destination, last_hop, lq, nlq, cost in combined_table:
-        link = mesh.get_link((destination, last_hop))
-        link.cost = _parse_olsr_float(cost)
-        link.lq, link.nlq = _parse_olsr_float(lq), _parse_olsr_float(nlq)
-    # the node itself can only be discovered here - make sure that its timestamp is current
-    if neighbour_link_table:
-        local_node = mesh.get_node(neighbour_link_table[0][0])
-        local_node.touch()
-
-
 def parse_topology_for_links(topology_table, neighbour_link_table):
     # remove the 3rd column from the neighbour link table ("Hysteresis")
     combined_table = topology_table + [item[:2] + item[3:] for item in neighbour_link_table]
@@ -82,26 +69,54 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
             ap.save()
 
 
-def parse_mid_for_alternatives(mesh, mid_table):
+def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
+    # HNA-Tabelle vorbereiten: Spalten austauschen; externe HNAs rausfiltern
+    for hna, source in hna_table:
+        if hna.endswith("/32") and (hna.startswith("192.168.") or hna.startswith("10.")):
+            mid_table.append((source, hna[:-3]))
     # the column "alternative" contains one or more IP addresses separated by semicolons
     for main_ip, alternatives in mid_table:
-        node = mesh.get_node(main_ip)
-        for alternative in alternatives.split(";"):
-            node.add_address(alternative)
+        # Pruefung, ob diese IP-Adresse auch zu einem anderen Objekt gehoert
+        found_interface = None
+        for interface in EthernetNetworkInterface.objects.filter(ip_address=main_ip):
+            if interface.access_point.main_ip != main_ip:
+                print("Removing duplicate Network Interface: %s" % str(interface))
+                interface.delete()
+            else:
+                if found_interface:
+                    # wir machen erstmal nichts mit diesem Konflikt
+                    print("Discovered duplicate APs: %s and %s" % (found_interface, interface))
+                found_interface = interface
+        if not found_interface:
+            ap, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
+            if created:
+                print("Created new AP %s" % main_ip)
+                ap.save()
+            interface = EthernetNetworkInterface.objects.create(ip_address=main_ip, access_point=ap)
+            print("Created new NetworkInterface %s" % main_ip)
+            interface.save()
+        else:
+            ap = found_interface.access_point
+        for ip_address in alternatives.split(";"):
+            interface = EthernetNetworkInterface.objects.filter(access_point=ap, ip_address=ip_address)
+            if not interface:
+                interface = EthernetNetworkInterface.objects.create(access_point=ap, ip_address=ip_address)
+                print("Created new NetworkInterface %s" % ip_address)
+                interface.save()
 
-
-def parse_olsr_topology(mesh=None, txtinfo_url="http://localhost:2006"):
+@transaction.atomic
+def import_routes_from_olsr(txtinfo_url="http://yurika.on-i.de:2006"):
     url = "%s/%s" % (txtinfo_url.rstrip("/"), "all")
-    topology_lines = urllib.request.urlopen(url).read().splitlines()
+    topology_lines = urllib.request.urlopen(url).read().decode("ascii").splitlines()
     tables = _txtinfo_parser(topology_lines, ("routes", "hna", "topology", "mid", "links"))
-    if mesh is None:
-        mesh = elements.get_mesh()
     # first "MID" then "Routes" - otherwise secondary IPs are used for nodes
     parse_hna_and_mid_for_alternatives(tables["mid"], tables["hna"])
     parse_topology_for_links(tables["topology"], tables["links"])
 
 
 if __name__ == "__main__":
-    mesh = parse_olsr_topology()
-    for item in mesh.links:
+    import_routes_from_olsr()
+    for item in oni_model.models.AccessPoint.objects():
         print(repr(item))
+    print(len(nodes))
+
