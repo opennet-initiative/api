@@ -159,7 +159,7 @@ def import_accesspoint(data):
                 "on_olsrd_mainip": "olsrd_main_ip",
 
                 "on_wifidog_status": "opennet_captive_portal_enabled",
-                "on_wifidog_id": "opennet_captive_portal_id",
+                "on_wifidog_id": "opennet_captive_portal_name",
 
                 "on_vpn_cn": "opennet_certificate_cn",
                 "on_vpn_status": "opennet_vpn_internet_enabled",
