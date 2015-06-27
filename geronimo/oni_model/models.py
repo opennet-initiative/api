@@ -17,7 +17,7 @@ class AccessPoint(models.Model):
     owner = models.TextField(null=True)
     # Geraete-Modell (im Wiki eingetragen)
     device_model = models.TextField(null=True)
-    lastseen_timestamp = models.DateTimeField(auto_now=True)
+    lastseen_timestamp = models.DateTimeField(null=True)
 
     # ondataservice-Daten
     device_board = models.TextField(null=True)

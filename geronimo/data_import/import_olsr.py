@@ -1,5 +1,6 @@
 import urllib.request, urllib.parse, urllib.error
 import ipaddress
+import datetime
 from django.db import transaction
 from oni_model.models import AccessPoint, EthernetNetworkInterface, RoutingLink, InterfaceRoutingLink
 
@@ -61,6 +62,12 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
             link_info.quality = qual
             link_info.save()
         linker.save()
+        #update AP timestamps
+        for ip_address in (last_hop_ip, destination_ip):
+            interface = EthernetNetworkInterface.objects.filter(ip_address=ip_address)[0]
+            ap = interface.access_point
+            ap.lastseen_timestamp=datetime.datetime.now(datetime.timezone.utc)
+            ap.save()
 
 
 def parse_hna_for_ugw(hna_table):
