@@ -64,6 +64,10 @@ def _update_value(target, attribute, raw_value):
     if attribute.startswith("ifstat_"):
         # Standard-Wert Null fuer Interface-Statistiken
         value = int(raw_value) if raw_value else 0
+    elif (attribute in ("wifi_bitrate", "wifi_signal")) and (raw_value == "unknown"):
+        value = 0
+    elif (attribute == "wifi_noise") and (raw_value == ""):
+        value = 0
     elif type(target_attr) is int:
         # Standard-Wert None fuer Interface-Statistiken
         value = float(raw_value) if raw_value else None
@@ -107,10 +111,6 @@ def _update_value(target, attribute, raw_value):
         # verwandle "802.11na" in "802.11an"
         sorted_suffix = sorted(raw_value[6:])
         value = "802.11" + "".join(sorted_suffix)
-    elif (attribute in ("wifi_bitrate", "wifi_signal")) and (raw_value == "unknown"):
-        value = 0
-    elif (attribute == "wifi_noise") and (raw_value == ""):
-        value = 0
     elif (type(target_attr) is bool) \
             or attribute.endswith("_enabled") \
             or attribute.endswith("_connected") \
