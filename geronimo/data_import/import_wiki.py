@@ -36,7 +36,7 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
     def handle_endtag(self, tag):
         if tag == "td":
             # irgendwie landen am Ende der latlon-Daten immer ein "\n" (kein Zeilenumbruch - sondern zwei Zeichen)
-            column_text = " ".join(self._column_data).strip().strip(r"\n")
+            column_text = " ".join(self._column_data).strip().strip("\n")
             self._row_data.append(column_text)
             self._column_data = None
         elif tag == "tr":
