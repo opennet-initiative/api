@@ -64,6 +64,10 @@ def _update_value(target, attribute, raw_value):
     if attribute.startswith("ifstat_"):
         # Standard-Wert Null fuer Interface-Statistiken
         value = int(raw_value) if raw_value else 0
+    elif (attribute in ("wifi_bitrate", "wifi_signal")) and (raw_value == "unknown"):
+        value = 0
+    elif (attribute == "wifi_noise") and (raw_value == ""):
+        value = 0
     elif type(target_attr) is int:
         # Standard-Wert None fuer Interface-Statistiken
         value = float(raw_value) if raw_value else None
@@ -158,8 +162,8 @@ def import_accesspoint(data):
                 "on_olsrd_status": "olsrd_running",
                 "on_olsrd_mainip": "olsrd_main_ip",
 
-                "on_wifidog_status": "opennet_wifidog_enabled",
-                "on_wifidog_id": "opennet_wifidog_id",
+                "on_wifidog_status": "opennet_captive_portal_enabled",
+                "on_wifidog_id": "opennet_captive_portal_name",
 
                 "on_vpn_cn": "opennet_certificate_cn",
                 "on_vpn_status": "opennet_vpn_internet_enabled",

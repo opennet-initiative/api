@@ -1,6 +1,7 @@
 import urllib.request, urllib.parse, urllib.error
-import ipaddr
-import elements
+import datetime
+from django.db import transaction
+from oni_model.models import AccessPoint, EthernetNetworkInterface, RoutingLink, InterfaceRoutingLink
 
 
 def _txtinfo_parser(lines, table_names):
@@ -34,13 +35,6 @@ def _parse_olsr_float(text):
     return float(text.replace("INFINITE", "inf"))
 
 
-def parse_routes_for_nodes(mesh, routes_table):
-    for destination, via, metric, etx, interface in routes_table:
-        node = mesh.get_node(destination)
-        # attach a timestamp
-        node.touch()
-
-
 def parse_topology_for_links(mesh, topology_table, neighbour_link_table):
     # remove the 3rd column from the neighbour link table ("Hysteresis")
     combined_table = topology_table + [item[:2] + item[3:] for item in neighbour_link_table]
@@ -54,12 +48,38 @@ def parse_topology_for_links(mesh, topology_table, neighbour_link_table):
         local_node.touch()
 
 
-def parse_hna_for_ugw(mesh, hna_table):
-    for destination, gateway in hna_table:
-        gateway_node = mesh.get_node(gateway)
-        destination = ipaddr.IPNetwork(destination)
-        if destination.numhosts == 1:
-            gateway_node.ugw = destination[0]
+def parse_topology_for_links(topology_table, neighbour_link_table):
+    # remove the 3rd column from the neighbour link table ("Hysteresis")
+    combined_table = topology_table + [item[:2] + item[3:] for item in neighbour_link_table]
+    for destination_ip, last_hop_ip, lq, nlq, cost in combined_table:
+        qualities = (_parse_olsr_float(lq), _parse_olsr_float(nlq))
+        interfaces = []
+        for ip_address in (last_hop_ip, destination_ip):
+            try:
+                interface = EthernetNetworkInterface.objects.filter(ip_address=ip_address)[0]
+            except IndexError:
+                ap, created = AccessPoint.objects.get_or_create(main_ip=ip_address)
+                if created:
+                    print ("Created new AP %s" % ip_address)
+                interface = EthernetNetworkInterface.objects.create(access_point=ap, ip_address=ip_address)
+                print("Created new NetworkInterface %s" % ip_address)
+                ap.save()
+                interface.save()
+            interfaces.append(interface)
+        linker, created = interfaces[0].get_or_create_link_to(interfaces[1])
+        if created:
+            print("Created new RoutingLink %s <-> %s" % (last_hop_ip, destination_ip))
+        for interface, qual in zip(interfaces, qualities):
+            link_info = InterfaceRoutingLink.objects.filter(routing_link=linker, interface=interface)[0]
+            link_info.quality = qual
+            link_info.save()
+        linker.save()
+        #update AP timestamps
+        for ip_address in (last_hop_ip, destination_ip):
+            interface = EthernetNetworkInterface.objects.filter(ip_address=ip_address)[0]
+            ap = interface.access_point
+            ap.lastseen_timestamp=datetime.datetime.now(datetime.timezone.utc)
+            ap.save()
 
 
 def parse_mid_for_alternatives(mesh, mid_table):
@@ -77,15 +97,11 @@ def parse_olsr_topology(mesh=None, txtinfo_url="http://localhost:2006"):
     if mesh is None:
         mesh = elements.get_mesh()
     # first "MID" then "Routes" - otherwise secondary IPs are used for nodes
-    parse_mid_for_alternatives(mesh, tables["mid"])
-    parse_routes_for_nodes(mesh, tables["routes"])
-    parse_topology_for_links(mesh, tables["topology"], tables["links"])
-    parse_hna_for_ugw(mesh, tables["hna"])
-    return mesh
+    parse_hna_and_mid_for_alternatives(tables["mid"], tables["hna"])
+    parse_topology_for_links(tables["topology"], tables["links"])
 
 
 if __name__ == "__main__":
     mesh = parse_olsr_topology()
     for item in mesh.links:
         print(repr(item))
-
