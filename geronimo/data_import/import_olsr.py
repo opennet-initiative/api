@@ -35,13 +35,6 @@ def _parse_olsr_float(text):
     return float(text.replace("INFINITE", "inf"))
 
 
-def parse_routes_for_nodes(routes_table):
-    for destination, via, metric, etx, interface in routes_table:
-        node = mesh.get_node(destination)
-        # attach a timestamp
-        node.touch()
-
-
 def parse_topology_for_links(topology_table, neighbour_link_table):
     # remove the 3rd column from the neighbour link table ("Hysteresis")
     combined_table = topology_table + [item[:2] + item[3:] for item in neighbour_link_table]
@@ -120,7 +113,6 @@ def import_routes_from_olsr(txtinfo_url="http://yurika.on-i.de:2006"):
     tables = _txtinfo_parser(topology_lines, ("routes", "hna", "topology", "mid", "links"))
     # first "MID" then "Routes" - otherwise secondary IPs are used for nodes
     parse_hna_and_mid_for_alternatives(tables["mid"], tables["hna"])
-    #parse_routes_for_nodes(tables["routes"])
     parse_topology_for_links(tables["topology"], tables["links"])
 
 
