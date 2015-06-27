@@ -14,5 +14,15 @@
 = Manueller Datenimport =
 
 * ./manage.py import_wiki
+* ./manage.py import_olsr
 * ./manage.py import_ondataservice SQLITE_DATABASE
 
+
+= URL-Beispiele =
+
+* http://api.opennet-initiative.de/api/v1/accesspoint
+* http://api.opennet-initiative.de/api/v1/accesspoint/192.168.2.151
+* http://api.opennet-initiative.de/api/v1/accesspoint/192.168.2.151/interfaces
+* http://api.opennet-initiative.de/api/v1/accesspoint/192.168.2.151/links
+* http://api.opennet-initiative.de/api/v1/link
+* http://api.opennet-initiative.de/api/v1/interface

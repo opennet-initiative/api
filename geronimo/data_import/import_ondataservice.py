@@ -11,7 +11,8 @@ import time
 import sqlite3
 import datetime
 
-import oni_model.models
+from oni_model.models import AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes
+from django.db import transaction
 
 
 def _get_table_meta(conn, table):
@@ -40,16 +41,22 @@ def _parse_nodes_data(conn):
             result[key] = value
         return result
     # add node tags
-    query = conn.execute("SELECT * FROM nodes")
-    for row in query.fetchall():
-        data = get_row_dict(row, nodes_columns)
-        import_accesspoint(data)
+    for node in conn.execute("SELECT * FROM nodes").fetchall():
+        data = get_row_dict(node, nodes_columns)
+        try:
+            import_accesspoint(data)
+        except ValueError:
+            print("Failed to update node %s: %s" % (node, data))
+            raise
     # add network interfaces
     ifaces_columns = _get_table_meta(conn, "ifaces")
-    query = conn.execute("SELECT * FROM ifaces")
-    for row in query.fetchall():
-        data = get_row_dict(row, ifaces_columns)
-        import_network_interface(data)
+    for iface in conn.execute("SELECT * FROM ifaces").fetchall():
+        data = get_row_dict(iface, ifaces_columns)
+        try:
+            import_network_interface(data)
+        except ValueError:
+            print("Failed to update interface %s: %s" % (iface, data))
+            raise
 
 
 def _update_value(target, attribute, raw_value):
@@ -66,9 +73,40 @@ def _update_value(target, attribute, raw_value):
     elif attribute.endswith("_timestamp"):
         value = datetime.date.fromtimestamp(int(raw_value)) if raw_value else None
     elif attribute == "system_uptime":
-        # TODO: ab Django 1.8 gibt es DurationField - fuer timedelta
-        #value = datetime.timedelta(seconds=float(raw_value))
-        value = float(raw_value) if raw_value else None
+        days_text_regex = r"(?P<days>[0-9]+) days, (?P<hours>[0-9]{1,2}):(?P<minutes>[0-9]{2})$"
+        match = re.match(days_text_regex, raw_value)
+        if match:
+            # in 0.9-ON5 enthaelt uptime eine textuelle Ausgabe (z.B.: "6 days, 18:18")
+            numbers = {key: int(text) for key, text in match.groupdict().items()}
+            value = float(60 * (numbers["minutes"] + 60 * (numbers["hours"] + 24 * numbers["days"])))
+        else:
+            # TODO: ab Django 1.8 gibt es DurationField - fuer timedelta
+            #value = datetime.timedelta(seconds=float(raw_value))
+            value = float(raw_value) if raw_value else None
+    elif attribute == "opennet_services_sorting":
+        # wir nennen die "metric"-Sortierung heute "hop"
+        value = "hop" if raw_value == "metric" else raw_value
+    elif attribute == "wifi_mode":
+        value = {
+                "Master": "master",
+                "Managed": "client",
+                "Client": "client",
+                "Ad-Hoc": "adhoc",
+            }[raw_value]
+    elif attribute == "wifi_crypt":
+        value = {
+                "WEP Open System (NONE)": "WEP",
+                "WPA2 PSK (CCMP)": "WPA2-PSK",
+                "unknown": "Plain",
+                "open": "Plain",
+                "none": "Plain",
+                "None": "Plain",
+            }[raw_value.strip()]
+    elif (attribute == "wifi_hwmode") and raw_value.startswith("802.11"):
+        # beim hwmode sortieren verschiedene APs die Suffixe in unterschiedlicher Reihenfolge
+        # verwandle "802.11na" in "802.11an"
+        sorted_suffix = sorted(raw_value[6:])
+        value = "802.11" + "".join(sorted_suffix)
     elif (type(target_attr) is bool) \
             or attribute.endswith("_enabled") \
             or attribute.endswith("_connected") \
@@ -95,7 +133,7 @@ def import_accesspoint(data):
     main_ip = data["on_olsrd_mainip"]
     if not main_ip:
         return
-    node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
+    node, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
     for key_from, key_to in {
                 "sys_board": "device_board",
                 "sys_os_arc": "device_architecture",
@@ -150,20 +188,15 @@ def import_accesspoint(data):
 def import_network_interface(data):
     main_ip = data["mainip"]
     try:
-        node = oni_model.models.AccessPoint.objects.get(main_ip=main_ip)
-    except oni_model.models.AccessPoint.DoesNotExist:
+        node = AccessPoint.objects.get(main_ip=main_ip)
+    except AccessPoint.DoesNotExist:
         # wir legen keine Netzwerk-Interfaces fuer APs an, die noch nicht in der Datenbank sind
         return
     # wir verwenden fuer wlan-Interfaces eine separate Klasse und weitere Attribute fuer wifi-Interfaces
-    if data["wlan_essid"]:
-        base_class = oni_model.models.WifiNetworkInterface
-    else:
-        base_class = oni_model.models.EthernetNetworkInterface
     try:
-       interface = base_class.objects.get(access_point=node, if_name=data["if_name"])
-    except base_class.DoesNotExist:
-       interface = base_class()
-    interface.access_point = node
+        interface = EthernetNetworkInterface.objects.get(access_point=node, if_name=data["if_name"])
+    except EthernetNetworkInterface.DoesNotExist:
+        interface = EthernetNetworkInterface.objects.create(access_point=node, ip_address=data["ip_addr"])
     # Uebertragung von sqlite-Eintraegen in unser Modell
     for key_from, key_to in {
                 "if_name": "if_name",
@@ -205,38 +238,29 @@ def import_network_interface(data):
             }.items():
         _update_value(interface, key_to, data[key_from])
         interface.dhcp_leasetime = _parse_dhcp_leasetime_seconds(data["dhcp_leasetime"])
-    if hasattr(interface, "wifi_ssid"):
+    interface.save()
+    if data["wlan_essid"]:
+        wifi_attributes, created = WifiNetworkInterfaceAttributes.objects.get_or_create(interface=interface)
         for key_from, key_to in {
                     "wlan_essid": "wifi_ssid",
                     "wlan_apmac": "wifi_bssid",
                     "wlan_type": "wifi_driver",
-                    "wlan_hwmode": "wifi_hwmode",
                     "wlan_channel": "wifi_channel",
+                    "wlan_crypt": "wifi_crypt",
                     "wlan_freq": "wifi_freq",
+                    "wlan_hwmode": "wifi_hwmode",
+                    "wlan_mode": "wifi_mode",
                     "wlan_txpower": "wifi_transmit_power",
                     "wlan_signal": "wifi_signal",
                     "wlan_noise": "wifi_noise",
                     "wlan_bitrate": "wifi_bitrate",
                     "wlan_vaps": "wifi_vaps_enabled",
                 }.items():
-            _update_value(interface, key_to, data[key_from])
-        # mode
-        interface.wifi_mode = {
-                "Master": "master",
-                "Managed": "client",
-                "Client": "client",
-                "Ad-Hoc": "adhoc",
-            }[data["wlan_mode"]]
-        interface.wifi_crypt = {
-                "WEP Open System (NONE)": "WEP",
-                "unknown": "Plain",
-                "open": "Plain",
-                "none": "Plain",
-                "None": "Plain",
-            }[data["wlan_crypt"].strip()]
-    interface.save()
+            _update_value(wifi_attributes, key_to, data[key_from])
+        wifi_attributes.save()
 
 
+@transaction.atomic
 def import_from_ondataservice(db_file="/var/run/olsrd/ondataservice.db"):
     try:
         conn = sqlite3.connect(db_file)

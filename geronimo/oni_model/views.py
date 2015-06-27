@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
-from oni_model.models import AccessPoint
-from oni_model.serializer import AccessPointSerializer
+from oni_model.models import AccessPoint, RoutingLink, EthernetNetworkInterface, InterfaceRoutingLink
+from oni_model.serializer import AccessPointSerializer, RoutingLinkSerializer, \
+        InterfaceRoutingLinkSerializer, EthernetNetworkInterfaceSerializer
 
 from rest_framework import mixins
 from rest_framework import filters
@@ -42,10 +43,46 @@ class DetailView(mixins.RetrieveModelMixin,
 
 
 class AccessPointList(ListView):
+    """Liefert eine Liste aller WLAN Accesspoints des Opennets"""
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
 
 
 class AccessPointDetail(DetailView):
+    """Liefert die Details eines WLAN Accesspoints des Opennets"""
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
+
+
+class AccessPointLinksList(ListView):
+    """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
+    queryset = RoutingLink.objects.all()
+    serializer_class = RoutingLinkSerializer
+
+
+class AccessPointLinksDetail(ListView):
+    """Alle Links zu diesem WLAN Accesspoints des Opennets"""
+
+    def get_queryset(self):
+        ip = self.kwargs["ip"]
+        ap = AccessPoint.objects.get(main_ip=ip)
+        return ap.get_links()
+
+    serializer_class = RoutingLinkSerializer
+
+
+class AccessPointInterfacesList(ListView):
+    """Liefert eine Liste aller Interfaces von Accesspoints des Opennets"""
+    queryset = EthernetNetworkInterface.objects.all()
+    serializer_class = EthernetNetworkInterfaceSerializer
+
+
+class AccessPointInterfacesDetail(ListView):
+    """Alle Interfaces eines Accesspoints des Opennets"""
+
+    def get_queryset(self):
+        ip = self.kwargs["ip"]
+        ap = AccessPoint.objects.get(main_ip=ip)
+        return ap.interfaces
+
+    serializer_class = EthernetNetworkInterfaceSerializer

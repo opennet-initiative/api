@@ -3,6 +3,7 @@ import urllib.request, urllib.error, urllib.parse
 import html.parser
 
 from django.contrib.gis.geos import Point
+from django.db import transaction
 
 import data_import.opennet
 import oni_model.models
@@ -64,6 +65,7 @@ def _get_node_table_rows():
     return parser._rows
 
 
+@transaction.atomic
 def import_accesspoints_from_wiki():
     # helper function for retrieving column data
     get_column = lambda row, column_name: row[NODE_TABLE_COLUMNS.index(column_name)]
@@ -79,22 +81,21 @@ def import_accesspoints_from_wiki():
         # parse the position
         latlon = get_column(row, "latlon")
         if not latlon:
-            print("Failed to parse position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
-            continue
-        splitted = latlon.strip().split()
-        lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
-        lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
-        coordinates = []
-        if len(splitted) != 2:
-            continue
-        lat, lon = splitted
-        try:
-            lon = float(lon_replace(lon))
-            lat = float(lat_replace(lat))
-        except ValueError:
-            print("Failed to parse position (%s) of node %s" % (latlon, main_ip), file=sys.stderr)
-            continue
-        node.position = Point(lon, lat)
+            print("Ignoring empty position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
+        else:
+            lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
+            lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
+            coordinates = []
+            try:
+                lat, lon = latlon.strip().split()
+                lon = float(lon_replace(lon))
+                lat = float(lat_replace(lat))
+            except ValueError:
+                # mehr oder weniger als zwei Elemente, bzw. falsches Format
+                print("Failed to parse position (%s) of node %s" % (latlon, main_ip), file=sys.stderr)
+                lat, lon = None, None
+            if lat and lon:
+                node.position = Point(lon, lat)
         node.save()
 
 
@@ -103,4 +104,3 @@ if __name__ == "__main__":
     for item in oni_model.models.AccessPoint.objects():
         print(repr(item))
     print(len(nodes))
-
