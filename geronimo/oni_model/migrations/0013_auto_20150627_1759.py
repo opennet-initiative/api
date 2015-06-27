@@ -21,4 +21,14 @@ class Migration(migrations.Migration):
             old_name='opennet_wifidog_id',
             new_name='opennet_captive_portal_name',
         ),
+        migrations.RemoveField(
+            model_name='accesspoint',
+            name='timestamp',
+        ),
+        migrations.AddField(
+            model_name='accesspoint',
+            name='lastseen_timestamp',
+            field=models.DateTimeField(null=True),
+            preserve_default=True,
+        ),
     ]
