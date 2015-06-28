@@ -66,7 +66,7 @@ def _update_value(target, attribute, raw_value):
         value = int(raw_value) if raw_value else 0
     elif (attribute in ("wifi_bitrate", "wifi_signal")) and (raw_value == "unknown"):
         value = 0
-    elif (attribute == "wifi_noise") and (raw_value == ""):
+    elif (attribute in ("wifi_noise", "device_memory_available", "device_memory_free")) and (raw_value == ""):
         value = 0
     elif type(target_attr) is int:
         # Standard-Wert None fuer Interface-Statistiken
