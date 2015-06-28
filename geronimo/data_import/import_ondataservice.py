@@ -184,6 +184,8 @@ def import_accesspoint(data):
     # load-Werte
     if data["sys_load"]:
         for minutes, value in zip((1, 5, 15), data["sys_load"].split()):
+            # machnaml haengt an einer Zeit-Angabe noch ein Komma (z.B.: "1.53,")
+            value = value.strip(",")
             setattr(node, "system_load_%dmin" % minutes, float(value))
     node.save()
 
