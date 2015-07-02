@@ -66,22 +66,19 @@ def _update_value(target, attribute, raw_value):
         value = int(raw_value) if raw_value else 0
     elif (attribute in ("wifi_bitrate", "wifi_signal")) and (raw_value == "unknown"):
         value = 0
-    elif (attribute in ("wifi_noise", "device_memory_available", "device_memory_free")) and (raw_value == ""):
+    elif (attribute in ("wifi_signal", "wifi_noise", "wifi_freq", "device_memory_available", "device_memory_free")) and (raw_value == ""):
         value = 0
-    elif type(target_attr) is int:
-        # Standard-Wert None fuer Interface-Statistiken
-        value = float(raw_value) if raw_value else None
     elif attribute in ("dhcp_range_start", "dhcp_range_limit"):
         # die DHCP-Werte tragen "null=True" - daher sind sie nicht als Integer erkennbar
         value = int(raw_value) if raw_value else None
     elif attribute.endswith("_timestamp"):
         value = datetime.date.fromtimestamp(int(raw_value)) if raw_value else None
     elif attribute == "system_uptime":
-        days_text_regex = r"(?P<days>[0-9]+) days, (?P<hours>[0-9]{1,2}):(?P<minutes>[0-9]{2})$"
+        # in 0.9-ON5 enthaelt uptime eine textuelle Ausgabe (z.B.: "6 days, 18:18" oder "21:01")
+        days_text_regex = r"(?:(?P<days>[0-9]+) days?, +)?(?P<hours>[0-9]{1,2}):(?P<minutes>[0-9]{2})$"
         match = re.match(days_text_regex, raw_value)
         if match:
-            # in 0.9-ON5 enthaelt uptime eine textuelle Ausgabe (z.B.: "6 days, 18:18")
-            numbers = {key: int(text) for key, text in match.groupdict().items()}
+            numbers = {key: int(text or 0) for key, text in match.groupdict().items()}
             value = float(60 * (numbers["minutes"] + 60 * (numbers["hours"] + 24 * numbers["days"])))
         else:
             # TODO: ab Django 1.8 gibt es DurationField - fuer timedelta
@@ -96,6 +93,7 @@ def _update_value(target, attribute, raw_value):
                 "Managed": "client",
                 "Client": "client",
                 "Ad-Hoc": "adhoc",
+                "AdHoc": "adhoc",
             }[raw_value]
     elif attribute == "wifi_crypt":
         value = {
@@ -105,12 +103,16 @@ def _update_value(target, attribute, raw_value):
                 "open": "Plain",
                 "none": "Plain",
                 "None": "Plain",
+                "": "Plain",
             }[raw_value.strip()]
     elif (attribute == "wifi_hwmode") and raw_value.startswith("802.11"):
         # beim hwmode sortieren verschiedene APs die Suffixe in unterschiedlicher Reihenfolge
         # verwandle "802.11na" in "802.11an"
         sorted_suffix = sorted(raw_value[6:])
         value = "802.11" + "".join(sorted_suffix)
+    elif type(target_attr) is int:
+        # Standard-Wert None fuer Interface-Statistiken
+        value = float(raw_value) if raw_value else None
     elif (type(target_attr) is bool) \
             or attribute.endswith("_enabled") \
             or attribute.endswith("_connected") \
