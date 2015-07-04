@@ -19,7 +19,7 @@ class EthernetNetworkInterfaceSerializer(serializers.ModelSerializer):
     wifi_attributes = WifiNetworkInterfaceAttributesSerializer(many=True, read_only=True)
     class Meta:
         model = EthernetNetworkInterface
-        fields = ("ip_address", "if_name", "wifi_attributes")
+        fields = ("ip_address", "if_name", "is_wifi", "wifi_attributes")
 
 
 class InterfaceRoutingLinkSerializer(serializers.ModelSerializer):

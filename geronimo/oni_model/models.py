@@ -139,6 +139,9 @@ class EthernetNetworkInterface(models.Model):
             link_info.save()
         return linker, True
 
+    def is_wifi(self):
+        return WifiNetworkInterfaceAttributes.objects.filter(interface=self).count() > 0
+
     def __unicode__(self):
         return 'Interface %s of AP %s' % (self.ip_address, self.access_point.main_ip)
 
