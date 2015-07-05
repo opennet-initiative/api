@@ -75,7 +75,7 @@ def _update_value(target, attribute, raw_value):
         value = datetime.date.fromtimestamp(int(raw_value)) if raw_value else None
     elif attribute == "system_uptime":
         # in 0.9-ON5 enthaelt uptime eine textuelle Ausgabe (z.B.: "6 days, 18:18" oder "21:01")
-        days_text_regex = r"(?:(?P<days>[0-9]+) days?, +)?(?P<hours>[0-9]{1,2}):(?P<minutes>[0-9]{2})$"
+        days_text_regex = r"(?:(?P<days>[0-9]+) days?,)? *(?P<hours>[0-9]{1,2}):(?P<minutes>[0-9]{2})$"
         match = re.match(days_text_regex, raw_value)
         if match:
             numbers = {key: int(text or 0) for key, text in match.groupdict().items()}
