@@ -81,7 +81,13 @@ def import_accesspoints_from_wiki():
         # parse the position
         latlon = get_column(row, "latlon")
         if not latlon:
-            print("Ignoring empty position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
+            # we can safely ignore some nodes without position
+            if ("test" in node.post_address.lower()) or ("test" in node.notes.lower()):
+                pass
+            elif node.post_address == "Webserver":
+                pass
+            else:
+                print("Ignoring empty position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
         else:
             lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
             lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
