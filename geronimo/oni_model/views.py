@@ -77,6 +77,14 @@ class AccessPointInterfacesList(ListView):
     serializer_class = EthernetNetworkInterfaceSerializer
 
 
+class NetworkInterfaceDetail(DetailView):
+    """Ein Interface mit einer spezifischen IP"""
+
+    lookup_field = "ip_address"
+    queryset = EthernetNetworkInterface.objects.all()
+    serializer_class = EthernetNetworkInterfaceSerializer
+
+
 class AccessPointInterfacesDetail(ListView):
     """Alle Interfaces eines Accesspoints des Opennets"""
 
