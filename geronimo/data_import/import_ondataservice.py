@@ -94,6 +94,7 @@ def _update_value(target, attribute, raw_value):
                 "Client": "client",
                 "Ad-Hoc": "adhoc",
                 "AdHoc": "adhoc",
+                "Monitor": "monitor",
             }[raw_value]
     elif attribute == "wifi_crypt":
         value = {
