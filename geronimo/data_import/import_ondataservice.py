@@ -270,7 +270,7 @@ def import_network_interface(data):
         wifi_attributes.save()
     elif interface.is_wifi():
         # alte wifi-Daten loeschen (anscheinend sind sie nicht mehr gueltig)
-        WifiNetworkInterfaceAttributes.filter(interface=interface).delete()
+        WifiNetworkInterfaceAttributes.objects.filter(interface=interface).delete()
 
 
 @transaction.atomic
