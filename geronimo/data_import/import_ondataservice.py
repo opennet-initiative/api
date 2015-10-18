@@ -119,7 +119,8 @@ def _update_value(target, attribute, raw_value):
             or attribute.endswith("_enabled") \
             or attribute.endswith("_connected") \
             or attribute.endswith("_running"):
-        value = (raw_value == "1")
+        # ein paar der bool-Werte sind als String definiert
+        value = ((raw_value == "1") or (raw_value == 1))
     else:
         value = str(raw_value)
     setattr(target, attribute, value)
