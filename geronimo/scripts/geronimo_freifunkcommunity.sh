@@ -9,6 +9,11 @@
 # This scripts generates Freifunk Community API JSON
 # see also https://wiki.opennet-initiative.de/wiki/Freifunk_API
 
+# usage: geronimo_freifunkcommunity.sh [city-key]
+# - generates community api json file for city
+# - default city key is "rostock"
+# - ready all needed values from cfg file
+
 # stop on error and unset variables
 set -eu
 
