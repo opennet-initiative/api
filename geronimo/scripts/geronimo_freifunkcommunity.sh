@@ -39,8 +39,13 @@ fi
 
 # set json variables from cfg
 [ -z "${COMMUNITY_LIST["$COMMUNITY_LIST_KEY"]+exists}" ] && echo -e >&2 "Error - key '$COMMUNITY_LIST_KEY' not found in cfg file" && exit 1
-COMMUNITY_LIST_ARRAY="${COMMUNITY_LIST["$COMMUNITY_LIST_KEY"]}"
-echo "$COMMUNITY_LIST_ARRAY"
+COMMUNITY_LIST_VALUE="${COMMUNITY_LIST["$COMMUNITY_LIST_KEY"]}"
+IFS=","
+COMMUNITY_LIST_ARRAY=($COMMUNITY_LIST_VALUE)
+unset IFS
+COMMUNITY_LIST_NAME="${COMMUNITY_LIST_ARRAY[0]}"
+COMMUNITY_LIST_LAT="${COMMUNITY_LIST_ARRAY[1]}"
+COMMUNITY_LIST_LON="${COMMUNITY_LIST_ARRAY[2]}"
 
 # process json template
 OUTPUT="$JSON_TMP/$JSON_NAME$COMMUNITY_LIST_NAME.json"
@@ -51,7 +56,7 @@ while read LINE; do
 done < "$HOME/$JSON"
 
 # format output
-#cat "$TMP_OUTPUT" | jq '.'
+cat "$TMP_OUTPUT" | jq '.'
 
 # clear temporary files
 rm "$TMP_OUTPUT"
