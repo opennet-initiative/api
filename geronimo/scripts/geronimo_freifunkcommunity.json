@@ -21,7 +21,7 @@
   },
   '"'metacommunity'"': '"'${COMMUNITY_META}'"',
   '"'state'"': {
-    '"'nodes'"': 283,
+    '"'nodes'"': ${COMMUNITY_LIST_NODES},
     '"'focus'"': [
       '"'infrastructure/backbone'"',
       '"'Public Free Wifi'"',
