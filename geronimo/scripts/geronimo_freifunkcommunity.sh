@@ -11,8 +11,13 @@
 
 # usage: geronimo_freifunkcommunity.sh [city-key]
 # - generates community api json file for city
+# - output to stdout, errors to stderr
 # - default city key is "rostock"
 # - ready all needed values from cfg file
+# usage: geronimo_freifunkcommunity.sh --batch
+# - generates all community api json files
+# - uses city list as in cfg file
+# - output to file in local dir, errors to stderr
 
 # stop on error and unset variables
 set -eu
@@ -32,7 +37,7 @@ declare -A COMMUNITY_LIST
 
 # default json variables
 COMMUNITY_LIST_KEY="rostock"
-COMMUNITY_LIST_NAME="rostock"
+COMMUNITY_LIST_NAME="Rostock"
 COMMUNITY_LIST_LAT=54.0914
 COMMUNITY_LIST_LON=12.1151
 DATEISO=$(date "+%FT%T%Z")
@@ -40,6 +45,18 @@ DATEISO=$(date "+%FT%T%Z")
 # retrieve requested key via input
 if [ $# -gt 0 ]; then
     COMMUNITY_LIST_KEY="$1"
+fi
+
+# check if batch processing is been requested
+# and iterate thru all cities in cfg file
+if [ "$COMMUNITY_LIST_KEY" = "--batch" ]; then
+    for KEY in "${!COMMUNITY_LIST[@]}"
+    do
+        echo -n "Processing '$KEY'.."
+	$0 "$KEY" > "$HOME/$JSON_NAME$KEY.json"
+        echo " done."
+    done
+    exit 0
 fi
 
 # set json variables from cfg
@@ -52,15 +69,15 @@ COMMUNITY_LIST_NAME="${COMMUNITY_LIST_ARRAY[0]}"
 COMMUNITY_LIST_LAT="${COMMUNITY_LIST_ARRAY[1]}"
 COMMUNITY_LIST_LON="${COMMUNITY_LIST_ARRAY[2]}"
 
-# process json template
-OUTPUT="$JSON_TMP/$JSON_NAME$COMMUNITY_LIST_NAME.json"
+# process json template, replace variables via eval
+OUTPUT="$JSON_TMP/$JSON_NAME$COMMUNITY_LIST_KEY.json"
 TMP_OUTPUT="$OUTPUT.tmp"
 echo > "$TMP_OUTPUT"
 while read LINE; do
    eval echo "$LINE" >> "$TMP_OUTPUT" 
 done < "$HOME/$JSON"
 
-# format output
+# format output via jq to stdout
 cat "$TMP_OUTPUT" | jq '.'
 
 # clear temporary files
