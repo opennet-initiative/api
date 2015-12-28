@@ -1,0 +1,78 @@
+{
+  '"'name'"': '"'${COMMUNITY_NAME} ${COMMUNITY_LIST_NAME}'"',
+  '"'url'"': '"'${COMMUNITY_URL}'"',
+  '"'location'"': {
+    '"'city'"': '"'${COMMUNITY_LIST_NAME}'"',
+    '"'country'"': '"'${COMMUNITY_COUNTRY}'"',
+    '"'lat'"': ${COMMUNITY_LIST_LAT},
+    '"'lon'"': ${COMMUNITY_LIST_LON},
+    '"'address'"': {
+      '"'Name'"': '"'${COMMUNITY_ADDR_NAME}'"',
+      '"'Street'"': '"'${COMMUNITY_ADDR_STREET}'"',
+      '"'Zipcode'"': '"'${COMMUNITY_ADDR_ZIP}'"'
+    }
+  },
+  '"'contact'"': {
+    '"'email'"': '"'${COMMUNITY_CONT_MAIL}'"',
+    '"'phone'"': '"'${COMMUNITY_CONT_PHONE}'"',
+    '"'irc'"': '"'${COMMUNITY_CONT_IRC}'"',
+    '"'ml'"': '"'${COMMUNITY_CONT_ML}'"',
+    '"'twitter'"': '"'${COMMUNITY_CONT_TWIT}'"'
+  },
+  '"'metacommunity'"': '"'${COMMUNITY_META}'"',
+  '"'state'"': {
+    '"'nodes'"': 283,
+    '"'focus'"': [
+      '"'infrastructure/backbone'"',
+      '"'Public Free Wifi'"',
+      '"'Social Community Building'"',
+      '"'Local services and content'"',
+      '"'Free internet access'"'
+    ],
+    '"'lastchange'"': '"'${DATEISO}'"'
+  },
+  '"'feeds'"': [
+    {
+      '"'name'"': '"'Blog'"',
+      '"'category'"': '"'blog'"',
+      '"'type'"': '"'rss'"',
+      '"'url'"': '"'${COMMUNITY_BLOG}'"'
+    }
+  ],
+  '"'nodeMaps'"': [
+    {
+      '"'url'"': '"'${COMMUNITY_NODELIST}'"',
+      '"'interval'"': '"'10'"',
+      '"'technicalType'"': '"'nodelist'"',
+      '"'mapType'"': '"'list/status'"'
+    },
+    {
+      '"'url'"': '"'${COMMUNITY_GEOMAP}'"',
+      '"'interval'"': '"'10'"',
+      '"'mapType'"': '"'geographical'"'
+    }
+  ],
+  '"'socialprojects'"': {
+    '"'website'"': '"'${COMMUNITY_SOCIAL}'"'
+  },
+  '"'techDetails'"': {
+    '"'firmware'"': {
+      '"'name'"': '"'${COMMUNITY_FW_NAME}'"',
+      '"'url'"': '"'${COMMUNITY_FW_URL}'"',
+      '"'docs'"': '"'${COMMUNITY_FW_DOCS}'"',
+      '"'vpnaccess'"': '"'webform'"',
+      '"'registrationurl'"': '"'${COMMUNITY_CA}'"'
+    },
+    '"'routing'"': [
+      '"'OLSR'"'
+    ],
+    '"'updatemode'"': [
+      '"'manual'"'
+    ],
+    '"'legals'"': [
+      '"'vpnnational'"',
+      '"'institutions'"'
+    ]
+  },
+  '"'api'"': '"'${COMMUNITY_API}'"'
+}
