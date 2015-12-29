@@ -44,9 +44,7 @@ COMMUNITY_LIST_NODES=300
 DATEISO=$(date "+%FT%T%Z")
 
 # retrieve requested key via input
-if [ $# -gt 0 ]; then
-    COMMUNITY_LIST_KEY="$1"
-fi
+[ $# -gt 0 ] && COMMUNITY_LIST_KEY="$1"
 
 # check if batch processing is been requested
 # and iterate thru all cities in cfg file
@@ -70,6 +68,9 @@ COMMUNITY_LIST_NAME="${COMMUNITY_LIST_ARRAY[0]}"
 COMMUNITY_LIST_LAT="${COMMUNITY_LIST_ARRAY[1]}"
 COMMUNITY_LIST_LON="${COMMUNITY_LIST_ARRAY[2]}"
 COMMUNITY_LIST_NODES="${COMMUNITY_LIST_ARRAY[3]}"
+
+# workaround: nodelist only for one city (rostock)
+[ "$COMMUNITY_LIST_KEY" != "rostock" ] && COMMUNITY_NODELIST=""
 
 # process json template, replace variables via eval
 OUTPUT="$JSON_TMP/$JSON_NAME$COMMUNITY_LIST_KEY.json"
