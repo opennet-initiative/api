@@ -88,21 +88,18 @@ class NetworkInterfaceDetail(DetailView):
 class NetworkInterfaceAccessPoint(DetailView):
     """Der AP der zu einer IP gehoert"""
 
-    lookup_field = "ip_address"
-    def get_queryset(self):
-        ip = self.kwargs["ip_address"]
-        interface = EthernetNetworkInterface.objects.get(ip_address=ip)
-        return interface.access_point
-
     serializer_class = AccessPointSerializer
+
+    def retrieve(self, request, ip_address=None):
+        interface = get_object_or_404(EthernetNetworkInterface, ip_address=ip_address)
+        return Response(self.serializer_class(interface.access_point).data)
 
 
 class AccessPointInterfacesDetail(ListView):
     """Alle Interfaces eines Accesspoints des Opennets"""
 
-    def get_queryset(self):
-        ip = self.kwargs["ip"]
-        ap = AccessPoint.objects.get(main_ip=ip)
-        return ap.interfaces
-
     serializer_class = EthernetNetworkInterfaceSerializer
+
+    def retrieve(self, request, ip_address=None):
+        ap = get_object_or_404(AccessPoint, main_ip=ip_address)
+        return Response(self.serializer_class(ap.interfaces).data)
