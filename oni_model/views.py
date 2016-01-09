@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import render, get_object_or_404
 
 from oni_model.models import AccessPoint, RoutingLink, EthernetNetworkInterface, InterfaceRoutingLink
@@ -9,6 +11,19 @@ from rest_framework import filters
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+
+# willkuerliche Festlegungen (deutlich laenger als die jeweils typische Aktualisierungsperiode)
+EXPIRE_AGE_MINUTES = {"link": 120,
+                      "interface": 48 * 60,
+                      "accesspoint": 30 * 60,
+                     }
+
+
+# bei Listen-Darstellugen filtern wir nach Alter
+def filter_by_timestamp_age(queryset, max_age_minutes):
+    min_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=max_age_minutes)
+    return queryset.filter(timestamp__gte=min_timestamp)
 
 
 ## abstract classes
@@ -44,37 +59,47 @@ class DetailView(mixins.RetrieveModelMixin,
 
 class AccessPointList(ListView):
     """Liefert eine Liste aller WLAN Accesspoints des Opennets"""
-    queryset = AccessPoint.objects.all()
+
     serializer_class = AccessPointSerializer
+
+    def get_queryset(self):
+        return filter_by_timestamp_age(AccessPoint.objects.all(), EXPIRE_AGE_MINUTES["accesspoint"])
 
 
 class AccessPointDetail(DetailView):
     """Liefert die Details eines WLAN Accesspoints des Opennets"""
+
     queryset = AccessPoint.objects.all()
     serializer_class = AccessPointSerializer
 
 
 class AccessPointLinksList(ListView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
-    queryset = RoutingLink.objects.all()
+
     serializer_class = RoutingLinkSerializer
+
+    def get_queryset(self):
+        return filter_by_timestamp_age(RoutingLink.objects.all(), EXPIRE_AGE_MINUTES["link"])
 
 
 class AccessPointLinksDetail(ListView):
     """Alle Links zu diesem WLAN Accesspoints des Opennets"""
 
+    serializer_class = RoutingLinkSerializer
+
     def get_queryset(self):
         ip = self.kwargs["ip"]
-        ap = AccessPoint.objects.get(main_ip=ip)
-        return ap.get_links()
-
-    serializer_class = RoutingLinkSerializer
+        ap = get_object_or_404(AccessPoint, main_ip=ip)
+        return filter_by_timestamp_age(ap.get_links(), EXPIRE_AGE_MINUTES["link"])
 
 
 class AccessPointInterfacesList(ListView):
     """Liefert eine Liste aller Interfaces von Accesspoints des Opennets"""
-    queryset = EthernetNetworkInterface.objects.all()
+
     serializer_class = EthernetNetworkInterfaceSerializer
+
+    def get_queryset(self):
+        return filter_by_timestamp_age(EthernetNetworkInterface.objects.all(), EXPIRE_AGE_MINUTES["interface"])
 
 
 class NetworkInterfaceDetail(DetailView):
