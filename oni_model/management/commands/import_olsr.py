@@ -7,8 +7,7 @@ class Command(BaseCommand):
     help = "Importieren der AP-Daten via olsrd-txtinfo"
 
     def handle(self, *args, **options):
+        import_args = {}
         if args:
-            olsrd_txtinfo_url = args[0]
-        else:
-            olsrd_txtinfo_url = None
-        data_import.import_olsr.import_routes_from_olsr(txtinfo_url=olsrd_txtinfo_url)
+            import_args["txtinfo_url"] = args[0]
+        data_import.import_olsr.import_routes_from_olsr(**import_args)
