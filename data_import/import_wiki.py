@@ -9,9 +9,10 @@ import data_import.opennet
 import oni_model.models
 
 
-URL_NODE_LIST = "http://wiki.opennet-initiative.de/wiki/Opennet_Nodes"
-# the node tables in the opennet wiki contain the following data columns
-NODE_TABLE_COLUMNS = ("ip_address", "lastseen", "post_address", "antenna", "device", "owner", "notes", "latlon")
+# "lambda" hilft fuer die verzoegerte Namensaufloesung der Parser-Klassen
+NODE_WIKI_PAGES = ((lambda: AccessPointTable, "http://wiki.opennet-initiative.de/wiki/Opennet_Nodes"),
+                   (lambda: ServerTable, "https://wiki.opennet-initiative.de/wiki/Server"),
+                  )
 
 
 # We need to add 'object' explicitely since HTMLParser.HTMLParser seems to be
@@ -25,6 +26,13 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
         self._row_data = None
         self._column_data = None
 
+    def parse_row_columns(self, columns):
+        """ parse a list of row items (one per column)
+
+            Return None for invalid inputs and a dictionary in case of success.
+        """
+        raise NotImplementedError
+
     def handle_starttag(self, tag, attrs):
         if tag == "tr":
             self._row_data = []
@@ -37,16 +45,19 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
         if tag == "td":
             # irgendwie landen am Ende der latlon-Daten immer ein "\n" (kein Zeilenumbruch - sondern zwei Zeichen)
             column_text = " ".join(self._column_data).strip().strip("\n")
+            # durch html-Entity-Entfernung entstehen ungewollte Leerzeichen
+            column_text = column_text.replace(" , ", ", ")
+            column_text = column_text.replace("( ", "(")
+            column_text = column_text.replace(" )", ")")
             self._row_data.append(column_text)
             self._column_data = None
         elif tag == "tr":
             # proper number of columns?
-            # first data column != "frei"?
-            # all data columns (excluding the first two columns) empty?
-            if (len(self._row_data) == len(NODE_TABLE_COLUMNS)) and \
-                    (self._row_data[NODE_TABLE_COLUMNS.index("post_address")].lower() != 'frei') and \
-                    "".join(self._row_data[2:]).strip():
-                self._rows.append(self._row_data)
+            if len(self._row_data) == len(self.column_names):
+                column_dict = {key: value for key, value in zip(self.column_names, self._row_data)}
+                parsed_data = self.parse_row_columns(column_dict)
+                if parsed_data:
+                    self._rows.append(parsed_data)
             self._row_data = None
         else:
             pass
@@ -57,29 +68,70 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
             if data:
                 self._column_data.append(data)
 
+    def get_parsed_items(self):
+        return list(self._rows)
 
-def _get_node_table_rows():
-    html = urllib.request.urlopen(URL_NODE_LIST).read().decode("utf-8")
-    parser = _MediaWikiNodeTableParser()
-    parser.feed(html)
-    return parser._rows
+
+class AccessPointTable(_MediaWikiNodeTableParser):
+
+    # the node tables in the opennet wiki contain the following data columns
+    column_names = ("main_ip", "lastseen", "post_address", "antenna", "device", "owner", "notes", "latlon")
+
+    def parse_row_columns(self, columns):
+        # first data column != "frei"?
+        if columns["post_address"].lower() == "frei":
+            return None
+        # are all data columns (excluding the first two columns) empty?
+        if not any([bool(columns[key].strip()) for key in self.column_names[2:]]):
+            return None
+        # this is a valid column
+        result = dict(columns)
+        result.pop("lastseen")
+        return result
+
+
+class ServerTable(_MediaWikiNodeTableParser):
+
+    # the server tables in the opennet wiki contain the following data columns
+    column_names = ("hostname", "main_ip", "other_ip_v4", "other_ipv6", "post_address", "notes")
+
+    def parse_row_columns(self, columns):
+        # ignore servers without a routing IP
+        if columns["main_ip"] in (None, "", "-"):
+            return
+        # waehle die erste IP, falls mehrere definiert sind
+        if len(columns["main_ip"].split()) > 1:
+            columns["main_ip"] = columns["main_ip"].split()[0]
+        return {"post_address": "{hostname}, {post_address}".format(**columns),
+                "main_ip": columns["main_ip"],
+                "notes": columns["notes"],
+               }
+
+
+def _parse_nodes():
+    result = []
+    for parser_func, url in NODE_WIKI_PAGES:
+        html = urllib.request.urlopen(url).read().decode("utf-8")
+        parser = parser_func()()
+        parser.feed(html)
+        result.extend(parser.get_parsed_items())
+    return result
 
 
 @transaction.atomic
 def import_accesspoints_from_wiki():
     # helper function for retrieving column data
-    get_column = lambda row, column_name: row[NODE_TABLE_COLUMNS.index(column_name)]
-    for row in _get_node_table_rows():
-        main_ip = data_import.opennet.parse_node_ip(get_column(row, "ip_address"))
+    for node_values in _parse_nodes():
+        main_ip = data_import.opennet.parse_node_ip(node_values.get("main_ip"))
         node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
-        node.post_address = get_column(row, "post_address")
-        node.antenna = get_column(row, "antenna")
-        node.device_model = get_column(row, "device")
-        node.owner = get_column(row, "owner")
-        node.notes = get_column(row, "notes")
+        node.post_address = node_values.get("post_address")
+        node.antenna = node_values.get("antenna")
+        node.device_model = node_values.get("device")
+        node.owner = node_values.get("owner")
+        node.notes = node_values.get("notes")
         #node.pretty_name = data_import.opennet.get_pretty_name(node)
         # parse the position
-        latlon = get_column(row, "latlon")
+        latlon = node_values.get("latlon")
         if not latlon:
             # we can safely ignore some nodes without position
             if ("test" in node.post_address.lower()) or ("test" in node.notes.lower()):
