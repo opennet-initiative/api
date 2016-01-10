@@ -139,7 +139,7 @@ def import_accesspoints_from_wiki():
             elif node.post_address == "Webserver":
                 pass
             else:
-                print("Ignoring empty position of node %s: %s" % (main_ip, latlon), file=sys.stderr)
+                print("Ignoring empty position of node %s: %s" % (main_ip, latlon))
         else:
             lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
             lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
