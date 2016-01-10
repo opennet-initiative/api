@@ -3,6 +3,7 @@ import urllib.request, urllib.error, urllib.parse
 import html.parser
 
 from django.contrib.gis.geos import Point
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
 import data_import.opennet
@@ -99,9 +100,6 @@ class ServerTable(_MediaWikiNodeTableParser):
         # ignore servers without a routing IP
         if columns["main_ip"] in (None, "", "-"):
             return
-        # waehle die erste IP, falls mehrere definiert sind
-        if len(columns["main_ip"].split()) > 1:
-            columns["main_ip"] = columns["main_ip"].split()[0]
         return {"post_address": "{hostname}, {post_address}".format(**columns),
                 "main_ip": columns["main_ip"],
                 "notes": columns["notes"],
@@ -118,12 +116,30 @@ def _parse_nodes():
     return result
 
 
+def get_node_by_main_ip_candidates(candidates):
+    """ Find a matching AccessPoint with using one of the given IP addresses as its main IP """
+    # transform names into IPs
+    candidate_ips = [data_import.opennet.parse_node_ip(candidate) for candidate in candidates]
+    # go through the candiates and look for a matching node
+    for ip in candidate_ips:
+        try:
+            return (ip, oni_model.models.AccessPoint.objects.get(main_ip=ip))
+        except ObjectDoesNotExist:
+            pass
+    # No match found? Create a new node by using the first candidate.
+    main_ip = candidate_ips[0]
+    print("Failed to find an existing AccessPoint with this main IP: {0}".format(main_ip))
+    node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
+    return (main_ip, node)
+
+
 @transaction.atomic
 def import_accesspoints_from_wiki():
     # helper function for retrieving column data
     for node_values in _parse_nodes():
-        main_ip = data_import.opennet.parse_node_ip(node_values.get("main_ip"))
-        node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
+        # maybe more than one IP is given (e.g. for servers)
+        main_ip_candidates = node_values["main_ip"].split()
+        main_ip, node = get_node_by_main_ip_candidates(main_ip_candidates)
         node.post_address = node_values.get("post_address")
         node.antenna = node_values.get("antenna")
         node.device_model = node_values.get("device")
