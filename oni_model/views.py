@@ -21,9 +21,11 @@ EXPIRE_AGE_MINUTES = {"link": 120,
 
 
 # bei Listen-Darstellugen filtern wir nach Alter
-def filter_by_timestamp_age(queryset, max_age_minutes):
+def filter_by_timestamp_age(queryset, max_age_minutes, timestamp_attribute):
     min_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=max_age_minutes)
-    return queryset.filter(timestamp__gte=min_timestamp)
+    # different objects use different attribute names for their timestamp
+    args = {"%s__gte" % timestamp_attribute: min_timestamp}
+    return queryset.filter(**args)
 
 
 ## abstract classes
@@ -63,7 +65,7 @@ class AccessPointList(ListView):
     serializer_class = AccessPointSerializer
 
     def get_queryset(self):
-        return filter_by_timestamp_age(AccessPoint.objects.all(), EXPIRE_AGE_MINUTES["accesspoint"])
+        return filter_by_timestamp_age(AccessPoint.objects.all(), EXPIRE_AGE_MINUTES["accesspoint"], "lastseen_timestamp")
 
 
 class AccessPointDetail(DetailView):
@@ -79,7 +81,7 @@ class AccessPointLinksList(ListView):
     serializer_class = RoutingLinkSerializer
 
     def get_queryset(self):
-        return filter_by_timestamp_age(RoutingLink.objects.all(), EXPIRE_AGE_MINUTES["link"])
+        return filter_by_timestamp_age(RoutingLink.objects.all(), EXPIRE_AGE_MINUTES["link"], "timestamp")
 
 
 class AccessPointLinksDetail(ListView):
