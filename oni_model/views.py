@@ -90,16 +90,14 @@ class AccessPointLinksDetail(ListView):
     def get_queryset(self):
         ip = self.kwargs["ip"]
         ap = get_object_or_404(AccessPoint, main_ip=ip)
-        return filter_by_timestamp_age(ap.get_links(), EXPIRE_AGE_MINUTES["link"])
+        return filter_by_timestamp_age(ap.get_links(), EXPIRE_AGE_MINUTES["link"], "timestamp")
 
 
 class AccessPointInterfacesList(ListView):
     """Liefert eine Liste aller Interfaces von Accesspoints des Opennets"""
 
     serializer_class = EthernetNetworkInterfaceSerializer
-
-    def get_queryset(self):
-        return filter_by_timestamp_age(EthernetNetworkInterface.objects.all(), EXPIRE_AGE_MINUTES["interface"])
+    queryset = EthernetNetworkInterface.objects.all()
 
 
 class NetworkInterfaceDetail(DetailView):
