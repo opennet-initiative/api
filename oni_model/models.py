@@ -151,7 +151,7 @@ class EthernetNetworkInterface(models.Model):
 
 class WifiNetworkInterfaceAttributes(models.Model):
     """Eine der WLAN-Schnittstellen eines APs"""
-    CRYPT_CHOICES = Choices('Plain', 'WEP', 'WPA2-PSK')
+    CRYPT_CHOICES = Choices('Plain', 'WEP', 'WPA-PSK', 'WPA2-PSK')
     MODE_CHOICES = Choices('master', 'client', 'adhoc', 'monitor')
     # die 802.11-Suffixe ("bgn" usw. werden beim Import alphabetisch sortiert)
     HWMODE_CHOICES = Choices('802.11bgn', '802.11an', '802.11bg')

@@ -101,6 +101,7 @@ def _update_value(target, attribute, raw_value):
                 "WEP Open System (NONE)": "WEP",
                 "WPA2 PSK (CCMP)": "WPA2-PSK",
                 "mixed WPA/WPA2 PSK (TKIP)": "WPA2-PSK",
+                "WPA PSK (CCMP)": "WPA-PSK",
                 "unknown": "Plain",
                 "open": "Plain",
                 "none": "Plain",
