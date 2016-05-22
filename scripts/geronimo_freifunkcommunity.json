@@ -22,6 +22,7 @@
   '"'metacommunity'"': '"'${COMMUNITY_META}'"',
   '"'state'"': {
     '"'nodes'"': ${COMMUNITY_LIST_NODES},
+    '"'description'"': '"'${COMMUNITY_META_DESCRIPTION}'"',
     '"'focus'"': [
       '"'infrastructure/backbone'"',
       '"'Public Free Wifi'"',
@@ -53,7 +54,9 @@
     }
   ],
   '"'socialprojects'"': {
-    '"'website'"': '"'${COMMUNITY_SOCIAL}'"'
+    '"'number'"': ${COMMUNITY_SOCIAL_NUM},
+    '"'website'"': '"'${COMMUNITY_SOCIAL_WEB}'"',
+    '"'contact'"': '"'${COMMUNITY_SOCIAL_MAIL}'"' 
   },
   '"'techDetails'"': {
     '"'firmware'"': {
@@ -62,6 +65,21 @@
       '"'docs'"': '"'${COMMUNITY_FW_DOCS}'"',
       '"'vpnaccess'"': '"'webform'"',
       '"'registrationurl'"': '"'${COMMUNITY_CA}'"'
+    },
+    '"'dns'"': [
+      {
+        '"'domainname'"': '"'${COMMUNITY_DNS_DOMAIN}'"',
+        '"'nameserver'"': [
+          '"'${COMMUNITY_DNS_NAMESERVER}'"'
+        ]
+      }
+    ],
+    '"'networks'"': {
+      '"'ipv4'"': [
+        {
+          '"'network'"': '"'${COMMUNITY_NETWORK_IPV4}'"'
+        }        
+      ]
     },
     '"'routing'"': [
       '"'OLSR'"'
