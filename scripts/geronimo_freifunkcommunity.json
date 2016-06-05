@@ -54,7 +54,7 @@
     }
   ],
   '"'socialprojects'"': {
-    '"'number'"': ${COMMUNITY_SOCIAL_NUM},
+    '"'number'"': ${COMMUNITY_LIST_SOCIAL_NUM},
     '"'website'"': '"'${COMMUNITY_SOCIAL_WEB}'"',
     '"'contact'"': '"'${COMMUNITY_SOCIAL_MAIL}'"' 
   },
