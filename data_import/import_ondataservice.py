@@ -68,6 +68,9 @@ def _update_value(target, attribute, raw_value):
         value = 0
     elif (attribute in ("wifi_signal", "wifi_noise", "wifi_freq", "wifi_channel", "device_memory_available", "device_memory_free")) and (raw_value == ""):
         value = 0
+    elif (attribute in ("wifi_freq", "wifi_channel")) and ("unknown" in raw_value):
+        # Parse-Fehler in der Firmware (bis v0.5.2) ausgleichen
+        value = 0
     elif attribute in ("dhcp_range_start", "dhcp_range_limit"):
         # die DHCP-Werte tragen "null=True" - daher sind sie nicht als Integer erkennbar
         value = int(raw_value) if raw_value else None
