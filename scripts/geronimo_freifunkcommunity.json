@@ -58,6 +58,16 @@
     '"'website'"': '"'${COMMUNITY_SOCIAL_WEB}'"',
     '"'contact'"': '"'${COMMUNITY_SOCIAL_MAIL}'"' 
   },
+  '"'support'"': {
+    '"'club'"': {
+      '"'name'"': '"'${COMMUNITY_META}'"',
+      '"'street'"': '"'${COMMUNITY_ADDR_STREET}'"',
+      '"'zip'"': '"'${COMMUNITY_ADDR_ZIP}'"',
+      '"'city'"': '"'${COMMUNITY_ADDR_CITY}'"',
+      '"'url'"': '"'${COMMUNITY_URL}'"',
+      '"'email'"': '"'${COMMUNITY_CONT_ML}'"'
+    }
+  },
   '"'techDetails'"': {
     '"'firmware'"': {
       '"'name'"': '"'${COMMUNITY_FW_NAME}'"',
@@ -82,7 +92,8 @@
       ]
     },
     '"'routing'"': [
-      '"'OLSR'"'
+      '"'OLSR'"',
+      '"'OLSRv2'"'
     ],
     '"'updatemode'"': [
       '"'manual'"'
