@@ -154,7 +154,7 @@ class WifiNetworkInterfaceAttributes(models.Model):
     CRYPT_CHOICES = Choices('Plain', 'WEP', 'WPA-PSK', 'WPA2-PSK')
     MODE_CHOICES = Choices('master', 'client', 'adhoc', 'monitor')
     # die 802.11-Suffixe ("bgn" usw. werden beim Import alphabetisch sortiert)
-    HWMODE_CHOICES = Choices('802.11bgn', '802.11an', '802.11bg')
+    HWMODE_CHOICES = Choices('802.11bgn', '802.11an', '802.11bg', '802.11abg')
     WIFI_DRIVER_CHOICES = Choices('nl80211', 'wl')
 
     interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True, related_name="wifi_attributes")
