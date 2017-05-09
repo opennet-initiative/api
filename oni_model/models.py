@@ -6,7 +6,7 @@ from model_utils import Choices
 
 class AccessPoint(models.Model):
     """Ein einzelner WLAN-Accesspoint im Opennet"""
-    DISTRIBUTION_CHOICES = Choices("OpenWrt", "AirOS", "Lede")
+    DISTRIBUTION_CHOICES = Choices("OpenWrt", "AirOS", "Lede", "LEDE")
     SERVICES_SORTING_CHOICES = Choices("manual", "hop", "etx")
 
     main_ip = models.IPAddressField(primary_key=True)
