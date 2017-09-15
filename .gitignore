@@ -23,3 +23,4 @@ tags
 media/
 node_modules/
 res/assets/components/
+static/
