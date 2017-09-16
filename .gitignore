@@ -21,6 +21,8 @@ tags
 
 # ignore grunt/bower/npm-stuff
 build/
+dist/
+geronimo.egg-info/
 media/
 node_modules/
 res/assets/components/
