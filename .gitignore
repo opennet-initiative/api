@@ -20,6 +20,7 @@ tags
 
 
 # ignore grunt/bower/npm-stuff
+build/
 media/
 node_modules/
 res/assets/components/
