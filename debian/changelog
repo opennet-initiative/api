@@ -1,3 +1,9 @@
+geronimo (1.0-3) unstable; urgency=medium
+
+  * Add UWSGI deployment settings
+
+ -- Lars Kruse <devel@sumpfralle.de>  Sun, 17 Sep 2017 04:44:54 +0200
+
 geronimo (1.0-2) unstable; urgency=medium
 
   * Architecture: any -> all

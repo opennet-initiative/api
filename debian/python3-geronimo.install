@@ -1,0 +1,2 @@
+uwsgi/geronimo.ini /etc/uwsgi/apps-available/
+uwsgi/wsgi.py /usr/share/python3-geronimo/
