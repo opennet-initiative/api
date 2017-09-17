@@ -19,7 +19,7 @@ def is_our_network(network):
 
 def parse_node_ip(address):
     """ Parse strings with full IP address or APx or APx.y values.
-        Return ipaddr.IPAddress 
+        Return ipaddr.IPAddress
     """
     if isinstance(address, ipaddr.IPv4Address):
         return address
@@ -45,7 +45,8 @@ def parse_node_ip(address):
             default_subnet = 1
             octets.insert(0, default_subnet)
         if len(octets) != 2:
-            raise ValueError("Invalid number of octets parsed - only two were expected: %s" % ap_name)
+            raise ValueError("Invalid number of octets parsed - only two were expected: %s"
+                             % ap_name)
         else:
             node_ip = "192.168.%d.%d" % tuple(octets)
             return ipaddr.IPv4Address(node_ip)
@@ -76,4 +77,3 @@ def get_accesspoint_pretty_name(node):
         return "AP%s.%s" % tuple(last_octets)
     else:
         return None
-

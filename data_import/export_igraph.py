@@ -1,5 +1,4 @@
 import igraph
-import import_olsr
 
 
 def generate_igraph(mesh):
@@ -11,7 +10,6 @@ def generate_igraph(mesh):
         vertex = graph.vs[index]
         # use the main IP as the name by default (can be overwritten below)
         vertex["name"] = str(node.addresses[0])
-        node_flags = node.get_flags()
         # apply all flags to the vertex
         for key, value in node.get_flags().items():
             vertex[key] = value
@@ -20,7 +18,6 @@ def generate_igraph(mesh):
         node_ids = [mesh.nodes.index(node) for node in link.nodes]
         graph.add_edges([node_ids])
         edge = graph.es[index]
-        node_flags = link.get_flags()
         # apply all flags to the vertex
         for key, value in link.get_flags().items():
             edge[key] = value
@@ -33,4 +30,3 @@ if __name__ == "__main__":
     graph = generate_igraph(mesh)
     print(graph)
     igraph.plot(graph, "output.png")
-

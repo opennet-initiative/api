@@ -1,4 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
+
 import data_import.import_wiki
 
 
@@ -8,4 +9,3 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         data_import.import_wiki.import_accesspoints_from_wiki()
-

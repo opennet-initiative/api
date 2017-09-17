@@ -1,7 +1,11 @@
-import urllib.request, urllib.parse, urllib.error
 import datetime
+import urllib.error
+import urllib.parse
+import urllib.request
+
 from django.db import transaction
-from oni_model.models import AccessPoint, EthernetNetworkInterface, RoutingLink, InterfaceRoutingLink
+
+from oni_model.models import AccessPoint, EthernetNetworkInterface, InterfaceRoutingLink
 
 
 def _txtinfo_parser(lines, table_names):
@@ -47,8 +51,9 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
             except IndexError:
                 ap, created = AccessPoint.objects.get_or_create(main_ip=ip_address)
                 if created:
-                    print ("Created new AP %s" % ip_address)
-                interface = EthernetNetworkInterface.objects.create(access_point=ap, ip_address=ip_address)
+                    print("Created new AP %s" % ip_address)
+                interface = EthernetNetworkInterface.objects.create(access_point=ap,
+                                                                    ip_address=ip_address)
                 print("Created new NetworkInterface %s" % ip_address)
                 ap.save()
                 interface.save()
@@ -57,15 +62,16 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
         if created:
             print("Created new RoutingLink %s <-> %s" % (last_hop_ip, destination_ip))
         for interface, qual in zip(interfaces, qualities):
-            link_info = InterfaceRoutingLink.objects.filter(routing_link=linker, interface=interface)[0]
+            link_info = InterfaceRoutingLink.objects.filter(routing_link=linker,
+                                                            interface=interface)[0]
             link_info.quality = qual
             link_info.save()
         linker.save()
-        #update AP timestamps
+        # update AP timestamps
         for ip_address in (last_hop_ip, destination_ip):
             interface = EthernetNetworkInterface.objects.filter(ip_address=ip_address)[0]
             ap = interface.access_point
-            ap.lastseen_timestamp=datetime.datetime.now(datetime.timezone.utc)
+            ap.lastseen_timestamp = datetime.datetime.now(datetime.timezone.utc)
             ap.save()
 
 
@@ -92,17 +98,21 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
             if created:
                 print("Created new AP %s" % main_ip)
                 ap.save()
-            interface = EthernetNetworkInterface.objects.create(ip_address=main_ip, access_point=ap)
+            interface = EthernetNetworkInterface.objects.create(ip_address=main_ip,
+                                                                access_point=ap)
             print("Created new NetworkInterface %s" % main_ip)
             interface.save()
         else:
             ap = found_interface.access_point
         for ip_address in alternatives.split(";"):
-            interface = EthernetNetworkInterface.objects.filter(access_point=ap, ip_address=ip_address)
+            interface = EthernetNetworkInterface.objects.filter(access_point=ap,
+                                                                ip_address=ip_address)
             if not interface:
-                interface = EthernetNetworkInterface.objects.create(access_point=ap, ip_address=ip_address)
+                interface = EthernetNetworkInterface.objects.create(access_point=ap,
+                                                                    ip_address=ip_address)
                 print("Created new NetworkInterface %s" % ip_address)
                 interface.save()
+
 
 @transaction.atomic
 def import_routes_from_olsr(txtinfo_url="http://localhost:2006"):
@@ -116,7 +126,7 @@ def import_routes_from_olsr(txtinfo_url="http://localhost:2006"):
 
 if __name__ == "__main__":
     import_routes_from_olsr()
-    for item in oni_model.models.AccessPoint.objects():
-        print(repr(item))
+    nodes = AccessPoint.objects()
+    for node in nodes:
+        print(repr(node))
     print(len(nodes))
-

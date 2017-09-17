@@ -29,7 +29,7 @@ class AccessPoint(models.Model):
     system_kernel = models.TextField(null=True)
     system_watchdog_enabled = models.NullBooleanField()
     # TODO: ab Django 1.8 gibt es DurationField
-    #system_uptime = models.DurationField(null=True)
+#   system_uptime = models.DurationField(null=True)
     system_uptime = models.IntegerField(null=True)
     system_load_1min = models.FloatField(null=True)
     system_load_5min = models.FloatField(null=True)
@@ -124,7 +124,8 @@ class EthernetNetworkInterface(models.Model):
     ifstat_tx_heartbeat_errors = models.IntegerField(null=True)
 
     def get_link_to(self, other):
-        return RoutingLink.objects.filter(endpoints__interface=self).filter(endpoints__interface=other)[0]
+        return RoutingLink.objects.filter(
+            endpoints__interface=self).filter(endpoints__interface=other)[0]
 
     def get_or_create_link_to(self, other):
         try:
@@ -157,7 +158,8 @@ class WifiNetworkInterfaceAttributes(models.Model):
     HWMODE_CHOICES = Choices('802.11bgn', '802.11an', '802.11bg', '802.11abg')
     WIFI_DRIVER_CHOICES = Choices('nl80211', 'wl')
 
-    interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True, related_name="wifi_attributes")
+    interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True,
+                                  related_name="wifi_attributes")
     wifi_ssid = models.CharField(max_length=32, null=True)
     wifi_bssid = models.CharField(max_length=17, null=True)
     wifi_driver = StatusField(choices_name='WIFI_DRIVER_CHOICES', null=True)
@@ -183,7 +185,7 @@ class RoutingLink(models.Model):
 
 
 class InterfaceRoutingLink(models.Model):
-    """Ein Ende eines gerichteten Links""" 
+    """Ein Ende eines gerichteten Links"""
     interface = models.ForeignKey(EthernetNetworkInterface)
     routing_link = models.ForeignKey(RoutingLink, related_name="endpoints")
     # Link quality von diesem Interface zum anderen

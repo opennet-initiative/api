@@ -1,4 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
+
 import data_import.import_ondataservice
 
 
@@ -12,4 +13,3 @@ class Command(BaseCommand):
         if args:
             kwargs["db_file"] = args[0]
         data_import.import_ondataservice.import_from_ondataservice(**kwargs)
-

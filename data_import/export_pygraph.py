@@ -19,7 +19,7 @@ class NetworkGraph(object):
             Raise KeyError if the given nodes are not connected.
         """
         spanning_tree, graph_ordering = pygraph.algorithms.minmax.shortest_path(self._graph, node2)
-        if not node1 in graph_ordering:
+        if node1 not in graph_ordering:
             raise KeyError("No connection between %s and %s." % (node1, node2))
         current = node1
         links = []
@@ -34,7 +34,6 @@ class NetworkGraph(object):
 if __name__ == "__main__":
     import opennet
     mesh = opennet.import_opennet_mesh()
-    graph = NetworkGraph(self.mesh)
+    graph = NetworkGraph(mesh)
     node1, node2 = mesh.nodes[0], mesh.nodes[4]
     print(graph.get_shortest_path(node1, node2))
-

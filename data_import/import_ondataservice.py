@@ -5,14 +5,14 @@
     documentation: https://wiki.opennet-initiative.de/wiki/Ondataservice
 """
 
-import sys
-import re
-import time
-import sqlite3
 import datetime
+import re
+import sqlite3
+import sys
+
+from django.db import transaction
 
 from oni_model.models import AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes
-from django.db import transaction
 
 
 def _get_table_meta(conn, table):
@@ -35,11 +35,13 @@ def _get_table_meta(conn, table):
 
 def _parse_nodes_data(conn):
     nodes_columns = _get_table_meta(conn, "nodes")
+
     def get_row_dict(row, columns):
         result = {}
         for key, value in zip(columns, row):
             result[key] = value
         return result
+
     # add node tags
     for node in conn.execute("SELECT * FROM nodes").fetchall():
         data = get_row_dict(node, nodes_columns)
@@ -66,7 +68,8 @@ def _update_value(target, attribute, raw_value):
         value = int(raw_value) if raw_value else 0
     elif (attribute in ("wifi_bitrate", "wifi_signal", "wifi_noise")) and (raw_value == "unknown"):
         value = 0
-    elif (attribute in ("wifi_signal", "wifi_noise", "wifi_freq", "wifi_channel", "device_memory_available", "device_memory_free")) and (raw_value == ""):
+    elif (attribute in ("wifi_signal", "wifi_noise", "wifi_freq", "wifi_channel",
+                        "device_memory_available", "device_memory_free")) and (raw_value == ""):
         value = 0
     elif (attribute in ("wifi_freq", "wifi_channel")) and ("unknown" in raw_value):
         # Parse-Fehler in der Firmware (bis v0.5.2) ausgleichen
@@ -78,14 +81,15 @@ def _update_value(target, attribute, raw_value):
         value = datetime.date.fromtimestamp(int(raw_value)) if raw_value else None
     elif attribute == "system_uptime":
         # in 0.9-ON5 enthaelt uptime eine textuelle Ausgabe (z.B.: "6 days, 18:18" oder "21:01")
-        days_text_regex = r"(?:(?P<days>[0-9]+) days?,)? *(?P<hours>[0-9]{1,2}):(?P<minutes>[0-9]{2})$"
-        match = re.match(days_text_regex, raw_value)
+        days_regex = r"(?:(?P<days>[0-9]+) days?,)? *(?P<hours>[0-9]{1,2}):(?P<minutes>[0-9]{2})$"
+        match = re.match(days_regex, raw_value)
         if match:
             numbers = {key: int(text or 0) for key, text in match.groupdict().items()}
-            value = float(60 * (numbers["minutes"] + 60 * (numbers["hours"] + 24 * numbers["days"])))
+            value = float(60 * (numbers["minutes"] + 60 * (numbers["hours"]
+                                                           + 24 * numbers["days"])))
         else:
             # TODO: ab Django 1.8 gibt es DurationField - fuer timedelta
-            #value = datetime.timedelta(seconds=float(raw_value))
+            # value = datetime.timedelta(seconds=float(raw_value))
             value = float(raw_value) if raw_value else None
     elif attribute == "opennet_services_sorting":
         # wir nennen die "metric"-Sortierung heute "hop"
@@ -207,11 +211,14 @@ def import_network_interface(data):
     except AccessPoint.DoesNotExist:
         # wir legen keine Netzwerk-Interfaces fuer APs an, die noch nicht in der Datenbank sind
         return
-    # wir verwenden fuer wlan-Interfaces eine separate Klasse und weitere Attribute fuer wifi-Interfaces
+    # Wir verwenden fuer wlan-Interfaces eine separate Klasse und weitere Attribute fuer
+    # wifi-Interfaces.
     try:
-        interface = EthernetNetworkInterface.objects.get(access_point=node, if_name=data["if_name"])
+        interface = EthernetNetworkInterface.objects.get(access_point=node,
+                                                         if_name=data["if_name"])
     except EthernetNetworkInterface.DoesNotExist:
-        interface = EthernetNetworkInterface.objects.create(access_point=node, ip_address=data["ip_addr"])
+        interface = EthernetNetworkInterface.objects.create(access_point=node,
+                                                            ip_address=data["ip_addr"])
     # Uebertragung von sqlite-Eintraegen in unser Modell
     for key_from, key_to in {
                 "if_name": "if_name",
@@ -255,7 +262,8 @@ def import_network_interface(data):
         interface.dhcp_leasetime = _parse_dhcp_leasetime_seconds(data["dhcp_leasetime"])
     interface.save()
     if data["wlan_essid"]:
-        wifi_attributes, created = WifiNetworkInterfaceAttributes.objects.get_or_create(interface=interface)
+        wifi_attributes, created = WifiNetworkInterfaceAttributes.objects.get_or_create(
+            interface=interface)
         for key_from, key_to in {
                     "wlan_essid": "wifi_ssid",
                     "wlan_apmac": "wifi_bssid",
@@ -283,16 +291,18 @@ def import_from_ondataservice(db_file="/var/run/olsrd/ondataservice.db"):
     try:
         conn = sqlite3.connect(db_file)
     except sqlite3.OperationalError as err_msg:
-        print("Failed to open ondataservice database (%s): %s" % (db_file, err_msg), file=sys.stderr)
+        print("Failed to open ondataservice database (%s): %s" % (db_file, err_msg),
+              file=sys.stderr)
     else:
         _parse_nodes_data(conn)
         conn.close()
 
 
 if __name__ == "__main__":
+    import opennet
     if len(sys.argv) < 2:
         print("No database given - exit.", file=sys.stderr)
-    mesh = parse_ondataservice(db_file=sys.argv[1])
+    mesh = opennet.import_opennet_mesh()
+    import_from_ondataservice(db_file=sys.argv[1])
     for a in mesh.nodes:
         print(repr(a))
-

@@ -1,6 +1,8 @@
-import sys
-import urllib.request, urllib.error, urllib.parse
 import html.parser
+import urllib.error
+import urllib.parse
+import urllib.request
+import sys
 
 from django.contrib.gis.geos import Point
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,9 +13,10 @@ import oni_model.models
 
 
 # "lambda" hilft fuer die verzoegerte Namensaufloesung der Parser-Klassen
-NODE_WIKI_PAGES = ((lambda: AccessPointTable, "http://wiki.opennet-initiative.de/wiki/Opennet_Nodes"),
-                   (lambda: ServerTable, "https://wiki.opennet-initiative.de/wiki/Server"),
-                  )
+NODE_WIKI_PAGES = (
+    (lambda: AccessPointTable, "https://wiki.opennet-initiative.de/wiki/Opennet_Nodes"),
+    (lambda: ServerTable, "https://wiki.opennet-initiative.de/wiki/Server"),
+)
 
 
 # We need to add 'object' explicitely since HTMLParser.HTMLParser seems to be
@@ -44,7 +47,8 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
 
     def handle_endtag(self, tag):
         if tag == "td":
-            # irgendwie landen am Ende der latlon-Daten immer ein "\n" (kein Zeilenumbruch - sondern zwei Zeichen)
+            # Irgendwie landet am Ende der latlon-Daten immer ein "\n" (kein Zeilenumbruch -
+            # sondern zwei Zeichen).
             column_text = " ".join(self._column_data).strip().strip("\n")
             # durch html-Entity-Entfernung entstehen ungewollte Leerzeichen
             column_text = column_text.replace(" , ", ", ")
@@ -64,7 +68,7 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
             pass
 
     def handle_data(self, data):
-        if not self._column_data is None:
+        if self._column_data is not None:
             data = data.strip()
             if data:
                 self._column_data.append(data)
@@ -76,7 +80,8 @@ class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
 class AccessPointTable(_MediaWikiNodeTableParser):
 
     # the node tables in the opennet wiki contain the following data columns
-    column_names = ("main_ip", "lastseen", "post_address", "antenna", "device", "owner", "notes", "latlon")
+    column_names = ("main_ip", "lastseen", "post_address", "antenna", "device", "owner", "notes",
+                    "latlon")
 
     def parse_row_columns(self, columns):
         # first data column != "frei"?
@@ -102,8 +107,7 @@ class ServerTable(_MediaWikiNodeTableParser):
             return
         return {"post_address": "{hostname}, {post_address}".format(**columns),
                 "main_ip": columns["main_ip"],
-                "notes": columns["notes"],
-               }
+                "notes": columns["notes"]}
 
 
 def _parse_nodes():
@@ -145,7 +149,7 @@ def import_accesspoints_from_wiki():
         node.device_model = node_values.get("device")
         node.owner = node_values.get("owner")
         node.notes = node_values.get("notes")
-        #node.pretty_name = data_import.opennet.get_pretty_name(node)
+#       node.pretty_name = data_import.opennet.get_pretty_name(node)
         # parse the position
         latlon = node_values.get("latlon")
         if not latlon:
@@ -159,14 +163,14 @@ def import_accesspoints_from_wiki():
         else:
             lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
             lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
-            coordinates = []
             try:
                 lat, lon = latlon.strip().split()
                 lon = float(lon_replace(lon))
                 lat = float(lat_replace(lat))
             except ValueError:
                 # mehr oder weniger als zwei Elemente, bzw. falsches Format
-                print("Failed to parse position (%s) of node %s" % (latlon, main_ip), file=sys.stderr)
+                print("Failed to parse position (%s) of node %s" % (latlon, main_ip),
+                      file=sys.stderr)
                 lat, lon = None, None
             if lat and lon:
                 node.position = Point(lon, lat)
@@ -175,6 +179,7 @@ def import_accesspoints_from_wiki():
 
 if __name__ == "__main__":
     import_accesspoints_from_wiki()
-    for item in oni_model.models.AccessPoint.objects():
-        print(repr(item))
+    nodes = oni_model.models.AccessPoint.objects()
+    for node in nodes:
+        print(repr(node))
     print(len(nodes))

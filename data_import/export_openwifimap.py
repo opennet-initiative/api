@@ -1,8 +1,7 @@
-import sys
 import json
 import requests
+import sys
 
-import elements
 import import_olsr
 import import_wiki
 import opennet
@@ -30,9 +29,9 @@ def _node2json(node):
         data["longitude"] = node.lon
     links = []
     for link in node.get_links():
-        partner = [other for other in link.nodes if not node is other][0]
+        peer = [other for other in link.nodes if node is not other][0]
         link_data = {}
-        link_data["id"] = _get_node_id(other)
+        link_data["id"] = _get_node_id(peer)
         # avoid divide-by-zero
         if getattr(link, "cost", 0) > 0:
             link_data["quality"] = 1.0 / link.cost
@@ -69,4 +68,3 @@ if __name__ == "__main__":
             status, text = _send_data("update_node/%s" % node_id, json_text)
             if not status:
                 print(node.name, text.strip())
-

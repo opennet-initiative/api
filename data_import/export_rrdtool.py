@@ -103,7 +103,8 @@ def update_rrd_database(mesh, parent_dir):
         _update_rrd(rrd_filename, datasets, timestamp)
     for link in mesh.links:
         rrd_filename = _get_rrd_filename_for_link(parent_dir, link)
-        timestamps = [node.get_timestamp_epoch() for node in link.nodes if node.get_timestamp_epoch()]
+        timestamps = [node.get_timestamp_epoch() for node in link.nodes
+                      if node.get_timestamp_epoch()]
         if not timestamps:
             continue
         _update_rrd(rrd_filename, {"cost": link.cost}, min(timestamps))
@@ -111,7 +112,6 @@ def update_rrd_database(mesh, parent_dir):
 
 if __name__ == "__main__":
     import sys
-    import os
     import import_olsr
     if len(sys.argv) > 1:
         base_dir = sys.argv[1]
@@ -119,4 +119,3 @@ if __name__ == "__main__":
         base_dir = os.getcwd()
     mesh = import_olsr.parse_olsr_topology()
     update_rrd_database(mesh, base_dir)
-

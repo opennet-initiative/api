@@ -1,23 +1,17 @@
 import datetime
 
-from django.shortcuts import render, get_object_or_404
-
-from oni_model.models import AccessPoint, RoutingLink, EthernetNetworkInterface, InterfaceRoutingLink
-from oni_model.serializer import AccessPointSerializer, RoutingLinkSerializer, \
-        InterfaceRoutingLinkSerializer, EthernetNetworkInterfaceSerializer
-
-from rest_framework import mixins
-from rest_framework import filters
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
-from rest_framework.views import APIView
+from rest_framework import mixins
 from rest_framework.response import Response
+
+from oni_model.models import (AccessPoint, RoutingLink, EthernetNetworkInterface)
+from oni_model.serializer import (
+    AccessPointSerializer, RoutingLinkSerializer, EthernetNetworkInterfaceSerializer)
 
 
 # willkuerliche Festlegungen (deutlich laenger als die jeweils typische Aktualisierungsperiode)
-EXPIRE_AGE_MINUTES = {"link": 120,
-                      "interface": 48 * 60,
-                      "accesspoint": 30 * 60,
-                     }
+EXPIRE_AGE_MINUTES = {"link": 120, "interface": 48 * 60, "accesspoint": 30 * 60}
 
 
 # bei Listen-Darstellugen filtern wir nach Alter
@@ -28,7 +22,7 @@ def filter_by_timestamp_age(queryset, max_age_minutes, timestamp_attribute):
     return queryset.filter(**args)
 
 
-## abstract classes
+# abstract classes
 class ListView(mixins.ListModelMixin,
                mixins.CreateModelMixin,
                generics.GenericAPIView):
@@ -65,7 +59,8 @@ class AccessPointList(ListView):
     serializer_class = AccessPointSerializer
 
     def get_queryset(self):
-        return filter_by_timestamp_age(AccessPoint.objects.all(), EXPIRE_AGE_MINUTES["accesspoint"], "lastseen_timestamp")
+        return filter_by_timestamp_age(AccessPoint.objects.all(),
+                                       EXPIRE_AGE_MINUTES["accesspoint"], "lastseen_timestamp")
 
 
 class AccessPointDetail(DetailView):
@@ -81,7 +76,8 @@ class AccessPointLinksList(ListView):
     serializer_class = RoutingLinkSerializer
 
     def get_queryset(self):
-        return filter_by_timestamp_age(RoutingLink.objects.all(), EXPIRE_AGE_MINUTES["link"], "timestamp")
+        return filter_by_timestamp_age(RoutingLink.objects.all(),
+                                       EXPIRE_AGE_MINUTES["link"], "timestamp")
 
 
 class AccessPointLinksDetail(ListView):
