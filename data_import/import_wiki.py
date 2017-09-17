@@ -122,8 +122,8 @@ def _parse_nodes():
 
 def get_node_by_main_ip_candidates(candidates):
     """ Find a matching AccessPoint with using one of the given IP addresses as its main IP """
-    # transform names into IPs
-    candidate_ips = [data_import.opennet.parse_node_ip(candidate) for candidate in candidates]
+    # transform names into IPs (string, not ipaddress)
+    candidate_ips = [str(data_import.opennet.parse_node_ip(candidate)) for candidate in candidates]
     # go through the candiates and look for a matching node
     for ip in candidate_ips:
         try:
