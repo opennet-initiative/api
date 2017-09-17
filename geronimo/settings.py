@@ -26,6 +26,9 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# required for spatialite v4.2 or later
+# see https://docs.djangoproject.com/en/1.11/ref/contrib/gis/install/spatialite/
+SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
 
 # Application definition
 
