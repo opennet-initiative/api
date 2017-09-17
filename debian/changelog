@@ -1,3 +1,12 @@
+geronimo (1.0-2) unstable; urgency=medium
+
+  * Architecture: any -> all
+  * add lintian overrides
+  * change "Recommends" to "Depends"
+  * add dependency for "adduser"
+
+ -- Lars Kruse <devel@sumpfralle.de>  Sun, 17 Sep 2017 03:51:07 +0200
+
 geronimo (1.0-1) unstable; urgency=medium
 
   * Initial release
