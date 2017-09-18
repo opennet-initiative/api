@@ -12,7 +12,7 @@ API_HOME=/var/lib/on-geronimo
 case "$1" in
     configure)
         if ! getent passwd "$API_USER" >/dev/null; then
-            adduser --quiet --system --home "$API_HOME" --disabled-password "$API_USER"
+            adduser --quiet --system --home "$API_HOME" --disabled-password --shell /bin/sh "$API_USER"
         fi
 	if ! [ -e "$API_HOME/db.sqlite3" ]; then
             spatialite "$API_HOME/db.sqlite3" "SELECT InitSpatialMetaData();"
