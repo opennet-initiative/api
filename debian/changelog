@@ -1,3 +1,9 @@
+geronimo (1.1.0-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Lars Kruse <devel@sumpfralle.de>  Mon, 18 Sep 2017 06:53:51 +0200
+
 geronimo (1.0-3) unstable; urgency=medium
 
   * Add UWSGI deployment settings
