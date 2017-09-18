@@ -1,2 +1,4 @@
+examples/apache2/on-geronimo.conf /etc/apache2/sites-available.d/
+
 uwsgi/geronimo.ini /etc/uwsgi/apps-available/
 uwsgi/on_geronimo.py /etc/on-geronimo/settings/
