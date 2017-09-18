@@ -14,9 +14,7 @@ case "$1" in
         if ! getent passwd "$API_USER" >/dev/null; then
             adduser --quiet --system --home "$API_HOME" --disabled-password --shell /bin/sh "$API_USER"
         fi
-	if ! [ -e "$API_HOME/db.sqlite3" ]; then
-            spatialite "$API_HOME/db.sqlite3" "SELECT InitSpatialMetaData();"
-        fi
+        su -c "geronimo-manage migrate" "$API_USER"
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
