@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-import data_import.import_olsr
+import geronimo.data_import.import_olsr
 
 
 class Command(BaseCommand):
@@ -11,4 +11,4 @@ class Command(BaseCommand):
         import_args = {}
         if args:
             import_args["txtinfo_url"] = args[0]
-        data_import.import_olsr.import_routes_from_olsr(**import_args)
+        geronimo.data_import.import_olsr.import_routes_from_olsr(**import_args)

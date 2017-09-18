@@ -5,8 +5,8 @@ from rest_framework import generics
 from rest_framework import mixins
 from rest_framework.response import Response
 
-from oni_model.models import (AccessPoint, RoutingLink, EthernetNetworkInterface)
-from oni_model.serializer import (
+from geronimo.oni_model.models import (AccessPoint, RoutingLink, EthernetNetworkInterface)
+from geronimo.oni_model.serializer import (
     AccessPointSerializer, RoutingLinkSerializer, EthernetNetworkInterfaceSerializer)
 
 

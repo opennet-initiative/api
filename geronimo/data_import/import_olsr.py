@@ -5,7 +5,7 @@ import urllib.request
 
 from django.db import transaction
 
-from oni_model.models import AccessPoint, EthernetNetworkInterface, InterfaceRoutingLink
+from geronimo.oni_model.models import AccessPoint, EthernetNetworkInterface, InterfaceRoutingLink
 
 
 def _txtinfo_parser(lines, table_names):

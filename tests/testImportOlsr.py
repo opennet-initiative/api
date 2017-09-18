@@ -1,5 +1,5 @@
 import unittest
-import data_import.import_olsr as olsr
+import geronimo.data_import.import_olsr as olsr
 
 
 class OLSRTestcase(unittest.TestCase):

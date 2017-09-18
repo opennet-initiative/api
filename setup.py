@@ -6,12 +6,9 @@ from geronimo import VERSION
 
 # Module entsprechend PEP420 (ohne "__init__.py") werden von setuptools.find_packages nicht erkannt
 # siehe https://bitbucket.org/pypa/setuptools/issues/97
-def get_package_list(paths):
-    result = []
-    for path in paths:
-        result.extend([item[0].replace(os.path.sep, ".") for item in os.walk(path)
-                       if "__pycache__" not in item[0]])
-    return result
+def get_package_list(path):
+    return [item[0].replace(os.path.sep, ".") for item in os.walk(path)
+            if "__pycache__" not in item[0]]
 
 
 # parse dependencies from requirements.txt
@@ -32,7 +29,7 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
     ],
-    packages=get_package_list(("geronimo", "data_import", "oni_model")),
+    packages=get_package_list("geronimo"),
     install_requires=get_requirements(),
     extras_require={},
     entry_points={

@@ -1,5 +1,5 @@
 import unittest
-from data_import import import_wiki
+from geronimo.data_import import import_wiki
 
 
 class TestImportWiki(unittest.TestCase):

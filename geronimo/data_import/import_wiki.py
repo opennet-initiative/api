@@ -8,8 +8,8 @@ from django.contrib.gis.geos import Point
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 
-import data_import.opennet
-import oni_model.models
+import geronimo.data_import.opennet
+import geronimo.oni_model.models
 
 
 # "lambda" hilft fuer die verzoegerte Namensaufloesung der Parser-Klassen
@@ -123,17 +123,18 @@ def _parse_nodes():
 def get_node_by_main_ip_candidates(candidates):
     """ Find a matching AccessPoint with using one of the given IP addresses as its main IP """
     # transform names into IPs (string, not ipaddress)
-    candidate_ips = [str(data_import.opennet.parse_node_ip(candidate)) for candidate in candidates]
+    candidate_ips = [str(geronimo.data_import.opennet.parse_node_ip(candidate))
+                     for candidate in candidates]
     # go through the candiates and look for a matching node
     for ip in candidate_ips:
         try:
-            return (ip, oni_model.models.AccessPoint.objects.get(main_ip=ip))
+            return (ip, geronimo.oni_model.models.AccessPoint.objects.get(main_ip=ip))
         except ObjectDoesNotExist:
             pass
     # No match found? Create a new node by using the first candidate.
     main_ip = candidate_ips[0]
     print("Failed to find an existing AccessPoint with this main IP: {0}".format(main_ip))
-    node, created = oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
+    node, created = geronimo.oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
     return (main_ip, node)
 
 
@@ -149,7 +150,8 @@ def import_accesspoints_from_wiki():
         node.device_model = node_values.get("device")
         node.owner = node_values.get("owner")
         node.notes = node_values.get("notes")
-#       node.pretty_name = data_import.opennet.get_pretty_name(node)
+        # TODO: enable again?
+#       node.pretty_name = geronimo.data_import.opennet.get_pretty_name(node)
         # parse the position
         latlon = node_values.get("latlon")
         if not latlon:
@@ -179,7 +181,7 @@ def import_accesspoints_from_wiki():
 
 if __name__ == "__main__":
     import_accesspoints_from_wiki()
-    nodes = oni_model.models.AccessPoint.objects()
+    nodes = geronimo.oni_model.models.AccessPoint.objects()
     for node in nodes:
         print(repr(node))
     print(len(nodes))

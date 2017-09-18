@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from oni_model import views
+from geronimo.oni_model import views
 
 
 urlpatterns = [

@@ -12,7 +12,8 @@ import sys
 
 from django.db import transaction
 
-from oni_model.models import AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes
+from geronimo.oni_model.models import (
+    AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes)
 
 
 def _get_table_meta(conn, table):
