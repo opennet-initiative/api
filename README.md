@@ -26,3 +26,8 @@
 * http://api.opennet-initiative.de/api/v1/accesspoint/192.168.2.151/links
 * http://api.opennet-initiative.de/api/v1/link
 * http://api.opennet-initiative.de/api/v1/interface
+
+
+= Entwicklung =
+* deb-Paketerstellung: make dist-deb
+* Release erstellen: make release-{patch,minor,major}
