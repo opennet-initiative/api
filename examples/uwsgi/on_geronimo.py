@@ -1,7 +1,7 @@
 # geronimo settings
 
 # load the default settings
-from geronimo.settings import *
+from geronimo.settings import *  # noqa: F401,F403
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
