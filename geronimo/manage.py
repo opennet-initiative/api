@@ -11,7 +11,16 @@ def main_func():
 
     from django.core.management import execute_from_command_line
 
-    execute_from_command_line(sys.argv)
+    try:
+        execute_from_command_line(sys.argv)
+    except ImportError as exc:
+        if exc.name == os.environ.get("DJANGO_SETTINGS_MODULE"):
+            repo_examples_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                             os.path.pardir, "examples")
+            sys.path.insert(0, repo_examples_dir)
+            execute_from_command_line(sys.argv)
+        else:
+            raise
 
 
 if __name__ == "__main__":
