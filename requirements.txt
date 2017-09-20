@@ -1,4 +1,4 @@
-Django==1.7.7
-django-model-utils==2.2
-djangorestframework==3.1.1
-djangorestframework-gis==0.8.1
+Django
+django-model-utils
+djangorestframework
+djangorestframework-gis
