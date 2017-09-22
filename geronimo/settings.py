@@ -42,6 +42,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    )
+}
+
 ROOT_URLCONF = 'geronimo.urls'
 
 WSGI_APPLICATION = 'geronimo.wsgi.application'
