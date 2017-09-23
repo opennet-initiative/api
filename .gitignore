@@ -13,7 +13,7 @@ db.sqlite3
 # ignore tags
 tags
 
-#ignore eclipse stuff
+# ignore eclipse stuff
 .project
 .pydevproject
 .metadata/
@@ -23,8 +23,12 @@ build/
 dist/
 debian/python3-on-geronimo/
 debian/on-geronimo-api/
-geronimo.egg-info/
+on_geronimo.egg-info/
 media/
 node_modules/
 res/assets/components/
+root/
 static/
+
+# api-Freifunk-Daten werden dynamisch erzeugt
+scripts/api.freifunk.net-*.json

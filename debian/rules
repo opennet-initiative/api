@@ -1,7 +1,10 @@
 #!/usr/bin/make -f
 
 
+export DH_VERBOSE = 1
+
+
 %:
 	PYBUILD_DESTDIR=debian/python3-on-geronimo \
 		dh $@ --package python3-on-geronimo --with python3 --buildsystem=pybuild
-	dh $@ --package on-geronimo-api
+	dh $@ --package on-geronimo-api --package on-freifunk-api
