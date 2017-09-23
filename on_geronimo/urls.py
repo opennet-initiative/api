@@ -7,6 +7,6 @@ urlpatterns = [
     # url(r'^$', 'gero_api.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
 
-    url(r'^api/', include('geronimo.oni_model.urls')),
+    url(r'^api/', include('on_geronimo.oni_model.urls')),
     url(r'^admin/', include(admin.site.urls)),
 ]

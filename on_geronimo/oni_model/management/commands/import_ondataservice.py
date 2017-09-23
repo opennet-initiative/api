@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-import geronimo.data_import.import_ondataservice
+import on_geronimo.data_import.import_ondataservice
 
 
 class Command(BaseCommand):
@@ -12,4 +12,4 @@ class Command(BaseCommand):
         kwargs = {}
         if args:
             kwargs["db_file"] = args[0]
-        geronimo.data_import.import_ondataservice.import_from_ondataservice(**kwargs)
+        on_geronimo.data_import.import_ondataservice.import_from_ondataservice(**kwargs)

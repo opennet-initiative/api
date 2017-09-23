@@ -4,7 +4,7 @@
 ** django-model-utils muss in Version > 2.2 vorliegen
 * git clone git@dev.opennet-initiative.de:on_geronimo.git
 * cd on_geronimo
-* mkvirtualenv --python /usr/bin/python3 geronimo
+* mkvirtualenv --python /usr/bin/python3 on-geronimo
 * pip install -r requirements.txt
 * spatialite db.sqlite3 "SELECT InitSpatialMetaData();"
 * ./manage.py migrate

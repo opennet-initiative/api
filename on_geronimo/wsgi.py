@@ -1,5 +1,5 @@
 """
-WSGI config for geronimo project.
+WSGI config for on-geronimo project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

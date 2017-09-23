@@ -1,7 +1,7 @@
 from setuptools import setup
 import os
 
-from geronimo import VERSION
+from on_geronimo import VERSION
 
 
 # Module entsprechend PEP420 (ohne "__init__.py") werden von setuptools.find_packages nicht erkannt
@@ -19,7 +19,7 @@ def get_requirements():
 
 
 setup(
-    name="geronimo",
+    name="on-geronimo",
     # "rc1.dev1254" may be added via environment
     version=VERSION + os.environ.get("RELEASE_SUFFIX", ""),
     description="Data collector and API for a mesh network",
@@ -29,12 +29,12 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
     ],
-    packages=get_package_list("geronimo"),
+    packages=get_package_list("on_geronimo"),
     install_requires=get_requirements(),
     extras_require={},
     entry_points={
         "console_scripts": [
-            "geronimo-manage=geronimo.manage:main_func",
+            "on-geronimo-manage=on_geronimo.manage:main_func",
         ],
     },
 )

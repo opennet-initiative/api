@@ -1,5 +1,5 @@
 """
-Django settings for geronimo project.
+Django settings for on-geronimo project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/dev/topics/settings/
@@ -29,7 +29,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'rest_framework',
-    'geronimo.oni_model',
+    'on_geronimo.oni_model',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -48,9 +48,9 @@ REST_FRAMEWORK = {
     )
 }
 
-ROOT_URLCONF = 'geronimo.urls'
+ROOT_URLCONF = 'on_geronimo.urls'
 
-WSGI_APPLICATION = 'geronimo.wsgi.application'
+WSGI_APPLICATION = 'on_geronimo.wsgi.application'
 
 
 # Internationalization

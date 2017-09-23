@@ -2,7 +2,7 @@
 *.pyc
 
 # ignore currently edited files
-.*.swp
+.*.sw[op]
 
 # ignore database
 db.sqlite3
@@ -18,10 +18,10 @@ tags
 .pydevproject
 .metadata/
 
-
 # ignore grunt/bower/npm-stuff
 build/
 dist/
+debian/python3-on-geronimo/
 geronimo.egg-info/
 media/
 node_modules/

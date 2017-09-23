@@ -12,7 +12,7 @@ import sys
 
 from django.db import transaction
 
-from geronimo.oni_model.models import (
+from on_geronimo.oni_model.models import (
     AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes)
 
 

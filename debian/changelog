@@ -1,22 +1,22 @@
-geronimo (1.1.1-1) unstable; urgency=medium
+on-geronimo (1.1.1-1) unstable; urgency=medium
 
   * New upstream release
 
  -- Lars Kruse <devel@sumpfralle.de>  Wed, 20 Sep 2017 04:00:15 +0200
 
-geronimo (1.1.0-1) unstable; urgency=medium
+on-geronimo (1.1.0-1) unstable; urgency=medium
 
   * New upstream release
 
  -- Lars Kruse <devel@sumpfralle.de>  Mon, 18 Sep 2017 06:53:51 +0200
 
-geronimo (1.0-3) unstable; urgency=medium
+on-geronimo (1.0-3) unstable; urgency=medium
 
   * Add UWSGI deployment settings
 
  -- Lars Kruse <devel@sumpfralle.de>  Sun, 17 Sep 2017 04:44:54 +0200
 
-geronimo (1.0-2) unstable; urgency=medium
+on-geronimo (1.0-2) unstable; urgency=medium
 
   * Architecture: any -> all
   * add lintian overrides
@@ -25,7 +25,7 @@ geronimo (1.0-2) unstable; urgency=medium
 
  -- Lars Kruse <devel@sumpfralle.de>  Sun, 17 Sep 2017 03:51:07 +0200
 
-geronimo (1.0-1) unstable; urgency=medium
+on-geronimo (1.0-1) unstable; urgency=medium
 
   * Initial release
 
