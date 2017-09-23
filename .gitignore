@@ -22,6 +22,7 @@ tags
 build/
 dist/
 debian/python3-on-geronimo/
+debian/on-geronimo-api/
 geronimo.egg-info/
 media/
 node_modules/

@@ -7,7 +7,7 @@ import sys
 def main_func():
     settings_path = os.environ.get("ON_GERONIMO_SETTINGS_DIR", "/etc/on-geronimo")
     sys.path.insert(0, settings_path)
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.on_geronimo")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings.on_geronimo_api")
 
     from django.core.management import execute_from_command_line
 

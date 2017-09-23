@@ -1,0 +1,3 @@
+examples/apache2/on-geronimo-api.conf /etc/apache2/sites-available/
+examples/settings/on_geronimo_api.py /etc/on-geronimo/settings/
+examples/uwsgi/on-geronimo-api.ini /etc/uwsgi/apps-available/

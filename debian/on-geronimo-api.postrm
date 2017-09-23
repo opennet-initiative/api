@@ -11,6 +11,7 @@ case "$1" in
     ;;
     purge)
         deluser --remove-home "$API_USER" || true
+        rm -f /var/lib/on-geronimo/db.sqlite3
     ;;
 
     *)

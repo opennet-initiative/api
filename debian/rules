@@ -1,4 +1,7 @@
 #!/usr/bin/make -f
 
+
 %:
-	dh $@ --with python3 --buildsystem=pybuild
+	PYBUILD_DESTDIR=debian/python3-on-geronimo \
+		dh $@ --package python3-on-geronimo --with python3 --buildsystem=pybuild
+	dh $@ --package on-geronimo-api

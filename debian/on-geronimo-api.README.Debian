@@ -1,0 +1,11 @@
+This package contains configuration files for:
+ * uwsgi (provide the API internally) and
+ * apache2 (publish the API)
+
+Enable the UWSGI application:
+ ln -s ../apps-available/on-geronimo-api.ini /etc/uwsgi/apps-enabled/
+ service uwsgi restart
+
+Enable the apache2 site:
+ a2ensite on-geronimo-api.conf
+ service apache2 restart

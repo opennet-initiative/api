@@ -10,10 +10,19 @@ Vcs-Browser: http://dev.opennet-initiative.de/browser/on_geronimo
 
 Package: python3-on-geronimo
 Architecture: all
-Depends: adduser, python3, python3-pkg-resources, python3-django,
+Depends: python3, python3-pkg-resources, python3-django,
  python3-django-model-utils, python3-djangorestframework-gis,
  libsqlite3-mod-spatialite, spatialite-bin, ${misc:Depends}
+Description: Informationssammlung für die Opennet Initiative.
+ Daten werden aus verschiedenen Quellen gesammelt und können mittels
+ einer einheitlichen API für verschiedene Nutzungszwecke
+ bereitgestellt werden.
+
+Package: on-geronimo-api
+Architecture: all
+Depends: adduser, python3, python3-on-geronimo, ${misc:Depends}
 Recommends: uwsgi, uwsgi-plugin-python3
-Description: Informationssammlung und API für die Opennet Initiative.
- Daten werden aus verschiedenen Quellen gesammelt und mittels einer
- einheitlichen API für verschiedene Nutzungszwecke bereitgestellt.
+Suggests: apache2
+Description: API für die Opennet Initiative.
+ Daten der on-geronimo-Datensammlung werden mittels einer API für
+ verschiedene Nutzungszwecke bereitgestellt.
