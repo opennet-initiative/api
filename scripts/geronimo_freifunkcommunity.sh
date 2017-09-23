@@ -77,16 +77,8 @@ COMMUNITY_LIST_SOCIAL_NUM="${COMMUNITY_LIST_ARRAY[4]}"
 
 # process json template, replace variables via eval
 OUTPUT="$JSON_TMP/$JSON_NAME$COMMUNITY_LIST_KEY.json"
-TMP_OUTPUT="$OUTPUT.tmp"
-echo > "$TMP_OUTPUT"
 while read -r LINE; do
-   eval echo "$LINE" >> "$TMP_OUTPUT" 
-done < "$HOME/$JSON"
-
-# format output via jq to stdout
-jq <"$TMP_OUTPUT" "."
-
-# clear temporary files
-rm "$TMP_OUTPUT"
+   eval echo "$LINE"
+done < "$HOME/$JSON" | jq "."
 
 exit 0
