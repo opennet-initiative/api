@@ -27,12 +27,13 @@ CFG=geronimo_freifunkcommunity.cfg
 JSON=geronimo_freifunkcommunity.json
 
 # get current script dir
-HOME="$(dirname $(readlink -f "$0"))"
+HOME="$(dirname "$(readlink -f "$0")")"
 
 # prepare array
 declare -A COMMUNITY_LIST
 
 # read variables
+# shellcheck source=scripts/geronimo_freifunkcommunity.cfg
 . "$HOME/$CFG"
 
 # default json variables
@@ -53,7 +54,7 @@ if [ "$COMMUNITY_LIST_KEY" = "--batch" ]; then
     for KEY in "${!COMMUNITY_LIST[@]}"
     do
         echo -n "Processing '$KEY'.."
-	$0 "$KEY" > "$HOME/$JSON_NAME$KEY.json"
+	"$0" "$KEY" > "$HOME/$JSON_NAME$KEY.json"
         echo " done."
     done
     exit 0
@@ -78,12 +79,12 @@ COMMUNITY_LIST_SOCIAL_NUM="${COMMUNITY_LIST_ARRAY[4]}"
 OUTPUT="$JSON_TMP/$JSON_NAME$COMMUNITY_LIST_KEY.json"
 TMP_OUTPUT="$OUTPUT.tmp"
 echo > "$TMP_OUTPUT"
-while read LINE; do
+while read -r LINE; do
    eval echo "$LINE" >> "$TMP_OUTPUT" 
 done < "$HOME/$JSON"
 
 # format output via jq to stdout
-cat "$TMP_OUTPUT" | jq '.'
+jq <"$TMP_OUTPUT" "."
 
 # clear temporary files
 rm "$TMP_OUTPUT"

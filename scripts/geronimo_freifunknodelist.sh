@@ -17,15 +17,16 @@ set -eu
 CFG=geronimo_freifunknodelist.cfg
 
 # get current script dir
-HOME="$(dirname $(readlink -f "$0"))"
+HOME="$(dirname "$(readlink -f "$0")")"
 
 # read variables
+# shellcheck source=scripts/geronimo_freifunknodelist.cfg
 . "$HOME/$CFG"
 
 # process list of online nodes
 wget -q "$GERONIMO_API/nodes/online" -O "$TMP_ONLINE"
 echo "{ \"online\": " > "$TMP_OUTPUT" 
-cat "$TMP_ONLINE" | jq '[.features[] | {
+jq <"$TMP_ONLINE" '[.features[] | {
     id: .properties.id,
     name: .properties.id,
     node_type: "AccessPoint",
@@ -43,7 +44,7 @@ cat "$TMP_ONLINE" | jq '[.features[] | {
 # process list of offline nodes
 wget -q "$GERONIMO_API/nodes/offline" -O "$TMP_OFFLINE"
 echo ", \"offline\": " >> "$TMP_OUTPUT"
-cat "$TMP_OFFLINE" | jq '[.features[] | {
+jq <"$TMP_OFFLINE" | jq '[.features[] | {
     id: .properties.id,
     name: .properties.id,
     node_type: "AccessPoint",
@@ -63,18 +64,18 @@ echo "}" >> "$TMP_OUTPUT"
 date=$(date "+%Y-%m-%d %H:%M")
 echo '{
     "version": "1.0.0",
-    "updated_at": "'$date'",
+    "updated_at": "'"$date"'",
     "community": {
         "href": "https://www.opennet-initiative.de/freifunk/api.freifunk.net-nodelist.json",
         "name": "Opennet Initiative e.V."
     },
     "nodes": ' > "$TMP_RESULT"
-cat "$TMP_OUTPUT" | jq 'add' >> "$TMP_RESULT"
+jq <"$TMP_OUTPUT" 'add' >> "$TMP_RESULT"
 echo "}" >> "$TMP_RESULT"
 
 # reformat lastcontact to ISO 8601 date format
 echo "" > "$TMP_ISODATE"
-while read LINE; do
+while read -r LINE; do
   if [[ $LINE =~ .*lastcontact.* ]]
   then
     declare -a DATE="(${LINE/:/ })"
@@ -86,7 +87,7 @@ while read LINE; do
 done < "$TMP_RESULT"
 
 # output to stdout
-cat "$TMP_ISODATE" | jq '.'
+jq <"$TMP_ISODATE" "."
 
 # clear temporary files
 rm "$TMP_ONLINE"

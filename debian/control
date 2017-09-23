@@ -20,7 +20,8 @@ Description: Informationssammlung für die Opennet Initiative.
 
 Package: on-geronimo-api
 Architecture: all
-Depends: adduser, python3, python3-on-geronimo, ${misc:Depends}
+Depends: adduser, coreutils, python3, python3-on-geronimo,
+ ${misc:Depends}
 Recommends: uwsgi, uwsgi-plugin-python3
 Suggests: apache2
 Description: API für die Opennet Initiative.
