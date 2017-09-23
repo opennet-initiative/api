@@ -31,4 +31,4 @@ root/
 static/
 
 # api-Freifunk-Daten werden dynamisch erzeugt
-scripts/api.freifunk.net-*.json
+freifunk-api/api.freifunk.net-*.json

@@ -33,7 +33,7 @@ HOME="$(dirname "$(readlink -f "$0")")"
 declare -A COMMUNITY_LIST
 
 # read variables
-# shellcheck source=scripts/geronimo_freifunkcommunity.cfg
+# shellcheck source=freifunk-api/geronimo_freifunkcommunity.cfg
 . "$HOME/$CFG"
 
 # default json variables
