@@ -13,15 +13,11 @@
 # stop on error and unset variables
 set -eu
 
-# config file
-CFG=geronimo_freifunknodelist.cfg
+
+GERONIMO_API=${GERONIMO_API:-http://www.opennet-initiative.de/api/}
 
 # get current script dir
 HOME="$(dirname "$(readlink -f "$0")")"
-
-# read variables
-# shellcheck source=scripts/geronimo_freifunknodelist.cfg
-. "$HOME/$CFG"
 
 
 # Convert old API timestamps from Geronimo v1 (UTC) to ISO format
