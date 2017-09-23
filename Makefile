@@ -12,6 +12,28 @@ default: build
 build: build-freifunk-api-data
 install: install-freifunk-api-data
 clean: clean-freifunk-api-data
+help: help-on-geronimo
+
+
+.PHONY: help-on-geronimo
+help-on-geronimo:
+	@echo "on-geronimo packaging targets:"
+	@echo "    deploy-deb-remote"
+	@echo "    build-freifunk-api-data"
+	@echo "    install-freifunk-api-data"
+	@echo "    clean-freifunk-api-data"
+	@echo
+
+
+.PHONY: deploy-deb-remote
+deploy-deb-remote: dist-deb-packages-directory
+	@if [ -z "$(DEPLOY_TARGET)" ]; then \
+		echo >&2 "Missing 'DEPLOY_TARGET' environment variable (e.g. 'root@jun.on')."; \
+		exit 1; fi
+	scp "$(DIR_DEBIAN_SIMPLIFIED_PACKAGE_FILES)"/*.deb "$(DEPLOY_TARGET):/tmp/"
+	ssh "$(DEPLOY_TARGET)" \
+		'for fname in python3-on-geronimo on-geronimo-api on-freifunk-api; do \
+			dpkg -i "/tmp/$$fname.deb" && rm "/tmp/$$fname.deb" || exit 1; done'
 
 
 .PHONY: build-freifunk-api-data

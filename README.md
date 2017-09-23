@@ -1,5 +1,12 @@
 = Installationsanleitung =
 
+== Installation mit deb-Paketen ==
+
+* `make deploy-deb DEPLOY_TARGET=root@example.org`
+
+
+== Manuelle Installation ==
+
 * aptitude install virtualenvwrapper libgeos++-dev libproj-dev gdal-bin spatialite-bin python3-django-model-utils
 ** django-model-utils muss in Version > 2.2 vorliegen
 * git clone git@dev.opennet-initiative.de:on_geronimo.git
