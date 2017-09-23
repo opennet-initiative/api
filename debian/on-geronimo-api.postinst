@@ -1,12 +1,8 @@
 #!/bin/sh
-# postinst script for on-geronimo
-#
-# see: dh_installdeb(1)
 
-set -e
 
-API_USER=on-geronimo
-API_HOME=/var/lib/on-geronimo
+API_USER=on-geronimo-api
+API_HOME=/var/lib/on-geronimo-api
 
 
 case "$1" in

@@ -14,7 +14,7 @@ SECRET_KEY = "REALLY_REPLACE_THIS_KEY"
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.spatialite",
-        "NAME": "/var/lib/on-geronimo/db.sqlite3",
+        "NAME": "/var/lib/on-geronimo-api/db.sqlite3",
     }
 }
 
