@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 
 FF_API_USER=on-freifunk-api
 FF_API_HOME=/var/lib/on-freifunk-api

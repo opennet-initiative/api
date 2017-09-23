@@ -46,9 +46,9 @@ build-freifunk-api-data:
 install-freifunk-api-data:
 	install -d "$(DESTDIR)/usr/share/on-freifunk-api/public"
 	find "$(DIR_FREIFUNK_API)" -type f -name "api.freifunk.net-*" -print0 \
-		| xargs -0 install -t "$(DESTDIR)/usr/share/on-freifunk-api/public" 
+		| xargs -0 install -m 644 -t "$(DESTDIR)/usr/share/on-freifunk-api/public" 
 	install -d "$(DESTDIR)/usr/bin"
-	install "$(DIR_FREIFUNK_API)/geronimo_freifunknodelist.sh" \
+	install -m 755 "$(DIR_FREIFUNK_API)/geronimo_freifunknodelist.sh" \
 		"$(DESTDIR)/usr/bin/on-freifunk-api-update-nodelist"
 
 
