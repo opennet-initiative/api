@@ -23,76 +23,91 @@ HOME="$(dirname "$(readlink -f "$0")")"
 # shellcheck source=scripts/geronimo_freifunknodelist.cfg
 . "$HOME/$CFG"
 
-# process list of online nodes
-wget -q "$GERONIMO_API/nodes/online" -O "$TMP_ONLINE"
-echo "{ \"online\": " > "$TMP_OUTPUT" 
-jq <"$TMP_ONLINE" '[.features[] | {
-    id: .properties.id,
-    name: .properties.id,
-    node_type: "AccessPoint",
-    status: {
-        online: true,
-        lastcontact: .properties.lastonline
-    }, 
-    position: {
-        lat: .geometry.coordinates[1],
-        lon: .geometry.coordinates[0]
-    }
-  }
-]' >> "$TMP_OUTPUT"
 
-# process list of offline nodes
-wget -q "$GERONIMO_API/nodes/offline" -O "$TMP_OFFLINE"
-echo ", \"offline\": " >> "$TMP_OUTPUT"
-jq <"$TMP_OFFLINE" | jq '[.features[] | {
-    id: .properties.id,
-    name: .properties.id,
-    node_type: "AccessPoint",
-    status: {
-        online: false,
-        lastcontact: .properties.lastonline
-    }, 
-    position: {
-        lat: .geometry.coordinates[1],
-        lon: .geometry.coordinates[0]
-    	}
-  }
-]' >> "$TMP_OUTPUT"
-echo "}" >> "$TMP_OUTPUT"
+# Convert old API timestamps from Geronimo v1 (UTC) to ISO format
+# Consume JSON data (dictionary of "online" and "offline" nodes) from stdin.
+# Output result on stdout.
+#   source time format: 23.09.2017 (15:21:05)
+#   target time format: 2017-09-23T15:21:05UTC
+format_geronimo_v1_date_to_iso() {
+    python3 -c '
+import datetime
+import json
+import sys
 
-# add header and trailer
-date=$(date "+%Y-%m-%d %H:%M")
-echo '{
-    "version": "1.0.0",
-    "updated_at": "'"$date"'",
-    "community": {
-        "href": "https://www.opennet-initiative.de/freifunk/api.freifunk.net-nodelist.json",
-        "name": "Opennet Initiative e.V."
-    },
-    "nodes": ' > "$TMP_RESULT"
-jq <"$TMP_OUTPUT" 'add' >> "$TMP_RESULT"
-echo "}" >> "$TMP_RESULT"
+def date_converter(orig):
+    return datetime.datetime.strptime(orig, "%d.%m.%Y (%H:%M:%S)").isoformat() + "UTC"
 
-# reformat lastcontact to ISO 8601 date format
-echo "" > "$TMP_ISODATE"
-while read -r LINE; do
-  if [[ $LINE =~ .*lastcontact.* ]]
-  then
-    declare -a DATE="(${LINE/:/ })"
-    DATEISO=$(strptime -t -i "%d.%m.%Y (%H:%M:%S)" "${DATE[1]}" | date +%FT%T%Z)
-    echo "\"lastcontact\": \"$DATEISO\"" >> "$TMP_ISODATE"
-  else
-    echo "$LINE" >> "$TMP_ISODATE"
-  fi
-done < "$TMP_RESULT"
+nodes = json.load(sys.stdin)
+for node in nodes:
+    contact_raw = node["status"]["lastcontact"]
+    node["status"]["lastcontact"] = date_converter(contact_raw)
+print(json.dumps(nodes))'
+}
 
-# output to stdout
-jq <"$TMP_ISODATE" "."
 
-# clear temporary files
-rm "$TMP_ONLINE"
-rm "$TMP_OFFLINE"
-rm "$TMP_OUTPUT"
-rm "$TMP_RESULT"
-rm "$TMP_ISODATE"
-exit 0
+# translate the old (geronimo v1) API into the freifunk API specification
+get_geronimo_v1_nodelist() {
+    {
+        echo '{ "online": '
+        wget -q -O - "$GERONIMO_API/nodes/online" | jq '[.features[] | {
+            id: .properties.id,
+            name: .properties.id,
+            node_type: "AccessPoint",
+            status: {
+                online: true,
+                lastcontact: .properties.lastonline
+            },
+            position: {
+                lat: .geometry.coordinates[1],
+                lon: .geometry.coordinates[0]
+            }
+          }
+        ]'
+
+        # process list of offline nodes
+        echo ', "offline": '
+        wget -q -O - "$GERONIMO_API/nodes/offline" | jq '[.features[] | {
+            id: .properties.id,
+            name: .properties.id,
+            node_type: "AccessPoint",
+            status: {
+                online: false,
+                lastcontact: .properties.lastonline
+            },
+            position: {
+                lat: .geometry.coordinates[1],
+                lon: .geometry.coordinates[0]
+            }
+          }
+        ]'
+        echo "}"
+    # merge the "online" and the "offline" lists into a flat one
+    } | jq "add"
+}
+
+
+generate_json_nodelist() {
+    get_geronimo_v1_nodelist | format_geronimo_v1_date_to_iso
+}
+
+
+add_header_and_footer() {
+    local date
+    date=$(date "+%Y-%m-%d %H:%M")
+    echo '{
+        "version": "1.0.0",
+        "updated_at": "'"$date"'",
+        "community": {
+            "href": "https://www.opennet-initiative.de/freifunk/api.freifunk.net-nodelist.json",
+            "name": "Opennet Initiative e.V."
+        },
+        "nodes": '
+    # insert the generated list of nodes
+    cat
+    echo "}"
+}
+
+
+# the final "jq" adds pretty linebreaks into the JSON data
+generate_json_nodelist | add_header_and_footer | jq "."
