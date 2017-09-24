@@ -11,7 +11,7 @@ case "$1" in
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
     ;;
     purge)
-        rm -f /var/lib/on-freifunk-api/api.freifunk.net-nodelist.json
+        rm -f /var/lib/on-freifunk-api/nodelist.json
         deluser --remove-home "$FF_API_USER" || true
     ;;
 

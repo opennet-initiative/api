@@ -95,7 +95,7 @@ add_header_and_footer() {
         "version": "1.0.0",
         "updated_at": "'"$date"'",
         "community": {
-            "href": "https://www.opennet-initiative.de/freifunk/api.freifunk.net-nodelist.json",
+            "href": "https://api.opennet-initiative.de/freifunk/dynamic/nodelist.json",
             "name": "Opennet Initiative e.V."
         },
         "nodes": '
