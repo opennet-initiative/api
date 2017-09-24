@@ -1,3 +1,5 @@
 usr/bin/on-freifunk-api-update-nodelist
 usr/share/on-freifunk-api/public
 examples/apache2/on-freifunk-api.conf /etc/apache2/sites-available/
+freifunk-api/static/opennet-regionen.html /usr/share/on-freifunk-api/public/
+freifunk-api/static/opennet-regionen.json /usr/share/on-freifunk-api/public/

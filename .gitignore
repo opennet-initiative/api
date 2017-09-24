@@ -32,3 +32,4 @@ static/
 
 # api-Freifunk-Daten werden dynamisch erzeugt
 freifunk-api/api.freifunk.net-*.json
+!freifunk-api/static/
