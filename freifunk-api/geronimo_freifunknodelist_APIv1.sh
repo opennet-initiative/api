@@ -9,6 +9,9 @@
 
 # This scripts generates Freifunk Nodelist API JSON
 # see also https://wiki.opennet-initiative.de/wiki/Freifunk_API
+#
+# Data source: geronimo (v1) API
+#
 
 # stop on error and unset variables
 set -eu
