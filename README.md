@@ -29,7 +29,6 @@ pip install -r requirements.txt
 
 = API starten / aktualisieren =
 ```shell
-spatialite db.sqlite3 "SELECT InitSpatialMetaData();"
 ./manage.py migrate
 ./manage.py runserver
 ```
