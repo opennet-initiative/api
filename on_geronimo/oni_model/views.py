@@ -10,15 +10,25 @@ from on_geronimo.oni_model.serializer import (
     AccessPointSerializer, RoutingLinkSerializer, EthernetNetworkInterfaceSerializer)
 
 
-# willkuerliche Festlegungen (deutlich laenger als die jeweils typische Aktualisierungsperiode)
-EXPIRE_AGE_MINUTES = {"link": 120, "interface": 48 * 60, "accesspoint": 30 * 60}
+# nach dreißig Tagen gelten APs nicht mehr als "flapping", sondern als "offline"
+OFFLINE_AGE_MINUTES = 30 * 24 * 60
+FLAPPING_AGE_MINUTES = 30 * 60
 
 
-# bei Listen-Darstellugen filtern wir nach Alter
-def filter_by_timestamp_age(queryset, max_age_minutes, timestamp_attribute):
-    min_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=max_age_minutes)
+def filter_by_timestamp_age(queryset, timedelta_minutes, timestamp_attribute):
+    """ bei Listen-Darstellugen filtern wir nach Alter
+
+    Ein positiver "timedelta_minutes"-Wert führt zur Auslieferung von Objekten, deren Zeitstempel
+    älter als die angegebene Anzahl von Minuten ist. Ein negativer Wert liefert die Objekte aus,
+    deren Zeitstempel jünger ist (vergleichbar mit der "-mtime"-Konvention).
+    """
+    limit_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=abs(timedelta_minutes))
     # different objects use different attribute names for their timestamp
-    args = {"%s__gte" % timestamp_attribute: min_timestamp}
+    if timedelta_minutes > 0:
+        cmp_func = "lte"
+    else:
+        cmp_func = "gte"
+    args = {"%s__%s" % (timestamp_attribute, cmp_func): limit_timestamp}
     return queryset.filter(**args)
 
 
@@ -54,13 +64,27 @@ class DetailView(mixins.RetrieveModelMixin,
 
 
 class AccessPointList(ListView):
-    """Liefert eine Liste aller WLAN Accesspoints des Opennets"""
+    """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
 
     serializer_class = AccessPointSerializer
 
     def get_queryset(self):
-        return filter_by_timestamp_age(AccessPoint.objects.all(),
-                                       EXPIRE_AGE_MINUTES["accesspoint"], "lastseen_timestamp")
+        wanted_status = self.request.query_params.get('status', 'online')
+        if wanted_status == "all":
+            return AccessPoint.objects.all()
+        elif wanted_status == "online":
+            return filter_by_timestamp_age(AccessPoint.objects.all(),
+                                           -FLAPPING_AGE_MINUTES, "lastseen_timestamp")
+        elif wanted_status == "offline":
+            return filter_by_timestamp_age(AccessPoint.objects.all(),
+                                           OFFLINE_AGE_MINUTES, "lastseen_timestamp")
+        elif wanted_status == "flapping":
+            flapping_or_dead = filter_by_timestamp_age(AccessPoint.objects.all(),
+                                                       FLAPPING_AGE_MINUTES, "lastseen_timestamp")
+            return filter_by_timestamp_age(flapping_or_dead, -OFFLINE_AGE_MINUTES,
+                                           "lastseen_timestamp")
+        else:
+            return []
 
 
 class AccessPointDetail(DetailView):
@@ -77,7 +101,7 @@ class AccessPointLinksList(ListView):
 
     def get_queryset(self):
         return filter_by_timestamp_age(RoutingLink.objects.all(),
-                                       EXPIRE_AGE_MINUTES["link"], "timestamp")
+                                       -FLAPPING_AGE_MINUTES, "timestamp")
 
 
 class AccessPointLinksDetail(ListView):
@@ -88,7 +112,7 @@ class AccessPointLinksDetail(ListView):
     def get_queryset(self):
         ip = self.kwargs["ip"]
         ap = get_object_or_404(AccessPoint, main_ip=ip)
-        return filter_by_timestamp_age(ap.get_links(), EXPIRE_AGE_MINUTES["link"], "timestamp")
+        return filter_by_timestamp_age(ap.get_links(), -FLAPPING_AGE_MINUTES, "timestamp")
 
 
 class AccessPointInterfacesList(ListView):
