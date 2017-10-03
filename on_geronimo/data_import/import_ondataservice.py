@@ -207,6 +207,10 @@ def import_accesspoint(data):
 # "data" ist ein Dictionary mit den Inhalten aus der ondataservice-sqlite-Datenbank
 def import_network_interface(data):
     main_ip = data["mainip"]
+    if not data["ip_addr"]:
+        print("Skipping network interface without IP: {} -> {}".format(main_ip, data["if_name"]),
+              file=sys.stderr)
+        return
     try:
         node = AccessPoint.objects.get(main_ip=main_ip)
     except AccessPoint.DoesNotExist:
