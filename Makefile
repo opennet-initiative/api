@@ -1,3 +1,5 @@
+PYPI2DEB_PACKAGES = django-geojson
+
 # aktiviere shell-Stil-Pruefungen
 DISABLE_SHELL_CHECK =
 
