@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.gis.db import models as gismodels
+import django.contrib.gis.geos.linestring
 from model_utils.fields import StatusField
 from model_utils import Choices
 
@@ -177,7 +178,27 @@ class WifiNetworkInterfaceAttributes(models.Model):
 
 class RoutingLink(models.Model):
     """Eine Online-Verbindung zwischen Interfaces zweier APs"""
+
     timestamp = models.DateTimeField(auto_now=True)
+
+    @property
+    def quality(self):
+        result = 1.0
+        for value in (iface_link.quality for iface_link in self.endpoints.all()):
+            result *= value
+        return result
+
+    @property
+    def position(self):
+        positions = []
+        for iface_link in self.endpoints.all():
+            node = iface_link.interface.access_point
+            if node.position:
+                positions.append(node.position)
+        if len(positions) > 1:
+            return django.contrib.gis.geos.linestring.LineString(positions)
+        else:
+            return None
 
     def __str__(self):
         ip_addrs = [iface_link.interface.ip_address for iface_link in self.endpoints.all()][:2]

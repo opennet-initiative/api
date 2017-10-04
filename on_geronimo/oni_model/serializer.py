@@ -40,3 +40,4 @@ class RoutingLinkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RoutingLink
+        fields = ("endpoints", "timestamp", "quality", "position")
