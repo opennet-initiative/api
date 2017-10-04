@@ -1,6 +1,8 @@
 import datetime
+import json
 
 from django.shortcuts import get_object_or_404
+import djgeojson.serializers
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework.response import Response
@@ -63,10 +65,25 @@ class DetailView(mixins.RetrieveModelMixin,
         abstract = True
 
 
+def get_geojson_serializer_selector(non_geojson_serializer_class):
+    def wrapped(self):
+        wanted_format = self.request.query_params.get('data_format', None)
+        if wanted_format == "geojson":
+            class GeoSerializer:
+                def __init__(self, queryset, **kwargs):
+                    json_string = djgeojson.serializers.Serializer().serialize(
+                        queryset, geometry_field="position", with_modelname=False)
+                    self.data = json.loads(json_string)
+            return GeoSerializer
+        else:
+            return non_geojson_serializer_class
+    return wrapped
+
+
 class AccessPointList(ListView):
     """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
 
-    serializer_class = AccessPointSerializer
+    serializer_class = property(get_geojson_serializer_selector(AccessPointSerializer))
 
     def get_queryset(self):
         wanted_status = self.request.query_params.get('status', 'online')
@@ -97,7 +114,7 @@ class AccessPointDetail(DetailView):
 class AccessPointLinksList(ListView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
 
-    serializer_class = RoutingLinkSerializer
+    serializer_class = property(get_geojson_serializer_selector(RoutingLinkSerializer))
 
     def get_queryset(self):
         return filter_by_timestamp_age(RoutingLink.objects.all(),
