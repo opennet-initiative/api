@@ -65,14 +65,15 @@ class DetailView(mixins.RetrieveModelMixin,
         abstract = True
 
 
-def get_geojson_serializer_selector(non_geojson_serializer_class):
+def get_geojson_serializer_selector(non_geojson_serializer_class, properties=None):
     def wrapped(self):
         wanted_format = self.request.query_params.get('data_format', None)
         if wanted_format == "geojson":
             class GeoSerializer:
                 def __init__(self, queryset, **kwargs):
                     json_string = djgeojson.serializers.Serializer().serialize(
-                        queryset, geometry_field="position", with_modelname=False)
+                        queryset, geometry_field="position", properties=properties,
+                        with_modelname=False)
                     self.data = json.loads(json_string)
             return GeoSerializer
         else:
@@ -114,7 +115,9 @@ class AccessPointDetail(DetailView):
 class AccessPointLinksList(ListView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
 
-    serializer_class = property(get_geojson_serializer_selector(RoutingLinkSerializer))
+    # we need to add the non-field 'quality' (a property) manually
+    serializer_class = property(get_geojson_serializer_selector(
+        RoutingLinkSerializer, properties=("endpoints", "timestamp", "quality")))
 
     def get_queryset(self):
         return filter_by_timestamp_age(RoutingLink.objects.all(),
