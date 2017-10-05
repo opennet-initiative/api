@@ -65,6 +65,10 @@ class DetailView(mixins.RetrieveModelMixin,
         abstract = True
 
 
+def _get_model_fieldnames(model):
+    return [field.name for field in model._meta.get_fields()]
+
+
 def get_geojson_serializer_selector(non_geojson_serializer_class, properties=None):
     def wrapped(self):
         wanted_format = self.request.query_params.get('data_format', None)
@@ -84,7 +88,10 @@ def get_geojson_serializer_selector(non_geojson_serializer_class, properties=Non
 class AccessPointList(ListView):
     """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
 
-    serializer_class = property(get_geojson_serializer_selector(AccessPointSerializer))
+    # The map relies on the primary key ("main_ip") being available. GeoJSON would skip the
+    # primary key, if it is not mentioned separately.
+    serializer_class = property(get_geojson_serializer_selector(
+        AccessPointSerializer, properties=(_get_model_fieldnames(AccessPoint) + ["main_ip"])))
 
     def get_queryset(self):
         wanted_status = self.request.query_params.get('status', 'online')
@@ -117,7 +124,8 @@ class AccessPointLinksList(ListView):
 
     # we need to add the non-field 'quality' (a property) manually
     serializer_class = property(get_geojson_serializer_selector(
-        RoutingLinkSerializer, properties=("endpoints", "timestamp", "quality")))
+        RoutingLinkSerializer,
+        properties=(_get_model_fieldnames(RoutingLink) + ["quality"])))
 
     def get_queryset(self):
         return filter_by_timestamp_age(RoutingLink.objects.all(),
