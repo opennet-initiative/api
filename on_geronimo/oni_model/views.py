@@ -125,7 +125,7 @@ class AccessPointLinksList(ListView):
     # we need to add the non-field 'quality' (a property) manually
     serializer_class = property(get_geojson_serializer_selector(
         RoutingLinkSerializer,
-        properties=(_get_model_fieldnames(RoutingLink) + ["quality"])))
+        properties=(_get_model_fieldnames(RoutingLink) + ["quality", "wifi_ssid"])))
 
     def get_queryset(self):
         return filter_by_timestamp_age(RoutingLink.objects.all(),

@@ -182,6 +182,15 @@ class RoutingLink(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
 
     @property
+    def wifi_ssid(self):
+        for iface_link in self.endpoints.all():
+            for wifi_settings in iface_link.interface.wifi_attributes.all():
+                if wifi_settings.wifi_ssid:
+                    return wifi_settings.wifi_ssid
+        else:
+            return None
+
+    @property
     def quality(self):
         result = 1.0
         for value in (iface_link.quality for iface_link in self.endpoints.all()):
