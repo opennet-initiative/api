@@ -13,8 +13,9 @@ from on_geronimo.oni_model.serializer import (
 
 
 # nach dreißig Tagen gelten APs nicht mehr als "flapping", sondern als "offline"
+# Vorsicht: Werte synchron halten mit der "flapping"-Unterscheidung im der on-map-Kartendarstellung
 OFFLINE_AGE_MINUTES = 30 * 24 * 60
-FLAPPING_AGE_MINUTES = 30 * 60
+FLAPPING_AGE_MINUTES = 30
 
 
 def filter_by_timestamp_age(queryset, timedelta_minutes, timestamp_attribute):
