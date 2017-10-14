@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 import djgeojson.serializers
 from rest_framework import generics
 from rest_framework import mixins
+from rest_framework.filters import BaseFilterBackend
 from rest_framework.response import Response
 
 from on_geronimo.oni_model.models import (AccessPoint, RoutingLink, EthernetNetworkInterface)
@@ -16,23 +17,6 @@ from on_geronimo.oni_model.serializer import (
 # Vorsicht: Werte synchron halten mit der "flapping"-Unterscheidung im der on-map-Kartendarstellung
 OFFLINE_AGE_MINUTES = 30 * 24 * 60
 FLAPPING_AGE_MINUTES = 30
-
-
-def filter_by_timestamp_age(queryset, timedelta_minutes, timestamp_attribute):
-    """ bei Listen-Darstellugen filtern wir nach Alter
-
-    Ein positiver "timedelta_minutes"-Wert führt zur Auslieferung von Objekten, deren Zeitstempel
-    älter als die angegebene Anzahl von Minuten ist. Ein negativer Wert liefert die Objekte aus,
-    deren Zeitstempel jünger ist (vergleichbar mit der "-mtime"-Konvention).
-    """
-    limit_timestamp = datetime.datetime.now() - datetime.timedelta(minutes=abs(timedelta_minutes))
-    # different objects use different attribute names for their timestamp
-    if timedelta_minutes > 0:
-        cmp_func = "lte"
-    else:
-        cmp_func = "gte"
-    args = {"%s__%s" % (timestamp_attribute, cmp_func): limit_timestamp}
-    return queryset.filter(**args)
 
 
 # abstract classes
@@ -80,31 +64,59 @@ def get_geojson_serializer_selector(non_geojson_serializer_class, properties=Non
     return wrapped
 
 
-class AccessPointList(ListView):
-    """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
+class OnlineStatusFilter(BaseFilterBackend):
+    """ filter objects by the a timestamp attribute into all/online/flapping/offline categories
 
-    # The map relies on the primary key ("main_ip") being available. GeoJSON would skip the
-    # primary key, if it is not mentioned separately.
-    serializer_class = property(get_geojson_serializer_selector(
-        AccessPointSerializer, properties=(_get_model_fieldnames(AccessPoint) + ["main_ip"])))
+    Query arguments:
+        * status: online/flapping/offline
+    Attributes:
+        * last_online_timestamp_field: name of the timestamp field (default: "timestamp")
+    """
 
-    def get_queryset(self):
-        wanted_status = self.request.query_params.get('status', 'online')
+    def _filter_by_timestamp_age(self, queryset, timedelta_minutes, timestamp_attribute):
+        """ bei Listen-Darstellugen filtern wir nach Alter
+
+        Ein positiver "timedelta_minutes"-Wert führt zur Auslieferung von Objekten, deren
+        Zeitstempel älter als die angegebene Anzahl von Minuten ist. Ein negativer Wert liefert die
+        Objekte aus, deren Zeitstempel jünger ist (vergleichbar mit der "-mtime"-Konvention).
+        """
+        limit_timestamp = datetime.datetime.now() - datetime.timedelta(
+            minutes=abs(timedelta_minutes))
+        # different objects use different attribute names for their timestamp
+        if timedelta_minutes > 0:
+            cmp_func = "lte"
+        else:
+            cmp_func = "gte"
+        args = {"%s__%s" % (timestamp_attribute, cmp_func): limit_timestamp}
+        return queryset.filter(**args)
+
+    def filter_queryset(self, request, queryset, view):
+        wanted_status = request.query_params.get('status', 'online')
+        timestamp_field = getattr(view, "last_online_timestamp_field", "timestamp")
         if wanted_status == "all":
-            return AccessPoint.objects.all()
+            return queryset
         elif wanted_status == "online":
-            return filter_by_timestamp_age(AccessPoint.objects.all(),
-                                           -FLAPPING_AGE_MINUTES, "lastseen_timestamp")
+            return self._filter_by_timestamp_age(
+                queryset, -FLAPPING_AGE_MINUTES, timestamp_field)
         elif wanted_status == "offline":
-            return filter_by_timestamp_age(AccessPoint.objects.all(),
-                                           OFFLINE_AGE_MINUTES, "lastseen_timestamp")
+            return self._filter_by_timestamp_age(
+                queryset, OFFLINE_AGE_MINUTES, timestamp_field)
         elif wanted_status == "flapping":
-            flapping_or_dead = filter_by_timestamp_age(AccessPoint.objects.all(),
-                                                       FLAPPING_AGE_MINUTES, "lastseen_timestamp")
-            return filter_by_timestamp_age(flapping_or_dead, -OFFLINE_AGE_MINUTES,
-                                           "lastseen_timestamp")
+            flapping_or_dead = self._filter_by_timestamp_age(
+                queryset, FLAPPING_AGE_MINUTES, timestamp_field)
+            return self._filter_by_timestamp_age(
+                flapping_or_dead, -OFFLINE_AGE_MINUTES, timestamp_field)
         else:
             return []
+
+
+class AccessPointList(generics.ListAPIView):
+    """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
+
+    serializer_class = AccessPointSerializer
+    filter_backends = (OnlineStatusFilter, )
+    queryset = AccessPoint.objects.all()
+    last_online_timestamp_field = "lastseen_timestamp"
 
 
 class AccessPointDetail(DetailView):
@@ -114,31 +126,27 @@ class AccessPointDetail(DetailView):
     serializer_class = AccessPointSerializer
 
 
-class AccessPointLinksList(ListView):
+class AccessPointLinksList(generics.ListAPIView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
 
-    # we need to add the non-field 'quality' (a property) manually
-    serializer_class = property(get_geojson_serializer_selector(
-        RoutingLinkSerializer,
-        properties=(_get_model_fieldnames(RoutingLink) + ["quality", "wifi_ssid"])))
-
-    def get_queryset(self):
-        return filter_by_timestamp_age(RoutingLink.objects.all(),
-                                       -FLAPPING_AGE_MINUTES, "timestamp")
+    serializer_class = RoutingLinkSerializer
+    filter_backends = (OnlineStatusFilter, )
+    queryset = RoutingLink.objects.all()
 
 
-class AccessPointLinksDetail(ListView):
+class AccessPointLinksDetail(generics.ListAPIView):
     """Alle Links zu diesem WLAN Accesspoints des Opennets"""
 
     serializer_class = RoutingLinkSerializer
+    filter_backends = (OnlineStatusFilter, )
 
     def get_queryset(self):
         ip = self.kwargs["ip"]
         ap = get_object_or_404(AccessPoint, main_ip=ip)
-        return filter_by_timestamp_age(ap.get_links(), -FLAPPING_AGE_MINUTES, "timestamp")
+        return ap.get_links()
 
 
-class AccessPointInterfacesList(ListView):
+class AccessPointInterfacesList(generics.ListAPIView):
     """Liefert eine Liste aller Interfaces von Accesspoints des Opennets"""
 
     serializer_class = EthernetNetworkInterfaceSerializer
