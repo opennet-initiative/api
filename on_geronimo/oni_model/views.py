@@ -7,6 +7,7 @@ from rest_framework import generics
 from rest_framework import mixins
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.response import Response
+from rest_framework_gis.filters import InBBoxFilter
 
 from on_geronimo.oni_model.models import (AccessPoint, RoutingLink, EthernetNetworkInterface)
 from on_geronimo.oni_model.serializer import (
@@ -115,7 +116,8 @@ class AccessPointList(generics.ListAPIView, GeoJSONListAPIView):
     # The map relies on the primary key ("main_ip") being available. GeoJSON would skip the
     # primary key, if it is not mentioned separately.
     geojson_serializer_fields = _get_model_fieldnames(AccessPoint) + ["main_ip"]
-    filter_backends = (OnlineStatusFilter, )
+    bbox_filter_field = 'position'
+    filter_backends = (InBBoxFilter, OnlineStatusFilter)
     queryset = AccessPoint.objects.all()
     last_online_timestamp_field = "lastseen_timestamp"
 
