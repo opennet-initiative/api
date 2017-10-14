@@ -35,20 +35,31 @@ def _get_model_fieldnames(model):
     return [field.name for field in model._meta.get_fields()]
 
 
-def get_geojson_serializer_selector(non_geojson_serializer_class, properties=None):
-    def wrapped(self):
+class GeoJSONListAPIView:
+    """ select a GeoJSON serializer if the query argument 'data_format' is 'geojson'
+
+    Query arguments:
+        * data_format: "geojson" or something else
+    Attributes:
+        * geojson_serializer_fields: list of fields to be copied to the feature properties
+        * serializer_class: the fallback serialer class (to be used if geojson is not requested)
+    """
+
+    def get_serializer_class(self):
         wanted_format = self.request.query_params.get('data_format', None)
         if wanted_format == "geojson":
+            feature_properties = self.geojson_serializer_fields
+
             class GeoSerializer:
                 def __init__(self, queryset, **kwargs):
                     json_string = djgeojson.serializers.Serializer().serialize(
-                        queryset, geometry_field="position", properties=properties,
+                        queryset, geometry_field="position", properties=feature_properties,
                         with_modelname=False)
                     self.data = json.loads(json_string)
+
             return GeoSerializer
         else:
-            return non_geojson_serializer_class
-    return wrapped
+            return self.serializer_class
 
 
 class OnlineStatusFilter(BaseFilterBackend):
@@ -97,10 +108,13 @@ class OnlineStatusFilter(BaseFilterBackend):
             return []
 
 
-class AccessPointList(generics.ListAPIView):
+class AccessPointList(generics.ListAPIView, GeoJSONListAPIView):
     """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
 
     serializer_class = AccessPointSerializer
+    # The map relies on the primary key ("main_ip") being available. GeoJSON would skip the
+    # primary key, if it is not mentioned separately.
+    geojson_serializer_fields = _get_model_fieldnames(AccessPoint) + ["main_ip"]
     filter_backends = (OnlineStatusFilter, )
     queryset = AccessPoint.objects.all()
     last_online_timestamp_field = "lastseen_timestamp"
@@ -113,10 +127,12 @@ class AccessPointDetail(DetailView):
     serializer_class = AccessPointSerializer
 
 
-class AccessPointLinksList(generics.ListAPIView):
+class AccessPointLinksList(generics.ListAPIView, GeoJSONListAPIView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
 
     serializer_class = RoutingLinkSerializer
+    # we need to add non-fields (properties) manually
+    geojson_serializer_fields = _get_model_fieldnames(RoutingLink) + ["quality", "wifi_ssid"]
     filter_backends = (OnlineStatusFilter, )
     queryset = RoutingLink.objects.all()
 
