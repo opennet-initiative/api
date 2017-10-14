@@ -146,7 +146,7 @@ class AccessPointLinksDetail(generics.ListAPIView):
     filter_backends = (OnlineStatusFilter, )
 
     def get_queryset(self):
-        ip = self.kwargs["ip"]
+        ip = self.kwargs["pk"]
         ap = get_object_or_404(AccessPoint, main_ip=ip)
         return ap.get_links()
 
