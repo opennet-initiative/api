@@ -43,9 +43,6 @@ class ListView(mixins.ListModelMixin,
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
     # make this an uninstanceable class
     class Meta:
         abstract = True
@@ -54,9 +51,6 @@ class ListView(mixins.ListModelMixin,
 class DetailView(mixins.RetrieveModelMixin,
                  mixins.UpdateModelMixin,
                  generics.GenericAPIView):
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
