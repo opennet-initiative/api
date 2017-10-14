@@ -1,13 +1,13 @@
 import datetime
-import json
 
 from django.shortcuts import get_object_or_404
-import djgeojson.serializers
 from rest_framework import generics
 from rest_framework import mixins
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.response import Response
+from rest_framework_gis.fields import GeometryField
 from rest_framework_gis.filters import InBBoxFilter
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from on_geronimo.oni_model.models import (AccessPoint, RoutingLink, EthernetNetworkInterface)
 from on_geronimo.oni_model.serializer import (
@@ -32,31 +32,43 @@ class DetailView(mixins.RetrieveModelMixin,
         abstract = True
 
 
-def _get_model_fieldnames(model):
-    return [field.name for field in model._meta.get_fields()]
-
-
-class GeoJSONListAPIView:
+class GeoJSONListAPIView(generics.ListAPIView):
     """ select a GeoJSON serializer if the query argument 'data_format' is 'geojson'
 
     Query arguments:
         * data_format: "geojson" or something else
     Attributes:
-        * geojson_serializer_fields: list of fields to be copied to the feature properties
+        * geojson_base_model: the django model of the objects to be rendered
+        * geojson_serializer_extra_fields: list of additional fields to be copied to the feature
+          properties (besides the fields of the base model)
         * serializer_class: the fallback serialer class (to be used if geojson is not requested)
     """
 
     def get_serializer_class(self):
         wanted_format = self.request.query_params.get('data_format', None)
         if wanted_format == "geojson":
-            feature_properties = self.geojson_serializer_fields
+            feature_fields = []
+            ignore_fields = getattr(self, "geojson_serializer_ignore_fields", [])
+            for field in self.geojson_base_model._meta.get_fields():
+                if field.name not in ignore_fields:
+                    feature_fields.append(field.name)
+            feature_fields.extend(self.geojson_serializer_extra_fields)
 
-            class GeoSerializer:
-                def __init__(self, queryset, **kwargs):
-                    json_string = djgeojson.serializers.Serializer().serialize(
-                        queryset, geometry_field="position", properties=feature_properties,
-                        with_modelname=False)
-                    self.data = json.loads(json_string)
+            class GeoSerializer(GeoFeatureModelSerializer):
+                class Meta:
+                    model = self.geojson_base_model
+                    geo_field = "position"
+                    fields = feature_fields
+
+                def to_representation(self, instance):
+                    result = super().to_representation(instance)
+                    if not isinstance(result["geometry"], dict):
+                        # The "position" was just dumped (being a stupid property). We need to
+                        # turn it into the geojson format.
+                        position = getattr(instance, self.Meta.geo_field)
+                        if position:
+                            result["geometry"] = GeometryField().to_representation(position)
+                    return result
 
             return GeoSerializer
         else:
@@ -109,13 +121,15 @@ class OnlineStatusFilter(BaseFilterBackend):
             return []
 
 
-class AccessPointList(generics.ListAPIView, GeoJSONListAPIView):
+class AccessPointList(GeoJSONListAPIView):
     """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
 
     serializer_class = AccessPointSerializer
+    geojson_base_model = AccessPoint
     # The map relies on the primary key ("main_ip") being available. GeoJSON would skip the
     # primary key, if it is not mentioned separately.
-    geojson_serializer_fields = _get_model_fieldnames(AccessPoint) + ["main_ip"]
+    geojson_serializer_extra_fields = ["main_ip"]
+    geojson_serializer_ignore_fields = ["interfaces"]
     bbox_filter_field = 'position'
     filter_backends = (InBBoxFilter, OnlineStatusFilter)
     queryset = AccessPoint.objects.all()
@@ -129,12 +143,13 @@ class AccessPointDetail(DetailView):
     serializer_class = AccessPointSerializer
 
 
-class AccessPointLinksList(generics.ListAPIView, GeoJSONListAPIView):
+class AccessPointLinksList(GeoJSONListAPIView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
 
     serializer_class = RoutingLinkSerializer
+    geojson_base_model = RoutingLink
     # we need to add non-fields (properties) manually
-    geojson_serializer_fields = _get_model_fieldnames(RoutingLink) + ["quality", "wifi_ssid"]
+    geojson_serializer_extra_fields = ["quality", "wifi_ssid"]
     filter_backends = (OnlineStatusFilter, )
     queryset = RoutingLink.objects.all()
 
