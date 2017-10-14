@@ -19,19 +19,6 @@ OFFLINE_AGE_MINUTES = 30 * 24 * 60
 FLAPPING_AGE_MINUTES = 30
 
 
-# abstract classes
-class ListView(mixins.ListModelMixin,
-               mixins.CreateModelMixin,
-               generics.GenericAPIView):
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-
-    # make this an uninstanceable class
-    class Meta:
-        abstract = True
-
-
 class DetailView(mixins.RetrieveModelMixin,
                  mixins.UpdateModelMixin,
                  generics.GenericAPIView):
@@ -171,10 +158,15 @@ class NetworkInterfaceAccessPoint(DetailView):
         return Response(self.serializer_class(interface.access_point).data)
 
 
-class AccessPointInterfacesDetail(ListView):
+class AccessPointInterfacesDetail(mixins.ListModelMixin,
+                                  mixins.CreateModelMixin,
+                                  generics.GenericAPIView):
     """Alle Interfaces eines Accesspoints des Opennets"""
 
     serializer_class = EthernetNetworkInterfaceSerializer
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
     def retrieve(self, request, ip_address=None):
         ap = get_object_or_404(AccessPoint, main_ip=ip_address)
