@@ -9,7 +9,8 @@ from rest_framework_gis.fields import GeometryField
 from rest_framework_gis.filters import InBBoxFilter
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from on_geronimo.oni_model.models import (AccessPoint, RoutingLink, EthernetNetworkInterface)
+from on_geronimo.oni_model.models import (
+    AccessPoint, EthernetNetworkInterface, InterfaceRoutingLink, RoutingLink)
 from on_geronimo.oni_model.serializer import (
     AccessPointSerializer, RoutingLinkSerializer, EthernetNetworkInterfaceSerializer)
 
@@ -71,6 +72,12 @@ class GeoJSONListAPIView(generics.ListAPIView):
                         position = getattr(instance, self.Meta.geo_field)
                         if position:
                             result["geometry"] = GeometryField().to_representation(position)
+                    # replace numeric AccessPoint IDs with "main_ip"
+                    if "endpoints" in result["properties"]:
+                        endpoints = result["properties"]["endpoints"]
+                        for index, iface_link_id in enumerate(endpoints):
+                            endpoints[index] = InterfaceRoutingLink.objects.get(
+                                pk=iface_link_id).interface.access_point.main_ip
                     return result
 
             return GeoSerializer
