@@ -59,6 +59,9 @@ class GeoJSONListAPIView(generics.ListAPIView):
                     model = self.geojson_base_model
                     geo_field = "position"
                     fields = feature_fields
+                    # We do not want GeoFeatureModelSerializer to "consume" the "main_ip" field
+                    # while filling the (unnecessary) "id" attribute.
+                    id_field = None
 
                 def to_representation(self, instance):
                     result = super().to_representation(instance)
