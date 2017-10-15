@@ -40,4 +40,4 @@ class RoutingLinkSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RoutingLink
-        fields = ("endpoints", "timestamp", "position", "quality", "wifi_ssid")
+        fields = ("endpoints", "timestamp", "position", "quality", "wifi_ssid", "is_wireless")

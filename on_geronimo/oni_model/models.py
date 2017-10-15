@@ -218,6 +218,13 @@ class RoutingLink(models.Model):
         else:
             return None
 
+    @property
+    def is_wireless(self):
+        for iface_link in self.endpoints.all():
+            if iface_link.interface.is_wireless():
+                return True
+        return False
+
     def __str__(self):
         ip_addrs = [iface_link.interface.ip_address for iface_link in self.endpoints.all()][:2]
         return "RoutingLink: %s <-> %s" % tuple(ip_addrs)

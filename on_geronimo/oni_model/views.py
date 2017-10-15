@@ -149,7 +149,7 @@ class AccessPointLinksList(GeoJSONListAPIView):
     serializer_class = RoutingLinkSerializer
     geojson_base_model = RoutingLink
     # we need to add non-fields (properties) manually
-    geojson_serializer_extra_fields = ["quality", "wifi_ssid"]
+    geojson_serializer_extra_fields = ["quality", "wifi_ssid", "is_wireless"]
     filter_backends = (OnlineStatusFilter, )
     queryset = RoutingLink.objects.all()
 
