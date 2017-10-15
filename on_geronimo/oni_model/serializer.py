@@ -22,7 +22,7 @@ class EthernetNetworkInterfaceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EthernetNetworkInterface
-        fields = ("ip_address", "if_name", "is_wifi", "wifi_attributes")
+        fields = ("ip_address", "if_name", "is_wireless", "wifi_attributes")
 
 
 class InterfaceRoutingLinkSerializer(serializers.ModelSerializer):
