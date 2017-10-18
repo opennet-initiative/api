@@ -6,6 +6,7 @@
 """
 
 import datetime
+import ipaddress
 import re
 import sqlite3
 import sys
@@ -13,7 +14,7 @@ import sys
 from django.db import transaction
 
 from on_geronimo.oni_model.models import (
-    AccessPoint, EthernetNetworkInterface, WifiNetworkInterfaceAttributes)
+    AccessPoint, NetworkInterfaceAddress, EthernetNetworkInterface, WifiNetworkInterfaceAttributes)
 
 
 def _get_table_meta(conn, table):
@@ -207,7 +208,11 @@ def import_accesspoint(data):
 # "data" ist ein Dictionary mit den Inhalten aus der ondataservice-sqlite-Datenbank
 def import_network_interface(data):
     main_ip = data["mainip"]
-    if not data["ip_addr"]:
+    # mehrere IP-Adressen sind zulaessig: "192.168.3.88/16 fe80::32b5:c2ff:fe3e:8736/64"
+    addresses = []
+    for address_string in data.pop("ip_addr").split():
+        addresses.append(ipaddress.ip_interface(address_string))
+    if not addresses:
         print("Skipping network interface without IP: {} -> {}".format(main_ip, data["if_name"]),
               file=sys.stderr)
         return
@@ -216,23 +221,44 @@ def import_network_interface(data):
     except AccessPoint.DoesNotExist:
         # wir legen keine Netzwerk-Interfaces fuer APs an, die noch nicht in der Datenbank sind
         return
-    # Wir verwenden fuer wlan-Interfaces eine separate Klasse und weitere Attribute fuer
-    # wifi-Interfaces.
-    try:
-        interface = EthernetNetworkInterface.objects.get(access_point=node,
-                                                         if_name=data["if_name"])
-    except EthernetNetworkInterface.DoesNotExist:
-        interface = EthernetNetworkInterface.objects.create(access_point=node,
-                                                            ip_address=data["ip_addr"])
+    # Versuche ein Interface zu finden, das zur main_ip und mindestens einer der gegebenen Adressen
+    # passt.
+    matching_interfaces = set()
+    for address in addresses:
+        match = EthernetNetworkInterface.objects.filter(access_point=node).filter(
+            EthernetNetworkInterface.get_filter_for_ipaddress(address))
+        if match:
+            matching_interfaces.add(match.first())
+    if not matching_interfaces:
+        interface = EthernetNetworkInterface.objects.create(access_point=node)
+    elif len(matching_interfaces) == 1:
+        interface = matching_interfaces.pop()
+    else:
+        # es gibt mehr als ein passendes Interface
+        # Sortiere Interfaces nach: "Name ist falsch" und "Name" (False, "eth0")
+        # Wir wählen dann das erste Interface aus dieser Sortierung. Dies garantiert im Zweifel
+        # eine stabile Auswahl desselben Interface-Objects.
+        interface = sorted(matching_interfaces,
+                           key=lambda item: (item.if_name != data["if_name"], item.if_name))[0]
+    active_address_objects = set()
+    for address in addresses:
+        match = NetworkInterfaceAddress.objects.filter(interface=interface).filter(
+            NetworkInterfaceAddress.get_filter_for_ipaddress(address))
+        if match:
+            address_object = match.first()
+        else:
+            address_object = NetworkInterfaceAddress.create_with_ipaddress(interface, address)
+        active_address_objects.add(address_object)
+    # remove unused addresses
+    for address_obj in interface.addresses.all():
+        if address_obj not in active_address_objects:
+            address_obj.delete()
     # Uebertragung von sqlite-Eintraegen in unser Modell
     for key_from, key_to in {
                 "if_name": "if_name",
                 "if_type_bridge": "if_is_bridge",
                 "if_type_bridgedif": "if_is_bridged",
                 "if_hwaddr": "if_hwaddress",
-                "ip_label": "ip_label",
-                "ip_addr": "ip_address",
-                "ip_broadcast": "ip_broadcast",
                 "on_networks": "opennet_networks",
                 "on_zones": "opennet_firewall_zones",
                 "on_olsr": "olsr_enabled",

@@ -13,9 +13,9 @@ urlpatterns = [
     url(r'^v1/accesspoint/(?P<pk>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))/links/$',
         views.AccessPointLinksDetail.as_view()),
     url(r'^v1/interface/$', views.AccessPointInterfacesList.as_view()),
-    url(r'^v1/interface/(?P<ip_address>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))$',
+    url(r'^v1/interface/(?P<addresses__address>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))$',
         views.NetworkInterfaceDetail.as_view()),
-    url(r'^v1/interface/(?P<ip_address>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))/accesspoint/$',
+    url(r'^v1/interface/(?P<addresses__address>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))/accesspoint/$',
         views.NetworkInterfaceAccessPoint.as_view()),
     url(r'^v1/link/$', cache_page(150)(views.AccessPointLinksList.as_view())),
 ]

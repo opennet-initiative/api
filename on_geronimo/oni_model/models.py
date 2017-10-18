@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.query_utils import Q
 from django.contrib.gis.db import models as gismodels
 import django.contrib.gis.geos.linestring
 from model_utils.fields import StatusField
@@ -86,9 +87,6 @@ class EthernetNetworkInterface(models.Model):
     if_is_bridge = models.BooleanField(default=False)
     if_is_bridged = models.BooleanField(default=False)
     if_hwaddress = models.TextField(null=True)
-    ip_label = models.TextField(null=True)
-    ip_address = models.GenericIPAddressField()
-    ip_broadcast = models.GenericIPAddressField(null=True)
     opennet_networks = models.TextField(null=True)
     opennet_firewall_zones = models.TextField(null=True)
     olsr_enabled = models.BooleanField(default=False)
@@ -153,11 +151,47 @@ class EthernetNetworkInterface(models.Model):
                     return True
         return False
 
+    @classmethod
+    def get_filter_for_ipaddress(cls, address_obj):
+        family = NetworkInterfaceAddress.get_address_family_from_ipaddress(address_obj)
+        return Q(addresses__address=str(address_obj.ip),
+                 addresses__family=family,
+                 addresses__netmask_prefixlen=address_obj.network.prefixlen)
+
     def __unicode__(self):
-        return 'Interface %s of AP %s' % (self.ip_address, self.access_point.main_ip)
+        return 'Interface %s of AP %s' % ((addr.address for addr in self.addresses.all()),
+                                          self.access_point.main_ip)
 
     def __str__(self):
         return self.__unicode__()
+
+
+class NetworkInterfaceAddress(models.Model):
+
+    ADRESS_FAMILIES = (("inet", "IPv4"), ("inet6", "IPv6"))
+
+    # TODO: enthaelt das Django-Datenmodell bereits die Address-Family?
+    address = models.GenericIPAddressField()
+    family = StatusField(choices_name='ADRESS_FAMILIES')
+    interface = models.ForeignKey(EthernetNetworkInterface, related_name="addresses")
+    netmask_prefixlen = models.IntegerField()
+
+    @classmethod
+    def get_address_family_from_ipaddress(cls, address_obj):
+        return {4: "inet", 6: "inet6"}[address_obj.version]
+
+    @classmethod
+    def create_with_ipaddress(cls, interface, address_obj):
+        family = cls.get_address_family_from_ipaddress(address_obj)
+        return cls.objects.create(interface=interface, address=str(address_obj.ip), family=family,
+                                  netmask_prefixlen=address_obj.network.prefixlen)
+
+    @classmethod
+    def get_filter_for_ipaddress(cls, address_obj):
+        family = cls.get_address_family_from_ipaddress(address_obj)
+        return Q(address=str(address_obj.ip),
+                 family=family,
+                 netmask_prefixlen=address_obj.network.prefixlen)
 
 
 class WifiNetworkInterfaceAttributes(models.Model):
@@ -226,8 +260,9 @@ class RoutingLink(models.Model):
         return False
 
     def __str__(self):
-        ip_addrs = [iface_link.interface.ip_address for iface_link in self.endpoints.all()][:2]
-        return "RoutingLink: %s <-> %s" % tuple(ip_addrs)
+        ip_addrs = [iface_link.interface.addresses.first()
+                    for iface_link in self.endpoints.all()][:2]
+        return "RoutingLink: {}".format(ip_addrs)
 
 
 class InterfaceRoutingLink(models.Model):
