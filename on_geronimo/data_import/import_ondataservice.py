@@ -211,7 +211,11 @@ def import_network_interface(data):
     # mehrere IP-Adressen sind zulaessig: "192.168.3.88/16 fe80::32b5:c2ff:fe3e:8736/64"
     addresses = []
     for address_string in data.pop("ip_addr").split():
-        addresses.append(ipaddress.ip_interface(address_string))
+        address_obj = ipaddress.ip_interface(address_string)
+        if (not address_obj.is_link_local
+                and not address_obj.is_loopback
+                and not address_obj.is_multicast):
+            addresses.append(address_obj)
     if not addresses:
         print("Skipping network interface without IP: {} -> {}".format(main_ip, data["if_name"]),
               file=sys.stderr)
