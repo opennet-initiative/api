@@ -70,7 +70,7 @@ class AccessPoint(models.Model):
     opennet_vpn_mesh_gateway_names = models.TextField(null=True)
 
     def get_links(self):
-        return RoutingLink.objects.filter(endpoints__interface__access_point=self)
+        return RoutingLink.objects.filter(endpoints__interface__accesspoint=self)
 
     def __unicode__(self):
         return 'AP %s owned by %s' % (self.main_ip, self.owner)
@@ -81,7 +81,7 @@ class AccessPoint(models.Model):
 
 class EthernetNetworkInterface(models.Model):
     """Eine der Kabelschnittstellen eines APs"""
-    access_point = models.ForeignKey(AccessPoint, related_name="interfaces")
+    accesspoint = models.ForeignKey(AccessPoint, related_name="interfaces")
 
     if_name = models.CharField(max_length=128, null=True)
     if_is_bridge = models.BooleanField(default=False)
@@ -160,7 +160,7 @@ class EthernetNetworkInterface(models.Model):
 
     def __unicode__(self):
         return 'Interface %s of AP %s' % ((addr.address for addr in self.addresses.all()),
-                                          self.access_point.main_ip)
+                                          self.accesspoint.main_ip)
 
     def __str__(self):
         return self.__unicode__()
@@ -244,7 +244,7 @@ class RoutingLink(models.Model):
     def position(self):
         positions = []
         for iface_link in self.endpoints.all():
-            node = iface_link.interface.access_point
+            node = iface_link.interface.accesspoint
             if node.position:
                 positions.append(node.position)
         if len(positions) > 1:

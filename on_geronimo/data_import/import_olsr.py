@@ -57,7 +57,7 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
                 ap, created = AccessPoint.objects.get_or_create(main_ip=ip_address)
                 if created:
                     print("Created new AP %s" % ip_address)
-                interface = EthernetNetworkInterface.objects.create(access_point=ap)
+                interface = EthernetNetworkInterface.objects.create(accesspoint=ap)
                 address_object = NetworkInterfaceAddress.create_with_ipaddress(
                     interface,
                     ipaddress.ip_interface("{}/{:d}".format(ip_address, NETMASK_PREFIXLEN)))
@@ -79,7 +79,7 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
         for ip_address in (last_hop_ip, destination_ip):
             interface = EthernetNetworkInterface.objects.filter(
                 addresses__address=ip_address).first()
-            ap = interface.access_point
+            ap = interface.accesspoint
             ap.lastseen_timestamp = datetime.datetime.now(datetime.timezone.utc)
             ap.save()
 
@@ -94,7 +94,7 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
         # Pruefung, ob diese IP-Adresse auch zu einem anderen Objekt gehoert
         found_interface = None
         for interface in EthernetNetworkInterface.objects.filter(addresses__address=main_ip):
-            if interface.access_point.main_ip != main_ip:
+            if interface.accesspoint.main_ip != main_ip:
                 print("Removing duplicate Network Interface: %s" % str(interface))
                 interface.delete()
             else:
@@ -106,7 +106,7 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
             ap, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
             if created:
                 print("Created new AP %s" % main_ip)
-            interface = EthernetNetworkInterface.objects.create(access_point=ap)
+            interface = EthernetNetworkInterface.objects.create(accesspoint=ap)
             address_object = NetworkInterfaceAddress.create_with_ipaddress(
                 interface, ipaddress.ip_interface("{}/{:d}".format(main_ip, NETMASK_PREFIXLEN)))
             print("Created new NetworkInterface %s" % main_ip)
@@ -114,12 +114,12 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
             interface.save()
             address_object.save()
         else:
-            ap = found_interface.access_point
+            ap = found_interface.accesspoint
         for ip_address in alternatives.split(";"):
-            interface = EthernetNetworkInterface.objects.filter(access_point=ap,
+            interface = EthernetNetworkInterface.objects.filter(accesspoint=ap,
                                                                 addresses__address=ip_address)
             if not interface:
-                interface = EthernetNetworkInterface.objects.create(access_point=ap)
+                interface = EthernetNetworkInterface.objects.create(accesspoint=ap)
                 address_object = NetworkInterfaceAddress.create_with_ipaddress(
                     interface,
                     ipaddress.ip_interface("{}/{:d}".format(ip_address, NETMASK_PREFIXLEN)))

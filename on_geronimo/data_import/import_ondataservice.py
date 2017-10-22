@@ -229,12 +229,12 @@ def import_network_interface(data):
     # passt.
     matching_interfaces = set()
     for address in addresses:
-        match = EthernetNetworkInterface.objects.filter(access_point=node).filter(
+        match = EthernetNetworkInterface.objects.filter(accesspoint=node).filter(
             EthernetNetworkInterface.get_filter_for_ipaddress(address))
         if match:
             matching_interfaces.add(match.first())
     if not matching_interfaces:
-        interface = EthernetNetworkInterface.objects.create(access_point=node)
+        interface = EthernetNetworkInterface.objects.create(accesspoint=node)
     elif len(matching_interfaces) == 1:
         interface = matching_interfaces.pop()
     else:

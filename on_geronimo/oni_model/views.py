@@ -77,7 +77,7 @@ class GeoJSONListAPIView(generics.ListAPIView):
                         endpoints = result["properties"]["endpoints"]
                         for index, iface_link_id in enumerate(endpoints):
                             endpoints[index] = InterfaceRoutingLink.objects.get(
-                                pk=iface_link_id).interface.access_point.main_ip
+                                pk=iface_link_id).interface.accesspoint.main_ip
                     return result
 
             return GeoSerializer
@@ -198,7 +198,7 @@ class NetworkInterfaceAccessPoint(DetailView):
 
     def retrieve(self, request, ip_address=None):
         interface = get_object_or_404(EthernetNetworkInterface, addresses_address=ip_address)
-        return Response(self.serializer_class(interface.access_point).data)
+        return Response(self.serializer_class(interface.accesspoint).data)
 
 
 class AccessPointInterfacesDetail(mixins.ListModelMixin,
