@@ -23,7 +23,7 @@ setup(
     # "rc1.dev1254" may be added via environment
     version=VERSION + os.environ.get("RELEASE_SUFFIX", ""),
     description="Data collector and API for a mesh network",
-    url="ssh://git@dev.on-i.de:on_geronimo.git",
+    url="ssh://git@dev.opennet-initiative.de:on_geronimo.git",
     author="Lars Kruse",
     author_email="devel@sumpfralle.de",
     classifiers=[

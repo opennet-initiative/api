@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: on-geronimo
-Source: https://on-i.de/wiki/Geronimo
+Source: https://opennet-initiative.de/wiki/Geronimo
 
 Files: *
 Copyright: 2016-2017 Lars Kruse <devel@sumpfralle.de>

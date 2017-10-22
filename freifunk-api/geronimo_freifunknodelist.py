@@ -14,7 +14,8 @@ import urllib.request
 import iso8601
 
 
-GERONIMO_API_URL = os.getenv("GERONIMO_API", "https://api.on-i.de/api/v1/accesspoint/")
+GERONIMO_API_URL = os.getenv("GERONIMO_API",
+                             "https://api.opennet-initiative.de/api/v1/accesspoint/")
 MAX_AP_ALIVE_TIMEOUT = datetime.timedelta(minutes=15)
 
 
