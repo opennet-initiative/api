@@ -19,7 +19,7 @@ NODE_WIKI_PAGES = (
 )
 
 
-# We need to add 'object' explicitely since HTMLParser.HTMLParser seems to be
+# We need to add 'object' explicitly since HTMLParser.HTMLParser seems to be
 # an old-style class (not inherited from 'object'). This causes the exception
 # 'TypeError: must be type, not classobj' during the 'super' call.
 class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
@@ -99,7 +99,8 @@ class AccessPointTable(_MediaWikiNodeTableParser):
 class ServerTable(_MediaWikiNodeTableParser):
 
     # the server tables in the opennet wiki contain the following data columns
-    column_names = ("hostname", "main_ip", "other_ip_v4", "other_ipv6", "post_address", "notes")
+    column_names = ("hostname", "main_ip", "other_ip_v4", "other_ipv6", "post_address", "notes",
+                    "latlon")
 
     def parse_row_columns(self, columns):
         # ignore servers without a routing IP
@@ -107,7 +108,8 @@ class ServerTable(_MediaWikiNodeTableParser):
             return
         return {"post_address": "{hostname}, {post_address}".format(**columns),
                 "main_ip": columns["main_ip"],
-                "notes": columns["notes"]}
+                "notes": columns["notes"],
+                "latlon": columns["latlon"]}
 
 
 def _parse_nodes():
