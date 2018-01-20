@@ -68,6 +68,10 @@ def _update_value(target, attribute, raw_value):
     if attribute.startswith("ifstat_"):
         # Standard-Wert Null fuer Interface-Statistiken
         value = int(raw_value) if raw_value else 0
+    elif attribute == "if_is_bridge":
+        value = len(raw_value.strip()) > 0
+    elif attribute == "if_is_bridged":
+        value = ((raw_value == "1") or (raw_value == 1))
     elif (attribute in ("wifi_bitrate", "wifi_signal", "wifi_noise")) and (raw_value == "unknown"):
         value = 0
     elif (attribute in ("wifi_signal", "wifi_noise", "wifi_freq", "wifi_channel",
