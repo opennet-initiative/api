@@ -72,6 +72,9 @@ def _update_value(target, attribute, raw_value):
         value = len(raw_value.strip()) > 0
     elif attribute == "if_is_bridged":
         value = ((raw_value == "1") or (raw_value == 1))
+    elif attribute in ("wifi_bssid", "if_hwaddress"):
+        # MACs vereinheitlichen auf lowercase
+        value = raw_value.lower() if raw_value else None
     elif (attribute in ("wifi_bitrate", "wifi_signal", "wifi_noise")) and (raw_value == "unknown"):
         value = 0
     elif (attribute in ("wifi_signal", "wifi_noise", "wifi_freq", "wifi_channel",
