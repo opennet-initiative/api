@@ -30,7 +30,8 @@ class EthernetNetworkInterfaceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EthernetNetworkInterface
-        fields = ("addresses", "if_name", "is_wireless", "wifi_attributes", "accesspoint")
+        fields = ("addresses", "if_name", "if_hwaddress", "is_wireless", "wifi_attributes",
+                  "accesspoint")
 
 
 class InterfaceRoutingLinkSerializer(serializers.ModelSerializer):
