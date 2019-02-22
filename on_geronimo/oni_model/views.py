@@ -1,5 +1,6 @@
 import datetime
 
+from django.core.exceptions import SuspiciousOperation
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework import mixins
@@ -180,7 +181,24 @@ class AccessPointInterfacesList(generics.ListAPIView):
     """Liefert eine Liste aller Interfaces von Accesspoints des Opennets"""
 
     serializer_class = EthernetNetworkInterfaceSerializer
-    queryset = EthernetNetworkInterface.objects.all()
+
+    def get_queryset(self):
+        queryset = EthernetNetworkInterface.objects.all()
+        if self.request.GET.get("if_hwaddress"):
+            queryset = queryset.filter(if_hwaddress__iexact=self.request.GET.get("if_hwaddress"))
+        if self.request.GET.get("wifi_ssid"):
+            queryset = queryset.filter(
+                wifi_attributes__wifi_ssid=self.request.GET.get("wifi_ssid"))
+        if self.request.GET.get("is_wireless"):
+            if self.request.GET.get("is_wireless").lower() in {"true", "1"}:
+                queryset = queryset.exclude(wifi_attributes=None)
+            elif self.request.GET.get("is_wireless").lower() in {"false", "0"}:
+                queryset = queryset.filter(wifi_attributes=None)
+            else:
+                raise SuspiciousOperation("Invalid boolean value requested ('{}') - expected one "
+                                          "of: true / false / 1 / 0"
+                                          .format(self.request.GET.get("is_wireless")))
+        return queryset
 
 
 class NetworkInterfaceDetail(DetailView):
