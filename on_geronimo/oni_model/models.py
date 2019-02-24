@@ -1,6 +1,11 @@
 from django.db import models
 from django.db.models.query_utils import Q
 from django.contrib.gis.db import models as gismodels
+try:
+    from django.contrib.gis.db.models.manager import GeoManager
+except ImportError:
+    # GeoManager was removed in Django 2.0. The usual manager should be sufficient now.
+    GeoManager = models.Manager
 import django.contrib.gis.geos.linestring
 from model_utils.fields import StatusField
 from model_utils import Choices
@@ -15,7 +20,7 @@ class AccessPoint(models.Model):
     post_address = models.TextField(null=True)
     antenna = models.TextField(null=True)
     position = gismodels.PointField(null=True, blank=True)
-    objects = gismodels.GeoManager()
+    objects = GeoManager()
     owner = models.TextField(null=True)
     # Geraete-Modell (im Wiki eingetragen)
     device_model = models.TextField(null=True)
