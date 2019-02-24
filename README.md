@@ -9,7 +9,7 @@
 == Manuelle Installation (auf Debian) ==
 
 ```shell
-aptitude install python3-django-model-utils python3-djangorestframework-gis \
+apt install python3-django-filters python3-django-model-utils python3-djangorestframework-gis \
 	libsqlite3-mod-spatialite spatialite-bin
 git clone git@dev.opennet-initiative.de:on_geronimo.git
 cd on_geronimo

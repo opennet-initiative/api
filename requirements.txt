@@ -1,4 +1,5 @@
 Django
+django-filter
 django-model-utils
 djangorestframework
 djangorestframework-gis
