@@ -86,7 +86,8 @@ class AccessPoint(models.Model):
 
 class EthernetNetworkInterface(models.Model):
     """Eine der Kabelschnittstellen eines APs"""
-    accesspoint = models.ForeignKey(AccessPoint, related_name="interfaces")
+    accesspoint = models.ForeignKey(AccessPoint, related_name="interfaces",
+                                    on_delete=models.CASCADE)
 
     if_name = models.CharField(max_length=128, null=True)
     if_is_bridge = models.BooleanField(default=False)
@@ -178,7 +179,8 @@ class NetworkInterfaceAddress(models.Model):
     # TODO: enthaelt das Django-Datenmodell bereits die Address-Family?
     address = models.GenericIPAddressField()
     family = StatusField(choices_name='ADRESS_FAMILIES')
-    interface = models.ForeignKey(EthernetNetworkInterface, related_name="addresses")
+    interface = models.ForeignKey(EthernetNetworkInterface, related_name="addresses",
+                                  on_delete=models.CASCADE)
     netmask_prefixlen = models.IntegerField()
 
     @classmethod
@@ -208,7 +210,7 @@ class WifiNetworkInterfaceAttributes(models.Model):
     WIFI_DRIVER_CHOICES = Choices('nl80211', 'wl')
 
     interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True,
-                                  related_name="wifi_attributes")
+                                  related_name="wifi_attributes", on_delete=models.CASCADE)
     wifi_ssid = models.CharField(max_length=32, null=True)
     wifi_bssid = models.CharField(max_length=17, null=True)
     wifi_driver = StatusField(choices_name='WIFI_DRIVER_CHOICES', null=True)
@@ -272,7 +274,8 @@ class RoutingLink(models.Model):
 
 class InterfaceRoutingLink(models.Model):
     """Ein Ende eines gerichteten Links"""
-    interface = models.ForeignKey(EthernetNetworkInterface)
-    routing_link = models.ForeignKey(RoutingLink, related_name="endpoints")
+    interface = models.ForeignKey(EthernetNetworkInterface, on_delete=models.CASCADE)
+    routing_link = models.ForeignKey(RoutingLink, related_name="endpoints",
+                                     on_delete=models.CASCADE)
     # Link quality von diesem Interface zum anderen
     quality = models.FloatField(default=0.0)

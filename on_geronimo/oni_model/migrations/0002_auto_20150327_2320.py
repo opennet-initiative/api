@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='WifiNetworkInterface',
             fields=[
-                ('ethernetnetworkinterface_ptr', models.OneToOneField(to='oni_model.EthernetNetworkInterface', parent_link=True, auto_created=True, primary_key=True, serialize=False)),
+                ('ethernetnetworkinterface_ptr', models.OneToOneField(to='oni_model.EthernetNetworkInterface', parent_link=True, auto_created=True, primary_key=True, serialize=False, on_delete=models.CASCADE)),
                 ('wifi_ssid', models.CharField(max_length=32)),
                 ('wifi_bssid', models.CharField(max_length=17)),
                 ('wifi_driver', model_utils.fields.StatusField(no_check_for_status=True, default='nl80211', max_length=100, choices=[('nl80211', 'nl80211')])),
@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ethernetnetworkinterface',
             name='access_point',
-            field=models.ForeignKey(to='oni_model.AccessPoint'),
+            field=models.ForeignKey(to='oni_model.AccessPoint', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(

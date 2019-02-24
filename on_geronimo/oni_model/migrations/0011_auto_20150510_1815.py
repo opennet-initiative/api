@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='ethernetnetworkinterface',
             name='access_point',
-            field=models.ForeignKey(to='oni_model.AccessPoint', related_name='interfaces'),
+            field=models.ForeignKey(to='oni_model.AccessPoint', related_name='interfaces',
+                                    on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

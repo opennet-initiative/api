@@ -19,7 +19,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
                 ('quality', models.FloatField()),
-                ('interface', models.ForeignKey(to='oni_model.EthernetNetworkInterface')),
+                ('interface', models.ForeignKey(to='oni_model.EthernetNetworkInterface',
+                                                on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -52,7 +53,8 @@ class Migration(migrations.Migration):
                 ('wifi_bitrate', models.DecimalField(max_digits=6, decimal_places=1)),
                 ('wifi_crypt', model_utils.fields.StatusField(no_check_for_status=True, choices=[('Plain', 'Plain'), ('WEP', 'WEP'), ('WPA2-PSK', 'WPA2-PSK')], default='Plain', max_length=100)),
                 ('wifi_vaps_enabled', models.BooleanField(default=False)),
-                ('interface', models.ForeignKey(to='oni_model.EthernetNetworkInterface')),
+                ('interface', models.ForeignKey(to='oni_model.EthernetNetworkInterface',
+                                                on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -68,7 +70,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='interfaceroutinglink',
             name='routing_link',
-            field=models.ForeignKey(to='oni_model.RoutingLink'),
+            field=models.ForeignKey(to='oni_model.RoutingLink', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(

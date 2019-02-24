@@ -19,7 +19,9 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='wifinetworkinterfaceattributes',
             name='interface',
-            field=models.ForeignKey(primary_key=True, serialize=False, to='oni_model.EthernetNetworkInterface'),
+            field=models.ForeignKey(primary_key=True, serialize=False,
+                                    to='oni_model.EthernetNetworkInterface',
+                                    on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(

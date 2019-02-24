@@ -20,7 +20,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='interfaceroutinglink',
             name='routing_link',
-            field=models.ForeignKey(related_name='endpoints', to='oni_model.RoutingLink'),
+            field=models.ForeignKey(related_name='endpoints', to='oni_model.RoutingLink',
+                                    on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]
