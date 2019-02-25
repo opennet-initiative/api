@@ -2,7 +2,11 @@ Source: on-geronimo
 Section: net
 Priority: optional
 Maintainer: Lars Kruse <devel@sumpfralle.de>
-Build-Depends: debhelper (>= 9), jq, python3, python3-django
+Build-Depends:
+ debhelper (>= 9),
+ jq,
+ python3,
+ python3-django
 Standards-Version: 4.0.0
 Homepage: https://opennet-initiative.de/wiki/Geronimo
 Vcs-Git: https://dev.opennet-initiative.de/git/on_geronimo.git
@@ -10,9 +14,15 @@ Vcs-Browser: http://dev.opennet-initiative.de/browser/on_geronimo
 
 Package: python3-on-geronimo
 Architecture: all
-Depends: python3, python3-pkg-resources, python3-django,
- python3-django-model-utils, python3-djangorestframework-gis,
- libsqlite3-mod-spatialite, spatialite-bin, ${misc:Depends}
+Depends:
+ python3,
+ python3-pkg-resources,
+ python3-django,
+ python3-django-model-utils,
+ python3-djangorestframework-gis,
+ libsqlite3-mod-spatialite,
+ spatialite-bin,
+ ${misc:Depends}
 Description: Informationssammlung für die Opennet Initiative.
  Daten werden aus verschiedenen Quellen gesammelt und können mittels
  einer einheitlichen API für verschiedene Nutzungszwecke
@@ -20,18 +30,30 @@ Description: Informationssammlung für die Opennet Initiative.
 
 Package: on-geronimo-api
 Architecture: all
-Depends: adduser, moreutils, python3, python3-on-geronimo,
+Depends:
+ adduser,
+ moreutils,
+ python3,
+ python3-on-geronimo,
  ${misc:Depends}
-Recommends: uwsgi, uwsgi-plugin-python3
-Suggests: apache2
+Recommends:
+ uwsgi,
+ uwsgi-plugin-python3,
+Suggests:
+ apache2
 Description: API für die Opennet Initiative.
  Daten der on-geronimo-Datensammlung werden mittels einer API für
  verschiedene Nutzungszwecke bereitgestellt.
 
 Package: on-freifunk-api
 Architecture: all
-Depends: adduser, python3, python3-iso8601, ${misc:Depends}
-Suggests: apache2
+Depends:
+ adduser,
+ python3,
+ python3-iso8601,
+ ${misc:Depends}
+Suggests:
+ apache2
 Description: Daten der Opennet Initiative entsprechend der Freifunk-API
  Dynamische Daten (verfügbare Knoten) werden regelmäßig aktualisiert.
  Statische Daten (lokale Communities innerhalb der Opennet Initiative)
