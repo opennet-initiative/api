@@ -19,11 +19,12 @@ cd on_geronimo
 == Manuelle Installation (virtualenv/pip) ==
 
 ```shell
-aptitude install virtualenvwrapper libgeos++-dev libproj-dev gdal-bin spatialite-bin
+apt install python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin
 git clone git@dev.opennet-initiative.de:on_geronimo.git
 cd on_geronimo
-mkvirtualenv --python /usr/bin/python3 on-geronimo
-pip install -r requirements.txt
+python3 -m venv build/venv
+. build/venv/bin/activate
+pip3 install -r requirements.txt
 ```
 
 
