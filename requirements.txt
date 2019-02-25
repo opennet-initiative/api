@@ -1,5 +1,8 @@
-Django
-django-filter
+# version requirement: see https://code.djangoproject.com/ticket/20036
+django>=1.11.5
+# version requirement: see https://github.com/carltongibson/django-filter/issues/673
+django-filter>=1.0.2
 django-model-utils
-djangorestframework
+# version requirement: necessary for Django 2.2 or later
+djangorestframework>=3.8.0
 djangorestframework-gis
