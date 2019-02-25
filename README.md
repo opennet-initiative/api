@@ -22,9 +22,7 @@ cd on_geronimo
 apt install python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin
 git clone git@dev.opennet-initiative.de:on_geronimo.git
 cd on_geronimo
-python3 -m venv build/venv
-. build/venv/bin/activate
-pip3 install -r requirements.txt
+make virtualenv-update
 ```
 
 
