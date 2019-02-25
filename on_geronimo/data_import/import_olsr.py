@@ -28,7 +28,9 @@ def _txtinfo_parser(lines, table_names):
             pass
         else:
             prefix, next_table = line.split(None, 1)
-            assert prefix == "Table:"
+            if prefix in {"Version:"}:
+                continue
+            assert prefix == "Table:", "Expected 'Table:', received '{}' instead".format(prefix)
             matching_names = [name for name in table_names if name.upper() == next_table.upper()]
             if matching_names:
                 current_table = matching_names[0]
@@ -90,7 +92,11 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
         if hna.endswith("/32") and (hna.startswith("192.168.") or hna.startswith("10.")):
             mid_table.append((source, hna[:-3]))
     # the column "alternative" contains one or more IP addresses separated by semicolons
-    for main_ip, alternatives in mid_table:
+    for one_mid_entry in mid_table:
+        main_ip = one_mid_entry[0]
+        alternatives = []
+        for alternative in one_mid_entry[1:]:
+            alternatives.extend(alternative.split(";"))
         # Pruefung, ob diese IP-Adresse auch zu einem anderen Objekt gehoert
         found_interface = None
         for interface in EthernetNetworkInterface.objects.filter(addresses__address=main_ip):
@@ -115,7 +121,7 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
             address_object.save()
         else:
             ap = found_interface.accesspoint
-        for ip_address in alternatives.split(";"):
+        for ip_address in alternatives:
             interface = EthernetNetworkInterface.objects.filter(accesspoint=ap,
                                                                 addresses__address=ip_address)
             if not interface:
