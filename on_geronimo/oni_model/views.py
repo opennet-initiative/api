@@ -132,6 +132,21 @@ class OnlineStatusFilter(BaseFilterBackend):
             return []
 
 
+class LinkAccessPointInBBoxFilter(InBBoxFilter):
+    """ filter links based on a bounding box
+
+    Only links referring to at least one AccessPoint within the given bounding box are returned.
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        bbox = self.get_filter_bbox(request)
+        if not bbox:
+            return queryset
+        else:
+            return (queryset.filter(endpoints__interface__accesspoint__position__contained=bbox)
+                    .distinct().prefetch_related("endpoints"))
+
+
 class AccessPointList(GeoJSONListAPIView):
     """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
 
@@ -142,7 +157,7 @@ class AccessPointList(GeoJSONListAPIView):
     geojson_serializer_extra_fields = ["main_ip"]
     geojson_serializer_ignore_fields = ["interfaces"]
     bbox_filter_field = 'position'
-    filter_backends = (InBBoxFilter, OnlineStatusFilter)
+    filter_backends = (OnlineStatusFilter, InBBoxFilter)
     queryset = AccessPoint.objects.all()
     last_online_timestamp_field = "lastseen_timestamp"
 
@@ -160,8 +175,9 @@ class AccessPointLinksList(GeoJSONListAPIView):
     serializer_class = RoutingLinkSerializer
     geojson_base_model = RoutingLink
     # we need to add non-fields (properties) manually
-    geojson_serializer_extra_fields = ["quality", "wifi_ssid", "is_wireless"]
-    filter_backends = (OnlineStatusFilter, )
+    geojson_serializer_extra_fields = {"quality", "wifi_ssid", "is_wireless"}
+    geojson_serializer_ignore_fields = {"endpoints", "timestamp"}
+    filter_backends = (OnlineStatusFilter, LinkAccessPointInBBoxFilter)
     queryset = RoutingLink.objects.all()
 
 
