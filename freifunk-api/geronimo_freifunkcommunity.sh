@@ -64,6 +64,7 @@ fi
 [ -z "${COMMUNITY_LIST["$COMMUNITY_LIST_KEY"]+exists}" ] && echo -e >&2 "Error - key '$COMMUNITY_LIST_KEY' not found in cfg file" && exit 1
 COMMUNITY_LIST_VALUE="${COMMUNITY_LIST["$COMMUNITY_LIST_KEY"]}"
 IFS=","
+# shellcheck disable=SC2206
 COMMUNITY_LIST_ARRAY=($COMMUNITY_LIST_VALUE)
 unset IFS
 COMMUNITY_LIST_NAME="${COMMUNITY_LIST_ARRAY[0]}"
