@@ -227,7 +227,12 @@ class WifiNetworkInterfaceAttributes(models.Model):
 
 
 class RoutingLink(models.Model):
-    """Eine Online-Verbindung zwischen Interfaces zweier APs"""
+    """Eine Online-Verbindung zwischen Interfaces zweier APs
+
+    ACHTUNG: derzeit sind die Routing-Link-Objekte defekt, da sie sich nicht auf die korrekten
+    Interfaces beziehen, sondern immer auf diejenigen Interfaces der beteiligten APs, die mit der
+    Main-IP des AP konfiguriert sind (siehe https://dev.opennet-initiative.de/ticket/212).
+    """
 
     timestamp = models.DateTimeField(auto_now=True)
 
