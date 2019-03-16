@@ -77,11 +77,8 @@ class AccessPoint(models.Model):
     def get_links(self):
         return RoutingLink.objects.filter(endpoints__interface__accesspoint=self)
 
-    def __unicode__(self):
-        return 'AP %s owned by %s' % (self.main_ip, self.owner)
-
     def __str__(self):
-        return self.__unicode__()
+        return 'AP %s owned by %s' % (self.main_ip, self.owner)
 
 
 class EthernetNetworkInterface(models.Model):
@@ -164,12 +161,9 @@ class EthernetNetworkInterface(models.Model):
                  addresses__family=family,
                  addresses__netmask_prefixlen=address_obj.network.prefixlen)
 
-    def __unicode__(self):
-        return 'Interface %s of AP %s' % ((addr.address for addr in self.addresses.all()),
-                                          self.accesspoint.main_ip)
-
     def __str__(self):
-        return self.__unicode__()
+        return "Interface {} of AP {}".format(
+            " / ".join(addr.address for addr in self.addresses.all()), self.accesspoint.main_ip)
 
 
 class NetworkInterfaceAddress(models.Model):
