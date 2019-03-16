@@ -244,6 +244,11 @@ class AccessPointInterfacesDetail(mixins.ListModelMixin,
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
+    def get_queryset(self):
+        ip = self.kwargs["pk"]
+        ap = get_object_or_404(AccessPoint, main_ip=ip)
+        return ap.interfaces
+
     def retrieve(self, request, ip_address=None):
         ap = get_object_or_404(AccessPoint, main_ip=ip_address)
         return Response(self.serializer_class(ap.interfaces).data)
