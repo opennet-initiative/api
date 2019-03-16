@@ -10,6 +10,36 @@ import django.contrib.gis.geos.linestring
 from model_utils.fields import StatusField
 from model_utils import Choices
 
+from .utils import get_center_of_points
+
+
+class AccessPointSite(models.Model):
+    """ A location hosting multiple AccessPoints
+
+    The Site content is mainly dynamically generated.  Thus it should be treated as a cache and not
+    as a permanent storage for information.
+    """
+
+    @property
+    def position(self):
+        return get_center_of_points(ap.position for ap in self.accesspoints.all() if ap.position)
+
+    @property
+    def post_address(self):
+        addresses = [ap.post_address for ap in self.accesspoints.all() if ap.post_address]
+        address_weights = sorted((addresses.count(address), address) for address in addresses)
+        if address_weights:
+            return address_weights[-1][1]
+        else:
+            return ""
+
+    def __str__(self):
+        site_details = []
+        if self.post_address:
+            site_details.append(self.post_address)
+        site_details.append("{:d} APs".format(self.accesspoints.count()))
+        return "Site #{:d} ({})".format(self.id, ", ".join(site_details))
+
 
 class AccessPoint(models.Model):
     """Ein einzelner WLAN-Accesspoint im Opennet"""
@@ -25,6 +55,8 @@ class AccessPoint(models.Model):
     # Geraete-Modell (im Wiki eingetragen)
     device_model = models.TextField(null=True)
     lastseen_timestamp = models.DateTimeField(null=True)
+    site = models.ForeignKey(AccessPointSite, related_name="accesspoints", null=True,
+                             on_delete=models.SET_NULL)
 
     # ondataservice-Daten
     device_board = models.TextField(null=True)
