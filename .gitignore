@@ -1,5 +1,6 @@
 # ignore python binary
 *.pyc
+__pycache__/
 
 # ignore currently edited files
 .*.sw[op]
