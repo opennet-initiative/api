@@ -92,3 +92,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static/'
+
+# fields.W342: silence a ForeignKey/OneToOneField hint for
+#     oni_model.WifiNetworkInterfaceAttributes.interface. In this specific case a OneToOneField
+#     complicates access to the wifi_attributes field, since not every EthernetNetworkInterface
+#     has a related WifiNetworkInterfaceAttributes object.
+SILENCED_SYSTEM_CHECKS = ["fields.W342"]
