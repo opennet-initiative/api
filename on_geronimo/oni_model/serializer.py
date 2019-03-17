@@ -16,18 +16,21 @@ class AccessPointSerializer(serializers.GeoModelSerializer):
 
     class Meta:
         model = AccessPoint
+        fields = "__all__"
 
 
 class WifiNetworkInterfaceAttributesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WifiNetworkInterfaceAttributes
+        fields = "__all__"
 
 
 class NetworkInterfaceAddressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NetworkInterfaceAddress
+        fields = "__all__"
 
 
 class EthernetNetworkInterfaceSerializer(serializers.ModelSerializer):
