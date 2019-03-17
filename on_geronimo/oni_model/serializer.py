@@ -1,8 +1,15 @@
 from rest_framework_gis import serializers
 
 from on_geronimo.oni_model.models import (
-    AccessPoint, InterfaceRoutingLink, RoutingLink, EthernetNetworkInterface,
+    AccessPoint, AccessPointSite, InterfaceRoutingLink, RoutingLink, EthernetNetworkInterface,
     NetworkInterfaceAddress, WifiNetworkInterfaceAttributes)
+
+
+class AccessPointSiteSerializer(serializers.GeoModelSerializer):
+
+    class Meta:
+        model = AccessPointSite
+        fields = ("accesspoints", "post_address")
 
 
 class AccessPointSerializer(serializers.GeoModelSerializer):

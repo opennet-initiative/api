@@ -11,9 +11,10 @@ from rest_framework_gis.filters import InBBoxFilter
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from on_geronimo.oni_model.models import (
-    AccessPoint, EthernetNetworkInterface, InterfaceRoutingLink, RoutingLink)
+    AccessPoint, AccessPointSite, EthernetNetworkInterface, InterfaceRoutingLink, RoutingLink)
 from on_geronimo.oni_model.serializer import (
-    AccessPointSerializer, RoutingLinkSerializer, EthernetNetworkInterfaceSerializer)
+    AccessPointSerializer, AccessPointSiteSerializer, RoutingLinkSerializer,
+    EthernetNetworkInterfaceSerializer)
 
 
 # nach dreißig Tagen gelten APs nicht mehr als "flapping", sondern als "offline"
@@ -145,6 +146,24 @@ class LinkAccessPointInBBoxFilter(InBBoxFilter):
         else:
             return (queryset.filter(endpoints__interface__accesspoint__position__contained=bbox)
                     .distinct().prefetch_related("endpoints"))
+
+
+class AccessPointSiteList(GeoJSONListAPIView):
+    """ Liefert eine Liste aller WLAN Accesspoints des Opennets """
+
+    serializer_class = AccessPointSiteSerializer
+    geojson_base_model = AccessPointSite
+    geojson_serializer_extra_fields = {"position"}
+    bbox_filter_field = "position"
+    filter_backends = (InBBoxFilter, )
+    queryset = AccessPointSite.objects.all()
+
+
+class AccessPointSiteDetail(DetailView):
+    """Liefert die Details eines WLAN Accesspoints des Opennets"""
+
+    queryset = AccessPointSite.objects.all()
+    serializer_class = AccessPointSiteSerializer
 
 
 class AccessPointList(GeoJSONListAPIView):
