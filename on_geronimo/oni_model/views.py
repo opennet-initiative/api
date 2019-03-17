@@ -1,6 +1,7 @@
 import datetime
 
 from django.core.exceptions import SuspiciousOperation
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework import mixins
@@ -188,6 +189,38 @@ class AccessPointDetail(DetailView):
     serializer_class = AccessPointSerializer
 
 
+class ExcludeSite2SiteLinks(BaseFilterBackend):
+    """ Remove all RoutingLink objects that are part of an inter-site connection
+
+    An inter-site connection satisfies the following conditions:
+        * both ends of the link are part of a (different) site
+        * the two connected sides have more than one direct connection
+    """
+
+    def _get_redundantly_connected_sites(self):
+        site_pairs_count = {}
+        for link in RoutingLink.objects.exclude(
+                endpoints__interface__accesspoint__site__isnull=True):
+            pair = tuple(sorted(endpoint.interface.accesspoint.site.id
+                                for endpoint in link.endpoints.all()))
+            # only use connections between different sites
+            if pair[0] != pair[1]:
+                try:
+                    site_pairs_count[pair] += 1
+                except KeyError:
+                    site_pairs_count[pair] = 1
+        return {pair for pair, count in site_pairs_count.items() if count > 1}
+
+    def filter_queryset(self, request, queryset, view):
+        if request.GET.get("with_redundant_site_links", "1") == "0":
+            for pair in self._get_redundantly_connected_sites():
+                first, second = pair
+                queryset = queryset.exclude(
+                    Q(endpoints__interface__accesspoint__site__id=first)
+                    & Q(endpoints__interface__accesspoint__site__id=second))
+        return queryset
+
+
 class AccessPointLinksList(GeoJSONListAPIView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
 
@@ -195,7 +228,7 @@ class AccessPointLinksList(GeoJSONListAPIView):
     geojson_base_model = RoutingLink
     # we need to add non-fields (properties) manually
     geojson_serializer_extra_fields = {"quality", "wifi_ssid", "is_wireless"}
-    filter_backends = (OnlineStatusFilter, LinkAccessPointInBBoxFilter)
+    filter_backends = (OnlineStatusFilter, LinkAccessPointInBBoxFilter, ExcludeSite2SiteLinks)
     queryset = RoutingLink.objects.all()
 
 
