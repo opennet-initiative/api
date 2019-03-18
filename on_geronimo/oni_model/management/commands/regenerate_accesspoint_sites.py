@@ -1,26 +1,14 @@
-import math
-
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import Count
 
 from on_geronimo.oni_model.models import AccessPoint, AccessPointSite
-from on_geronimo.oni_model.utils import get_center_of_points
-
-
-BASE_SITE_RADIUS = getattr(settings, "BASE_SITE_RADIUS", 20)
-MINIMUM_SITE_POPULATION = getattr(settings, "MINIMUM_SITE_POPULATION", 4)
+from on_geronimo.oni_model.utils import (
+    get_center_of_points, get_dynamic_site_radius, MINIMUM_SITE_POPULATION)
 
 
 class Command(BaseCommand):
 
     help = "Generate Accesspoint Sites based on locations"
-
-    def _get_dynamic_site_radius(self, population_count=MINIMUM_SITE_POPULATION):
-        # Increase the radius based on the current population count in order to allow bigger sites.
-        # The factor below keeps the target density (population per area) constant.
-        population_factor = max(1, math.sqrt(population_count / MINIMUM_SITE_POPULATION))
-        return BASE_SITE_RADIUS * population_factor
 
     def _remove_dislocated_accesspoints_from_sites(self):
         """ Remove all AccessPoints from each Site that are outside of the maximum site radius """
@@ -38,7 +26,7 @@ class Command(BaseCommand):
             if site_position:
                 for ap in site.accesspoints.filter(
                         position__distance_gt=(
-                            site_position, 1.25 * self._get_dynamic_site_radius(site_population))):
+                            site_position, 1.25 * get_dynamic_site_radius(site_population))):
                     self.stdout.write(self.style.NOTICE(
                         "Removing {} from {} due to its distance: {}"
                         .format(ap, site, site_position.distance(ap.position))))
@@ -63,7 +51,8 @@ class Command(BaseCommand):
                                    .filter(site__isnull=False)
                                    .exclude(site__id=site.id)
                                    .filter(position__distance_lt=(
-                                       site.position, self._get_dynamic_site_radius()))))
+                                       site.position,
+                                       get_dynamic_site_radius(MINIMUM_SITE_POPULATION)))))
             for other_site in overlapping_sites:
                 if site.accesspoints.count() > other_site.accesspoints.count():
                     removal_site = other_site
@@ -95,7 +84,7 @@ class Command(BaseCommand):
                         .filter(position__isnull=False)
                         .exclude(site=site)
                         .filter(position__distance_lt=(
-                            site_position, self._get_dynamic_site_radius(site_population)))):
+                            site_position, get_dynamic_site_radius(site_population)))):
                     self.stdout.write(self.style.NOTICE("Adding {} to {}".format(new_ap, site)))
                     new_ap.site = site
                     new_ap.save()
@@ -109,9 +98,8 @@ class Command(BaseCommand):
         for tolerance in (2.5, 2.0, 1.6, 1.3, 1.0):
             candidates = AccessPoint.objects.filter(
                 site__isnull=True, position__isnull=False,
-                position__distance_lt=(
-                    current_position,
-                    tolerance * self._get_dynamic_site_radius(candidate_population)))
+                position__distance_lt=(current_position,
+                                       tolerance * get_dynamic_site_radius(candidate_population)))
             candidate_population = candidates.count()
             current_position = get_center_of_points(ap.position for ap in candidates)
             if not current_position:
