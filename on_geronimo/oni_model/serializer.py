@@ -1,3 +1,4 @@
+from rest_framework.serializers import PrimaryKeyRelatedField
 from rest_framework_gis import serializers
 from rest_framework_gis.fields import GeometryField
 
@@ -9,6 +10,10 @@ from .models import (
 class AccessPointSiteSerializer(serializers.GeoModelSerializer):
 
     position = GeometryField()
+    # TODO: remove this explicit relation as soon as we require django-restframework v3.5 or above.
+    #    Previously django-restframework failed to detect the related field properly due to its
+    #    unusual name ("main_ip" instead of "id").
+    accesspoints = PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = AccessPointSite
