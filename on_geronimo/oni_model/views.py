@@ -203,7 +203,7 @@ class AccessPointLinksList(GeoJSONListAPIView):
     queryset = RoutingLink.objects.all()
 
 
-class AccessPointLinksDetail(generics.ListAPIView):
+class AccessPointLinkDetail(generics.ListAPIView):
     """Alle Links zu diesem WLAN Accesspoints des Opennets"""
 
     serializer_class = RoutingLinkSerializer

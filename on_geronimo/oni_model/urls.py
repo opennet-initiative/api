@@ -13,7 +13,7 @@ urlpatterns = [
     url(ap_path_prefix + "$", views.AccessPointDetail.as_view(), name="accesspoint-details"),
     url(ap_path_prefix + "/interfaces/$", views.AccessPointInterfacesDetail.as_view(),
         name="accesspoint-interfaces"),
-    url(ap_path_prefix + "/links/$", views.AccessPointLinksDetail.as_view(),
+    url(ap_path_prefix + "/links/$", views.AccessPointLinkDetail.as_view(),
         name="accesspoint-links"),
     url(r"^v1/interface/$", views.AccessPointInterfacesList.as_view(), name="interface-list"),
     url(iface_path_prefix + "$", views.NetworkInterfaceDetail.as_view(), name="interface-details"),
