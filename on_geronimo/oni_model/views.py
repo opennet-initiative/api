@@ -169,12 +169,16 @@ class ExcludeSite2SiteLinks(BaseFilterBackend):
                 endpoints__interface__accesspoint__site__isnull=True):
             pair = tuple(sorted(endpoint.interface.accesspoint.site.id
                                 for endpoint in link.endpoints.all()))
-            # only use connections between different sites
-            if pair[0] != pair[1]:
-                try:
-                    site_pairs_count[pair] += 1
-                except KeyError:
-                    site_pairs_count[pair] = 1
+            if len(pair) != 2:
+                # remove a broken (partially deleted) link
+                link.delete()
+            else:
+                # only use connections between different sites
+                if pair[0] != pair[1]:
+                    try:
+                        site_pairs_count[pair] += 1
+                    except KeyError:
+                        site_pairs_count[pair] = 1
         return {pair for pair, count in site_pairs_count.items() if count > 1}
 
     def filter_queryset(self, request, queryset, view):
