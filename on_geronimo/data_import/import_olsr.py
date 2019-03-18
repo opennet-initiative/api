@@ -106,7 +106,11 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
             else:
                 if found_interface:
                     # wir machen erstmal nichts mit diesem Konflikt
-                    print("Discovered duplicate APs: %s and %s" % (found_interface, interface))
+                    print("Removing duplicate APs: %s and %s" % (found_interface, interface))
+                    # remove both
+                    interface.delete()
+                    found_interface.delete()
+                    found_interface = None
                 found_interface = interface
         if not found_interface:
             ap, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
