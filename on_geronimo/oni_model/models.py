@@ -12,7 +12,7 @@ import django.contrib.gis.geos.linestring
 from model_utils.fields import StatusField
 from model_utils import Choices
 
-from .utils import get_center_of_points
+from .utils import get_center_of_points, get_dynamic_site_radius
 
 
 class AliveBaseManager(models.Manager):
@@ -75,6 +75,10 @@ class AccessPointSite(models.Model):
     @property
     def position(self):
         return get_center_of_points(ap.position for ap in self.accesspoints.all() if ap.position)
+
+    @property
+    def radius(self):
+        return get_dynamic_site_radius(self.accesspoints.count())
 
     @property
     def post_address(self):

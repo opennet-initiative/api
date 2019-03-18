@@ -12,7 +12,7 @@ class AccessPointSiteSerializer(serializers.GeoModelSerializer):
 
     class Meta:
         model = AccessPointSite
-        fields = ("accesspoints", "id", "position", "post_address")
+        fields = ("accesspoints", "id", "position", "post_address", "radius")
 
 
 class AccessPointSerializer(serializers.GeoModelSerializer):
