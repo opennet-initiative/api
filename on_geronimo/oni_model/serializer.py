@@ -1,4 +1,5 @@
 from rest_framework_gis import serializers
+from rest_framework_gis.fields import GeometryField
 
 from on_geronimo.oni_model.models import (
     AccessPoint, AccessPointSite, InterfaceRoutingLink, RoutingLink, EthernetNetworkInterface,
@@ -7,9 +8,11 @@ from on_geronimo.oni_model.models import (
 
 class AccessPointSiteSerializer(serializers.GeoModelSerializer):
 
+    position = GeometryField()
+
     class Meta:
         model = AccessPointSite
-        fields = ("accesspoints", "id", "post_address")
+        fields = ("accesspoints", "id", "position", "post_address")
 
 
 class AccessPointSerializer(serializers.GeoModelSerializer):
