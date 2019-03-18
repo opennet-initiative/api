@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.views.decorators.cache import cache_page
 
-from on_geronimo.oni_model import views
+from . import views
 
 
 ap_path_prefix = r"^v1/accesspoint/(?P<pk>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))"

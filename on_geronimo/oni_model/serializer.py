@@ -1,7 +1,7 @@
 from rest_framework_gis import serializers
 from rest_framework_gis.fields import GeometryField
 
-from on_geronimo.oni_model.models import (
+from .models import (
     AccessPoint, AccessPointSite, InterfaceRoutingLink, RoutingLink, EthernetNetworkInterface,
     NetworkInterfaceAddress, WifiNetworkInterfaceAttributes)
 

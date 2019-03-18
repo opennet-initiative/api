@@ -8,11 +8,10 @@ from rest_framework_gis.fields import GeometryField
 from rest_framework_gis.filters import InBBoxFilter
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from on_geronimo.oni_model.models import (
-    AccessPoint, AccessPointSite, EthernetNetworkInterface, InterfaceRoutingLink, RoutingLink)
-from on_geronimo.oni_model.serializer import (
-    AccessPointSerializer, AccessPointSiteSerializer, RoutingLinkSerializer,
-    EthernetNetworkInterfaceSerializer)
+from .models import (AccessPoint, AccessPointSite, EthernetNetworkInterface, InterfaceRoutingLink,
+                     RoutingLink)
+from .serializer import (AccessPointSerializer, AccessPointSiteSerializer, RoutingLinkSerializer,
+                         EthernetNetworkInterfaceSerializer)
 
 
 class DetailView(mixins.RetrieveModelMixin,
