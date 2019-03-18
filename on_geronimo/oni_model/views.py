@@ -1,5 +1,4 @@
 from django.core.exceptions import SuspiciousOperation
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework import mixins
@@ -165,7 +164,7 @@ class ExcludeSite2SiteLinks(BaseFilterBackend):
 
     def _get_redundantly_connected_sites(self):
         site_pairs_count = {}
-        for link in RoutingLink.objects.exclude(
+        for link in RoutingLink.online_objects.exclude(
                 endpoints__interface__accesspoint__site__isnull=True):
             pair = tuple(sorted(endpoint.interface.accesspoint.site.id
                                 for endpoint in link.endpoints.all()))
@@ -183,11 +182,14 @@ class ExcludeSite2SiteLinks(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         if request.GET.get("with_redundant_site_links", "1") == "0":
+            ignored_routing_links = set()
             for pair in self._get_redundantly_connected_sites():
                 first, second = pair
-                queryset = queryset.exclude(
-                    Q(endpoints__interface__accesspoint__site__id=first)
-                    & Q(endpoints__interface__accesspoint__site__id=second))
+                ignored_routing_links.update(link.id for link in (
+                    RoutingLink.objects
+                    .filter(endpoints__interface__accesspoint__site__id=first)
+                    .filter(endpoints__interface__accesspoint__site__id=second)))
+            queryset = queryset.exclude(pk__in=ignored_routing_links)
         return queryset
 
 
