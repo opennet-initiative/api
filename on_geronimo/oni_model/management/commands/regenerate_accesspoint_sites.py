@@ -8,13 +8,19 @@ from on_geronimo.oni_model.models import AccessPoint, AccessPointSite
 from on_geronimo.oni_model.utils import get_center_of_points
 
 
-MAX_SITE_RADIUS_METER = getattr(settings, "MAX_SITE_RADIUS_METER", 40)
-MINIMUM_SITE_POPULATION = getattr(settings, "MINIMUM_SITE_POPULATION", 5)
+BASE_SITE_RADIUS = getattr(settings, "BASE_SITE_RADIUS", 20)
+MINIMUM_SITE_POPULATION = getattr(settings, "MINIMUM_SITE_POPULATION", 4)
 
 
 class Command(BaseCommand):
 
     help = "Generate Accesspoint Sites based on locations"
+
+    def _get_dynamic_site_radius(self, population_count=MINIMUM_SITE_POPULATION):
+        # Increase the radius based on the current population count in order to allow bigger sites.
+        # The factor below keeps the target density (population per area) constant.
+        population_factor = max(1, math.sqrt(population_count / MINIMUM_SITE_POPULATION))
+        return BASE_SITE_RADIUS * population_factor
 
     def _remove_dislocated_accesspoints_from_sites(self):
         """ Remove all AccessPoints from each Site that are outside of the maximum site radius """
@@ -28,9 +34,11 @@ class Command(BaseCommand):
         # remove accesspoints outside of the range of the site
         for site in AccessPointSite.objects.all():
             site_position = site.position
+            site_population = site.accesspoints.count()
             if site_position:
                 for ap in site.accesspoints.filter(
-                        position__distance_gt=(site_position, MAX_SITE_RADIUS_METER)):
+                        position__distance_gt=(
+                            site_position, 1.25 * self._get_dynamic_site_radius(site_population))):
                     self.stdout.write(self.style.NOTICE(
                         "Removing {} from {} due to its distance: {}"
                         .format(ap, site, site_position.distance(ap.position))))
@@ -54,8 +62,8 @@ class Command(BaseCommand):
                 ap.site for ap in (AccessPoint.objects
                                    .filter(site__isnull=False)
                                    .exclude(site__id=site.id)
-                                   .filter(position__distance_lt=(site.position,
-                                                                  MAX_SITE_RADIUS_METER))))
+                                   .filter(position__distance_lt=(
+                                       site.position, self._get_dynamic_site_radius()))))
             for other_site in overlapping_sites:
                 if site.accesspoints.count() > other_site.accesspoints.count():
                     removal_site = other_site
@@ -80,26 +88,35 @@ class Command(BaseCommand):
         for site in AccessPointSite.objects.all():
             site_position = site.position
             if site_position:
+                site_population = site.accesspoints.count()
                 for new_ap in (
                         AccessPoint.objects
                         .filter(site__isnull=True)
                         .filter(position__isnull=False)
                         .exclude(site=site)
-                        .filter(position__distance_lt=(site_position, MAX_SITE_RADIUS_METER))):
+                        .filter(position__distance_lt=(
+                            site_position, self._get_dynamic_site_radius(site_population)))):
                     self.stdout.write(self.style.NOTICE("Adding {} to {}".format(new_ap, site)))
                     new_ap.site = site
                     new_ap.save()
 
     def _get_access_points_for_site(self, start_position):
         current_position = start_position
+        candidate_population = MINIMUM_SITE_POPULATION
         # Run multiple rounds to find a suitable collection of APs for the new site.
         # This is necessary due to the feedback loop caused by the shift of the center with every
         # new point.
-        for tolerance in (2.0, 1.8, 1.5, 1.3, 1.0):
+        for tolerance in (2.5, 2.0, 1.6, 1.3, 1.0):
             candidates = AccessPoint.objects.filter(
                 site__isnull=True, position__isnull=False,
-                position__distance_lt=(current_position, tolerance * MAX_SITE_RADIUS_METER))
+                position__distance_lt=(
+                    current_position,
+                    tolerance * self._get_dynamic_site_radius(candidate_population)))
+            candidate_population = candidates.count()
             current_position = get_center_of_points(ap.position for ap in candidates)
+            if not current_position:
+                # the radius decreased until no accesspoints remained
+                return []
         return list(candidates)
 
     def _create_new_sites(self):
