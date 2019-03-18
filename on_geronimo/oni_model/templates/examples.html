@@ -1,0 +1,42 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Opennet Initiative e.V.</title>
+</head>
+
+<body>
+<p>Willkommen zum / Welcome to the <a href="https://wiki.opennet-initiative.de/wiki/Opennet_API">Application Programming Interface (API) Opennet Initiative e.V.</a></p>
+
+<p>
+<pre>
+                                   _
+  ___  _ __   ___ _ __  _ __   ___| |_
+ / _ \| '_ \ / _ \ '_ \| '_ \ / _ \ __|
+| (_) | |_) |  __/ | | | | | |  __/ |_
+ \___/| .__/ \___|_| |_|_| |_|\___|\__|
+      |_|
+
+Willkommen auf api.opennet-initiative.de!
+
+</pre>
+</p>
+
+<p>Beispiele / Examples:</p>
+<ul>
+<li><a href="{% url 'accesspoint-list' %}">{% url 'accesspoint-list' %}</a></li>
+<li><a href="{% url 'accesspoint-details' '192.168.1.11' %}">{% url 'accesspoint-details' '192.168.1.11' %}</a></li>
+<li><a href="{% url 'accesspoint-details' '192.168.1.11' %}?format=json">{% url 'accesspoint-details' '192.168.1.11' %}?format=json</a></li>
+<li><a href="{% url 'accesspoint-links' '192.168.1.11' %}">{% url 'accesspoint-links' '192.168.1.11' %}</a></li>
+<li><a href="{% url 'accesspoint-interfaces' '192.168.1.11' %}">{% url 'accesspoint-interfaces' '192.168.1.11' %}</a></li>
+<li><a href="{% url 'interface-list' %}">{% url 'interface-list' %}</a></li>
+<li><a href="{% url 'interface-list' %}?if_hwaddress=00:27:22:aa:5d:a0">{% url 'interface-list' %}?if_hwaddress=00:27:22:aa:5d:a0</a></li>
+<li><a href="{% url 'interface-list' %}?wifi_ssid=PhiloTurm-Suedwest.on-i.de">{% url 'interface-list' %}?wifi_ssid=PhiloTurm-Suedwest.on-i.de</a></li>
+<li><a href="{% url 'interface-list' %}?is_wireless=true">{% url 'interface-list' %}?is_wireless=true</a></li>
+<li><a href="{% url 'interface-details' '192.168.1.11' %}">{% url 'interface-details' '192.168.1.11' %}</a></li>
+<li><a href="{% url 'link-list' %}">{% url 'link-list' %}</a></li>
+<li><a href="{% url 'site-list' %}">{% url 'site-list' %}</a></li>
+<li><a href="{% url 'site-details' '1' %}">{% url 'site-details' '1' %}</a></li>
+</ul>
+
+</body>
+</html>
