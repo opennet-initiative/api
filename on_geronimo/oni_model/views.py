@@ -98,7 +98,7 @@ class OnlineStatusFilter(BaseFilterBackend):
         elif wanted_status == "flapping":
             return queryset.model.flapping_objects.filter_by_status(queryset)
         else:
-            return []
+            return queryset.none()
 
 
 class LinkAccessPointInBBoxFilter(InBBoxFilter):
