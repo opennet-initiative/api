@@ -1,5 +1,6 @@
 import math
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import Count
 
@@ -7,8 +8,8 @@ from on_geronimo.oni_model.models import AccessPoint, AccessPointSite
 from on_geronimo.oni_model.utils import get_center_of_points
 
 
-MAX_SITE_RADIUS_METER = 20
-MINIMUM_SITE_POPULATION = 5
+MAX_SITE_RADIUS_METER = getattr(settings, "MAX_SITE_RADIUS_METER", 40)
+MINIMUM_SITE_POPULATION = getattr(settings, "MINIMUM_SITE_POPULATION", 5)
 
 
 class Command(BaseCommand):
