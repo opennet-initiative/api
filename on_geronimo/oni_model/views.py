@@ -1,5 +1,3 @@
-import datetime
-
 from django.core.exceptions import SuspiciousOperation
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
@@ -16,12 +14,6 @@ from on_geronimo.oni_model.models import (
 from on_geronimo.oni_model.serializer import (
     AccessPointSerializer, AccessPointSiteSerializer, RoutingLinkSerializer,
     EthernetNetworkInterfaceSerializer)
-
-
-# nach dreißig Tagen gelten APs nicht mehr als "flapping", sondern als "offline"
-# Vorsicht: Werte synchron halten mit der "flapping"-Unterscheidung im der on-map-Kartendarstellung
-OFFLINE_AGE_MINUTES = 30 * 24 * 60
-FLAPPING_AGE_MINUTES = 30
 
 
 class DetailView(mixins.RetrieveModelMixin,
@@ -92,44 +84,19 @@ class OnlineStatusFilter(BaseFilterBackend):
     """ filter objects by the a timestamp attribute into all/online/flapping/offline categories
 
     Query arguments:
-        * status: online/flapping/offline
-    Attributes:
-        * last_online_timestamp_field: name of the timestamp field (default: "timestamp")
+        * status: all/online/flapping/offline
     """
-
-    def _filter_by_timestamp_age(self, queryset, timedelta_minutes, timestamp_attribute):
-        """ bei Listen-Darstellugen filtern wir nach Alter
-
-        Ein positiver "timedelta_minutes"-Wert führt zur Auslieferung von Objekten, deren
-        Zeitstempel älter als die angegebene Anzahl von Minuten ist. Ein negativer Wert liefert die
-        Objekte aus, deren Zeitstempel jünger ist (vergleichbar mit der "-mtime"-Konvention).
-        """
-        limit_timestamp = datetime.datetime.now() - datetime.timedelta(
-            minutes=abs(timedelta_minutes))
-        # different objects use different attribute names for their timestamp
-        if timedelta_minutes > 0:
-            cmp_func = "lte"
-        else:
-            cmp_func = "gte"
-        args = {"%s__%s" % (timestamp_attribute, cmp_func): limit_timestamp}
-        return queryset.filter(**args)
 
     def filter_queryset(self, request, queryset, view):
         wanted_status = request.query_params.get('status', 'online')
-        timestamp_field = getattr(view, "last_online_timestamp_field", "timestamp")
         if wanted_status == "all":
             return queryset
         elif wanted_status == "online":
-            return self._filter_by_timestamp_age(
-                queryset, -FLAPPING_AGE_MINUTES, timestamp_field)
+            return queryset.model.online_objects.filter_by_status(queryset)
         elif wanted_status == "offline":
-            return self._filter_by_timestamp_age(
-                queryset, OFFLINE_AGE_MINUTES, timestamp_field)
+            return queryset.model.offline_objects.filter_by_status(queryset)
         elif wanted_status == "flapping":
-            flapping_or_dead = self._filter_by_timestamp_age(
-                queryset, FLAPPING_AGE_MINUTES, timestamp_field)
-            return self._filter_by_timestamp_age(
-                flapping_or_dead, -OFFLINE_AGE_MINUTES, timestamp_field)
+            return queryset.model.flapping_objects.filter_by_status(queryset)
         else:
             return []
 
@@ -179,7 +146,6 @@ class AccessPointList(GeoJSONListAPIView):
     bbox_filter_field = 'position'
     filter_backends = (OnlineStatusFilter, InBBoxFilter)
     queryset = AccessPoint.objects.all()
-    last_online_timestamp_field = "lastseen_timestamp"
 
 
 class AccessPointDetail(DetailView):

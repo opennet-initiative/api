@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.db.models.query_utils import Q
 from django.contrib.gis.db import models as gismodels
@@ -11,6 +13,56 @@ from model_utils.fields import StatusField
 from model_utils import Choices
 
 from .utils import get_center_of_points
+
+
+class AliveBaseManager(models.Manager):
+
+    # nach dreißig Tagen gelten APs nicht mehr als "flapping", sondern als "offline"
+    # Vorsicht: Werte synchron halten mit der "flapping"-Unterscheidung im der
+    # on-map-Kartendarstellung.
+    OFFLINE_AGE_MINUTES = 30 * 24 * 60
+    FLAPPING_AGE_MINUTES = 30
+
+    # Ein positiver "timedelta_minutes"-Wert führt zur Auslieferung von Objekten, deren
+    # Zeitstempel älter als die angegebene Anzahl von Minuten ist. Ein negativer Wert liefert die
+    # Objekte aus, deren Zeitstempel jünger ist (vergleichbar mit der "-mtime"-Konvention).
+    timedelta_minutes = None
+
+    def __init__(self, timestamp_fieldname):
+        self.timestamp_fieldname = timestamp_fieldname
+        super().__init__()
+
+    def _filter_by_age(self, queryset, timedelta_minutes):
+        """ bei Listen-Darstellugen filtern wir nach Alter """
+        queryset
+        limit_timestamp = datetime.datetime.now() - datetime.timedelta(
+            minutes=abs(timedelta_minutes))
+        # different objects use different attribute names for their timestamp
+        if timedelta_minutes > 0:
+            cmp_func = "lte"
+        else:
+            cmp_func = "gte"
+        args = {"%s__%s" % (self.timestamp_fieldname, cmp_func): limit_timestamp}
+        return queryset.filter(**args)
+
+    def get_queryset(self):
+        return self.filter_by_status(super().get_queryset())
+
+
+class OnlineManager(AliveBaseManager):
+    def filter_by_status(self, queryset):
+        return self._filter_by_age(queryset, -self.FLAPPING_AGE_MINUTES)
+
+
+class OfflineManager(AliveBaseManager):
+    def filter_by_status(self, queryset):
+        return self._filter_by_age(queryset, self.OFFLINE_AGE_MINUTES)
+
+
+class FlappingManager(AliveBaseManager):
+    def filter_by_status(self, queryset):
+        flapping_or_dead = self._filter_by_age(queryset, self.FLAPPING_AGE_MINUTES)
+        return self._filter_by_age(flapping_or_dead, -self.OFFLINE_AGE_MINUTES)
 
 
 class AccessPointSite(models.Model):
@@ -46,11 +98,15 @@ class AccessPoint(models.Model):
     DISTRIBUTION_CHOICES = Choices("OpenWrt", "AirOS", "Lede", "LEDE")
     SERVICES_SORTING_CHOICES = Choices("manual", "hop", "etx")
 
+    objects = GeoManager()
+    online_objects = OnlineManager("lastseen_timestamp")
+    offline_objects = OfflineManager("lastseen_timestamp")
+    flapping_objects = FlappingManager("lastseen_timestamp")
+
     main_ip = models.GenericIPAddressField(primary_key=True)
     post_address = models.TextField(null=True)
     antenna = models.TextField(null=True)
     position = gismodels.PointField(null=True, blank=True)
-    objects = GeoManager()
     owner = models.TextField(null=True)
     # Geraete-Modell (im Wiki eingetragen)
     device_model = models.TextField(null=True)
@@ -259,6 +315,11 @@ class RoutingLink(models.Model):
     Interfaces beziehen, sondern immer auf diejenigen Interfaces der beteiligten APs, die mit der
     Main-IP des AP konfiguriert sind (siehe https://dev.opennet-initiative.de/ticket/212).
     """
+
+    objects = models.Manager()
+    online_objects = OnlineManager("timestamp")
+    offline_objects = OfflineManager("timestamp")
+    flapping_objects = FlappingManager("timestamp")
 
     timestamp = models.DateTimeField(auto_now=True)
 
