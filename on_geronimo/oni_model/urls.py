@@ -20,6 +20,7 @@ urlpatterns = [
     url(iface_path_prefix + "/accesspoint/$", views.NetworkInterfaceAccessPoint.as_view(),
         name="interface-accesspoint"),
     url(r'^v1/link/$', cache_page(150)(views.AccessPointLinksList.as_view()), name="link-list"),
+    url(r'^v1/link/(?P<pk>\d+)$', views.AccessPointLinkDetail.as_view(), name="link-details"),
     url(r'^v1/site/$', views.AccessPointSiteList.as_view(), name="site-list"),
     url(r'^v1/site/(?P<pk>\d+)$', views.AccessPointSiteDetail.as_view(), name="site-details"),
 ]
