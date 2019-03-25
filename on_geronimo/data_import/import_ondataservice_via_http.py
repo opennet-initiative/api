@@ -58,8 +58,8 @@ class TemporaryRetrievalError(ValueError):
 def parse_body(body):
     accesspoint_data = None
     interfaces_data = []
-    for line in body.strip().splitlines():
-        line = line.replace(b"\t", b" ")
+    for line in body.decode().strip().splitlines():
+        line = line.replace("\t", " ")
         try:
             line_data = json.loads(line)
         except ValueError:
