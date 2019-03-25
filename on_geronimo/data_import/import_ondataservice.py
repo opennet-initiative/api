@@ -157,6 +157,9 @@ def _parse_dhcp_leasetime_seconds(text):
 
 # "data" ist ein Dictionary mit den Inhalten aus der ondataservice-sqlite-Datenbank
 def import_accesspoint(data):
+    # firmware version 0.4-5 used "on_olsr_mainip" instead of "on_olsrd_mainip"
+    if "on_olsr_mainip" in data:
+        data["on_olsrd_mainip"] = data.pop("on_olsr_mainip")
     main_ip = data["on_olsrd_mainip"]
     if not main_ip:
         return
