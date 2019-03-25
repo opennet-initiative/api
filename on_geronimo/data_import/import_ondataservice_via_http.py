@@ -188,6 +188,7 @@ def import_from_ondataservice_via_http(parallel_count=20, dry_run=False, stdout=
 
     async def retrieve_from_all():
         parsed_accesspoints = asyncio.Queue()
+
         async def handle_incoming_results():
             while True:
                 item = await parsed_accesspoints.get()
