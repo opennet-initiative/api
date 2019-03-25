@@ -204,13 +204,13 @@ def import_from_ondataservice_via_http(parallel_count=20, dry_run=False, stdout=
                             import_network_interface(item.accesspoint.main_ip, iface_data)
                 results.append(item)
 
-        task = asyncio.create_task(handle_incoming_results())
+        injection_task = asyncio.ensure_future(handle_incoming_results())
         await asyncio.gather(*[
-            asyncio.create_task(retrieve_ondataservice_worker(
+            asyncio.ensure_future(retrieve_ondataservice_worker(
                 unprocessed_accesspoints, parsed_accesspoints, failures, stdout, stderr))
             for _ in range(parallel_count)])
         await parsed_accesspoints.put(None)
-        asyncio.ensure_future(task)
+        asyncio.gather(injection_task)
     loop.run_until_complete(retrieve_from_all())
     loop.close()
     print("Successes: {:d}".format(len(results)))
