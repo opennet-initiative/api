@@ -56,8 +56,9 @@ def _parse_nodes_data(conn):
     ifaces_columns = _get_table_meta(conn, "ifaces")
     for iface in conn.execute("SELECT * FROM ifaces").fetchall():
         data = get_row_dict(iface, ifaces_columns)
+        main_ip = data.pop("mainip")
         try:
-            import_network_interface(data)
+            import_network_interface(main_ip, data)
         except ValueError:
             print("Failed to update interface %s: %s" % (iface, data))
             raise
@@ -213,8 +214,7 @@ def import_accesspoint(data):
 
 
 # "data" ist ein Dictionary mit den Inhalten aus der ondataservice-sqlite-Datenbank
-def import_network_interface(data):
-    main_ip = data["mainip"]
+def import_network_interface(main_ip, data):
     # mehrere IP-Adressen sind zulaessig: "192.168.3.88/16 fe80::32b5:c2ff:fe3e:8736/64"
     addresses = []
     for address_string in data.pop("ip_addr").split():
