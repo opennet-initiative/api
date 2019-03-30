@@ -1,12 +1,20 @@
-= Installationsanleitung =
+= Geronimo =
 
-== Installation mit deb-Paketen ==
+Geronimo verwaltet die Daten eines Mesh-Netzwerks mit besonderem Fokus auf die Infrastruktur
+der [Opennet Initiative e.V.](https://opennet-initiative.de/).
 
-* Pakete bauen: `make dist-deb`
-* Pakete bauen und halb-automatisch auf entferntem Host installieren:
-  `make deploy-deb DEPLOY_TARGET=root@example.org`
+Die Django-basierte Web-Anwendung erfüllt folgende Aufgaben:
 
-== Manuelle Installation (auf Debian) ==
+* Sammeln von Daten aus verschiedenen Quellen (OLSR, ondataservice, Wiki)
+* Bereitstellung von Informationen mittels einer API
+* Zusammenfassung von relevanten Informationen
+
+Alle Informationen werden in einer Datenbank dauerhaft gespeichert.
+
+
+= Abhängigkeiten installieren =
+
+== Als Debian-Pakete ==
 
 ```shell
 apt install python3-django-filters python3-django-model-utils python3-djangorestframework-gis \
@@ -16,13 +24,14 @@ cd on_geronimo
 ```
 
 
-== Manuelle Installation (virtualenv/pip) ==
+== Via virtualenv/pip ==
 
 ```shell
 apt install python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin
 git clone git@dev.opennet-initiative.de:on_geronimo.git
 cd on_geronimo
 make virtualenv-update
+. build/venv/bin/activate
 ```
 
 
@@ -36,21 +45,17 @@ make virtualenv-update
 = Manueller Datenimport =
 
 * `./manage.py import_wiki`
-* `./manage.py import_olsr`
-* `./manage.py import_ondataservice SQLITE_DATABASE`
+* `./manage.py import_olsr http://192.168.2.76:2006`
+* `./manage.py import_ondataservice examples/ondataservice.db`
 
 
 = URL-Beispiele =
 
-* http://api.opennet-initiative.de/api/v1/accesspoint
-* http://api.opennet-initiative.de/api/v1/accesspoint/192.168.2.151
-* http://api.opennet-initiative.de/api/v1/accesspoint/192.168.2.151/interfaces
-* http://api.opennet-initiative.de/api/v1/accesspoint/192.168.2.151/links
-* http://api.opennet-initiative.de/api/v1/link
-* http://api.opennet-initiative.de/api/v1/interface
+Siehe https://api.opennet-initiative.de/
 
 
 = Entwicklung =
+* Prüfung des Code-Stils: `make lint`
+* triviale Tests: `make test`
 * deb-Paketerstellung: `make dist-deb`
 * Release erstellen: `make release-{patch,minor,major}`
-* triviale Tests: `make test`
