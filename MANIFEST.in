@@ -1,0 +1,6 @@
+include Changelog
+include LICENSE
+include README.md
+
+graft on_geronimo
+global-exclude *.py[co]
