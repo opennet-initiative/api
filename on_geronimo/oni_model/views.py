@@ -88,6 +88,8 @@ class OnlineStatusFilter(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         wanted_status = request.query_params.get('status', 'online')
         if wanted_status == "all":
+            # This set contains all objects without a timestamp (e.g. accesspoints that went
+            # offline before the API started to collect data.
             return queryset
         elif wanted_status == "online":
             return queryset.model.online_objects.filter_by_status(queryset)
