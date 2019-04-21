@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from django.db import models
 from django.db.models.query_utils import Q
@@ -67,6 +68,55 @@ class FlappingManager(AliveBaseManager):
         return self._filter_by_age(flapping_or_dead, -self.OFFLINE_AGE_MINUTES)
 
 
+class FirmwareVersionQuerySet(models.QuerySet):
+
+    VERSION_REGEXES = {
+        "airos": re.compile(r"^opennet0\.(\d)\.sdk$"),
+        "openwrt": re.compile(
+            r"^(?P<main>\d+(?:\.\d+)+)(?:-unstable)?-(?P<sub>\d+)(?:-[a-f\d]+)?$"),
+    }
+    VERSION_FIELDNAME = "opennet_version"
+
+    @classmethod
+    def _get_comparable_tuple_for_version(cls, version_string):
+        print(version_string)
+        match = cls.VERSION_REGEXES["airos"].match(version_string)
+        if match:
+            return (-1, int(match.groups()[0]))
+        match = cls.VERSION_REGEXES["openwrt"].match(version_string)
+        if match:
+            version_numbers = [int(value) for value in match.groupdict()["main"].split(".")]
+            sub_version = int(match.groupdict()["sub"])
+            return tuple(version_numbers + [sub_version])
+        return ()
+
+    @classmethod
+    def _get_all_versions(cls, queryset):
+        return {item[cls.VERSION_FIELDNAME] for item in queryset.values(cls.VERSION_FIELDNAME)}
+
+    def _filter_version_before_or_after(cls, queryset, reference_version: str, only_before: bool):
+        reference_tuple = cls._get_comparable_tuple_for_version(reference_version)
+        all_versions = cls._get_all_versions(queryset)
+        older_versions = {
+            version for version in all_versions
+            if version and (reference_tuple > cls._get_comparable_tuple_for_version(version))}
+        if only_before:
+            valid_versions = older_versions
+        else:
+            # choose only versions after the reference_version
+            valid_versions = all_versions.difference(older_versions.union(reference_version))
+        return Q(**{"{}__in".format(cls.VERSION_FIELDNAME): valid_versions})
+
+    def is_version(self, queryset, value):
+        return queryset.filter(**{self.VERSION_FIELDNAME: value})
+
+    def before_version(self, queryset, value):
+        return queryset.filter(self._filter_version_before_or_after(queryset, value, True))
+
+    def after_version(self, queryset, value):
+        return queryset.filter(self._filter_version_before_or_after(queryset, value, False))
+
+
 class AccessPointSite(models.Model):
     """ A location hosting multiple AccessPoints
 
@@ -108,6 +158,7 @@ class AccessPoint(models.Model):
     online_objects = OnlineManager("lastseen_timestamp")
     offline_objects = OfflineManager("lastseen_timestamp")
     flapping_objects = FlappingManager("lastseen_timestamp")
+    firmware_version_objects = FirmwareVersionQuerySet.as_manager()
 
     main_ip = models.GenericIPAddressField(primary_key=True)
     post_address = models.TextField(null=True)

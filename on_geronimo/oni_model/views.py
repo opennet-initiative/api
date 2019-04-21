@@ -101,6 +101,23 @@ class OnlineStatusFilter(BaseFilterBackend):
             return queryset.none()
 
 
+class FirmwareVersionFilter(BaseFilterBackend):
+
+    def filter_queryset(self, request, queryset, view):
+        version_queryset = queryset.model.firmware_version_objects
+        wanted_version = request.query_params.get("firmware_version")
+        # allow filtering for "no version set" (empty string)
+        if wanted_version is not None:
+            queryset = version_queryset.is_version(queryset, wanted_version or None)
+        before_version = request.query_params.get("firmware_version__before")
+        if before_version:
+            queryset = version_queryset.before_version(queryset, before_version)
+        after_version = request.query_params.get("firmware_version__after")
+        if after_version:
+            queryset = version_queryset.after_version(queryset, after_version)
+        return queryset
+
+
 class LinkAccessPointInBBoxFilter(InBBoxFilter):
     """ filter links based on a bounding box
 
@@ -144,7 +161,7 @@ class AccessPointList(GeoJSONListAPIView):
     geojson_serializer_extra_fields = ["main_ip"]
     geojson_serializer_ignore_fields = ["interfaces"]
     bbox_filter_field = "position"
-    filter_backends = (OnlineStatusFilter, InBBoxFilter)
+    filter_backends = (OnlineStatusFilter, FirmwareVersionFilter, InBBoxFilter)
     queryset = AccessPoint.objects.all()
 
 

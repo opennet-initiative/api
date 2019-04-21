@@ -25,6 +25,9 @@ Willkommen auf api.opennet-initiative.de!
 <ul>
 <li><a href="{% url 'accesspoint-list' %}">{% url 'accesspoint-list' %}</a></li>
 <li><a href="{% url 'accesspoint-list' %}?status=flapping">{% url 'accesspoint-list' %}?status=flapping</a> (online / flapping / offline)</li>
+<li><a href="{% url 'accesspoint-list' %}?firmware_version=0.5.3-1992">{% url 'accesspoint-list' %}?firmware_version=0.5.3-1992</a></li>
+<li><a href="{% url 'accesspoint-list' %}?firmware_version__before=0.5.3-1992">{% url 'accesspoint-list' %}?firmware_version__before=0.5.3-1992</a></li>
+<li><a href="{% url 'accesspoint-list' %}?firmware_version__after=0.5.3-1992">{% url 'accesspoint-list' %}?firmware_version__after=0.5.3-1992</a></li>
 <li><a href="{% url 'accesspoint-details' '192.168.1.11' %}">{% url 'accesspoint-details' '192.168.1.11' %}</a></li>
 <li><a href="{% url 'accesspoint-details' '192.168.1.11' %}?format=json">{% url 'accesspoint-details' '192.168.1.11' %}?format=json</a></li>
 <li><a href="{% url 'accesspoint-links' '192.168.1.11' %}">{% url 'accesspoint-links' '192.168.1.11' %}</a></li>
