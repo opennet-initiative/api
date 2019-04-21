@@ -33,17 +33,19 @@ class AliveBaseManager(models.Manager):
         super().__init__()
 
     def _filter_by_age(self, queryset, timedelta_minutes):
-        """ bei Listen-Darstellugen filtern wir nach Alter """
-        queryset
+        """ bei Listen-Darstellugen filtern wir nach dem Alter der letzten Erreichbarkeit """
         limit_timestamp = datetime.datetime.now() - datetime.timedelta(
             minutes=abs(timedelta_minutes))
         # different objects use different attribute names for their timestamp
         if timedelta_minutes > 0:
-            cmp_func = "lte"
+            # liefere Objekte zurück, die sich vor weniger als "timedelta_minutes" gemeldet haben
+            args = {"{}__lte".format(self.timestamp_fieldname): limit_timestamp}
+            condition = Q(**args)
         else:
-            cmp_func = "gte"
-        args = {"%s__%s" % (self.timestamp_fieldname, cmp_func): limit_timestamp}
-        return queryset.filter(**args)
+            # liefere Objekte zurück, die sich noch nie oder vor längerer Zeit gemeldet haben
+            args = {"{}__gte".format(self.timestamp_fieldname): limit_timestamp}
+            condition = Q(**args) | Q(**{"{}__isnull".format(self.timestamp_fieldname): True})
+        return queryset.filter(condition)
 
     def get_queryset(self):
         return self.filter_by_status(super().get_queryset())
