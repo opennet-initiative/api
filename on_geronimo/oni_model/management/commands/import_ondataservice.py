@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = "Importieren der AP-Daten aus einer lokalen ondataservice-Datenbank"
 
     def add_arguments(self, parser):
-        parser.add_argument('database_file', nargs='?', type=argparse.FileType("r"))
+        parser.add_argument("database_file", nargs="?", type=argparse.FileType("r"))
 
     def handle(self, *args, **options):
         kwargs = {}

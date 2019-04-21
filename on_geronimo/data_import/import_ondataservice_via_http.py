@@ -34,7 +34,7 @@ def suppress_ssl_exception_report():
         old_handler_fn = old_handler
 
     def ignore_exc(_loop, ctx):
-        exc = ctx.get('exception')
+        exc = ctx.get("exception")
         if isinstance(exc, ssl.SSLError):
             return
         old_handler_fn(loop, ctx)

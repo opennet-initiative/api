@@ -39,7 +39,7 @@ class GeoJSONListAPIView(generics.ListAPIView):
     """
 
     def get_serializer_class(self):
-        wanted_format = self.request.query_params.get('data_format', None)
+        wanted_format = self.request.query_params.get("data_format", None)
         if wanted_format == "geojson":
             feature_fields = []
             ignore_fields = getattr(self, "geojson_serializer_ignore_fields", [])
@@ -86,7 +86,7 @@ class OnlineStatusFilter(BaseFilterBackend):
     """
 
     def filter_queryset(self, request, queryset, view):
-        wanted_status = request.query_params.get('status', 'online')
+        wanted_status = request.query_params.get("status", "online")
         if wanted_status == "all":
             # This set contains all objects without a timestamp (e.g. accesspoints that went
             # offline before the API started to collect data.
@@ -143,7 +143,7 @@ class AccessPointList(GeoJSONListAPIView):
     # primary key, if it is not mentioned separately.
     geojson_serializer_extra_fields = ["main_ip"]
     geojson_serializer_ignore_fields = ["interfaces"]
-    bbox_filter_field = 'position'
+    bbox_filter_field = "position"
     filter_backends = (OnlineStatusFilter, InBBoxFilter)
     queryset = AccessPoint.objects.all()
 

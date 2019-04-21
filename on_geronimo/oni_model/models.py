@@ -170,7 +170,7 @@ class AccessPoint(models.Model):
         return RoutingLink.objects.filter(endpoints__interface__accesspoint=self)
 
     def __str__(self):
-        return 'AP %s owned by %s' % (self.main_ip, self.owner)
+        return "AP %s owned by %s" % (self.main_ip, self.owner)
 
 
 class EthernetNetworkInterface(models.Model):
@@ -264,7 +264,7 @@ class NetworkInterfaceAddress(models.Model):
 
     # TODO: enthaelt das Django-Datenmodell bereits die Address-Family?
     address = models.GenericIPAddressField()
-    family = StatusField(choices_name='ADRESS_FAMILIES')
+    family = StatusField(choices_name="ADRESS_FAMILIES")
     interface = models.ForeignKey(EthernetNetworkInterface, related_name="addresses",
                                   on_delete=models.CASCADE)
     netmask_prefixlen = models.IntegerField()
@@ -289,26 +289,26 @@ class NetworkInterfaceAddress(models.Model):
 
 class WifiNetworkInterfaceAttributes(models.Model):
     """Eine der WLAN-Schnittstellen eines APs"""
-    CRYPT_CHOICES = Choices('Plain', 'WEP', 'WPA-PSK', 'WPA2-PSK')
-    MODE_CHOICES = Choices('master', 'client', 'adhoc', 'monitor')
+    CRYPT_CHOICES = Choices("Plain", "WEP", "WPA-PSK", "WPA2-PSK")
+    MODE_CHOICES = Choices("master", "client", "adhoc", "monitor")
     # die 802.11-Suffixe ("bgn" usw. werden beim Import alphabetisch sortiert)
-    HWMODE_CHOICES = Choices('802.11bgn', '802.11an', '802.11bg', '802.11abg')
-    WIFI_DRIVER_CHOICES = Choices('nl80211', 'wl')
+    HWMODE_CHOICES = Choices("802.11bgn", "802.11an", "802.11bg", "802.11abg")
+    WIFI_DRIVER_CHOICES = Choices("nl80211", "wl")
 
     interface = models.ForeignKey(EthernetNetworkInterface, primary_key=True,
                                   related_name="wifi_attributes", on_delete=models.CASCADE)
     wifi_ssid = models.CharField(max_length=32, null=True)
     wifi_bssid = models.CharField(max_length=17, null=True)
-    wifi_driver = StatusField(choices_name='WIFI_DRIVER_CHOICES', null=True)
-    wifi_hwmode = StatusField(choices_name='HWMODE_CHOICES', null=True)
-    wifi_mode = StatusField(choices_name='MODE_CHOICES', null=True)
+    wifi_driver = StatusField(choices_name="WIFI_DRIVER_CHOICES", null=True)
+    wifi_hwmode = StatusField(choices_name="HWMODE_CHOICES", null=True)
+    wifi_mode = StatusField(choices_name="MODE_CHOICES", null=True)
     wifi_channel = models.PositiveSmallIntegerField(null=True)
     wifi_freq = models.DecimalField(max_digits=6, decimal_places=3, null=True)
     wifi_transmit_power = models.PositiveSmallIntegerField(null=True)
     wifi_signal = models.SmallIntegerField(null=True)
     wifi_noise = models.SmallIntegerField(null=True)
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1, null=True)
-    wifi_crypt = StatusField(choices_name='CRYPT_CHOICES', null=True)
+    wifi_crypt = StatusField(choices_name="CRYPT_CHOICES", null=True)
     wifi_vaps_enabled = models.NullBooleanField(default=False)
 
 

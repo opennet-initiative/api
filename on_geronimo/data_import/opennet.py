@@ -5,7 +5,7 @@ import re
 import ipaddress as ipaddr
 
 
-OUR_NETWORKS = ['192.168.0.0/16']
+OUR_NETWORKS = ["192.168.0.0/16"]
 
 
 def is_our_network(network):
