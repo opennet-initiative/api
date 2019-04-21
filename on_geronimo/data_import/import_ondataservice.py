@@ -101,6 +101,9 @@ def _update_value(target, attribute, raw_value):
             # TODO: ab Django 1.8 gibt es DurationField - fuer timedelta
             # value = datetime.timedelta(seconds=float(raw_value))
             value = float(raw_value) if raw_value else None
+    elif attribute == "firmware_release_version":
+        # replace empty strings with None
+        value = raw_value if raw_value else None
     elif attribute == "opennet_services_sorting":
         # wir nennen die "metric"-Sortierung heute "hop"
         value = "hop" if raw_value == "metric" else raw_value
