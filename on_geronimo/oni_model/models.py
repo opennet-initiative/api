@@ -37,14 +37,13 @@ class AliveBaseManager(models.Manager):
         """ bei Listen-Darstellugen filtern wir nach dem Alter der letzten Erreichbarkeit """
         limit_timestamp = datetime.datetime.now() - datetime.timedelta(
             minutes=abs(timedelta_minutes))
-        # different objects use different attribute names for their timestamp
-        if timedelta_minutes > 0:
+        if timedelta_minutes < 0:
             # liefere Objekte zurück, die sich vor weniger als "timedelta_minutes" gemeldet haben
-            args = {"{}__lte".format(self.timestamp_fieldname): limit_timestamp}
+            args = {"{}__gte".format(self.timestamp_fieldname): limit_timestamp}
             condition = Q(**args)
         else:
             # liefere Objekte zurück, die sich noch nie oder vor längerer Zeit gemeldet haben
-            args = {"{}__gte".format(self.timestamp_fieldname): limit_timestamp}
+            args = {"{}__lte".format(self.timestamp_fieldname): limit_timestamp}
             condition = Q(**args) | Q(**{"{}__isnull".format(self.timestamp_fieldname): True})
         return queryset.filter(condition)
 
