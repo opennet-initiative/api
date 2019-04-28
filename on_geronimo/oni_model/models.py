@@ -71,8 +71,9 @@ class FirmwareVersionQuerySet(models.QuerySet):
 
     VERSION_REGEXES = {
         "airos": re.compile(r"^opennet0\.(\d)\.sdk$"),
-        "openwrt": re.compile(
-            r"^(?P<main>\d+(?:\.\d+)+)(?:-unstable)?-(?P<sub>\d+)(?:-[a-f\d]+)?$"),
+        "openwrt-with-build-id": re.compile(
+            r"^(?P<main>\d+(?:\.\d+)+)(?:-(?P<flag>unstable))?-(?P<sub>\d+)(?:-[a-f\d]+)?$"),
+        "generic": re.compile(r"^(\d+(?:\.\d+)*)$"),
     }
     VERSION_FIELDNAME = "opennet_version"
 
@@ -82,11 +83,15 @@ class FirmwareVersionQuerySet(models.QuerySet):
         match = cls.VERSION_REGEXES["airos"].match(version_string)
         if match:
             return (-1, int(match.groups()[0]))
-        match = cls.VERSION_REGEXES["openwrt"].match(version_string)
+        match = cls.VERSION_REGEXES["openwrt-with-build-id"].match(version_string)
         if match:
             version_numbers = [int(value) for value in match.groupdict()["main"].split(".")]
             sub_version = int(match.groupdict()["sub"])
-            return tuple(version_numbers + [sub_version])
+            flag_version = -1 if match.groupdict()["flag"] == "unstable" else 0
+            return tuple(version_numbers + [flag_version, sub_version])
+        match = cls.VERSION_REGEXES["generic"].match(version_string)
+        if match:
+            return tuple([int(value) for value in match.groups()[0].split(".")] + [0])
         return ()
 
     @classmethod
