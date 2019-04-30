@@ -135,12 +135,16 @@ async def retrieve_ondataservice_worker(incoming_queue, results, failures, stdou
 @transaction.atomic
 @suppress_ssl_exception_report()
 def import_from_ondataservice_via_http(parallel_count=20, dry_run=False, stdout=sys.stdout,
-                                       stderr=sys.stderr):
+                                       stderr=sys.stderr, wanted_addresses=None):
     loop = asyncio.get_event_loop()
     unprocessed_accesspoints = asyncio.Queue()
     results = []
     failures = []
-    for accesspoint in AccessPoint.online_objects.order_by("main_ip"):
+    if wanted_addresses is None:
+        queryset = AccessPoint.online_objects
+    else:
+        queryset = AccessPoint.objects.filter(main_ip__in=wanted_addresses)
+    for accesspoint in queryset.order_by("main_ip"):
         unprocessed_accesspoints.put_nowait(accesspoint)
 
     async def retrieve_from_all():

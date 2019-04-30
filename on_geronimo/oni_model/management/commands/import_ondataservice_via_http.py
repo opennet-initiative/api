@@ -8,6 +8,9 @@ class Command(BaseCommand):
 
     help = "Herunterladen von AP-Daten (im ondataservice-Format) von den Acesspoints"
 
-    def handle(self, *args, **options):
-        import_from_ondataservice_via_http(20, dry_run=False,
-                                           stdout=self.stdout, stderr=self.stderr)
+    def add_arguments(self, parser):
+        parser.add_argument("addresses", nargs="*", type=str)
+
+    def handle(self, *args, addresses=None, **options):
+        import_from_ondataservice_via_http(
+            stdout=self.stdout, stderr=self.stderr, wanted_addresses=(addresses or None))
