@@ -15,6 +15,8 @@ import on_geronimo.oni_model.models
 # "lambda" hilft fuer die verzoegerte Namensaufloesung der Parser-Klassen
 NODE_WIKI_PAGES = (
     (lambda: AccessPointTable, "https://wiki.opennet-initiative.de/wiki/Opennet_Nodes"),
+    # The "other nodes" table is distinguished from the AccessPointTable by its number of columns.
+    (lambda: ServerTable, "https://wiki.opennet-initiative.de/wiki/Opennet_Nodes"),
     (lambda: ServerTable, "https://wiki.opennet-initiative.de/wiki/Server"),
 )
 
