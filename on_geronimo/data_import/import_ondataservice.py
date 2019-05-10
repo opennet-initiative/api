@@ -190,6 +190,7 @@ def import_accesspoint(data):
                 "on_id": "opennet_id",
                 "on_olsrd_status": "olsrd_running",
                 "on_olsrd_mainip": "olsrd_main_ip",
+                "on_ipv6_mainip": "main_ipv6",
 
                 "on_wifidog_status": "opennet_captive_portal_enabled",
                 "on_wifidog_id": "opennet_captive_portal_name",

@@ -165,6 +165,7 @@ class AccessPoint(models.Model):
     firmware_version_objects = FirmwareVersionQuerySet.as_manager()
 
     main_ip = models.GenericIPAddressField(primary_key=True)
+    main_ipv6 = models.GenericIPAddressField(protocol="IPv6", null=True)
     post_address = models.TextField(null=True)
     antenna = models.TextField(null=True)
     position = gismodels.PointField(null=True, blank=True)
