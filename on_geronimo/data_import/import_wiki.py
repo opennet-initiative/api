@@ -19,13 +19,10 @@ NODE_WIKI_PAGES = (
 )
 
 
-# We need to add 'object' explicitly since HTMLParser.HTMLParser seems to be
-# an old-style class (not inherited from 'object'). This causes the exception
-# 'TypeError: must be type, not classobj' during the 'super' call.
-class _MediaWikiNodeTableParser(html.parser.HTMLParser, object):
+class _MediaWikiNodeTableParser(html.parser.HTMLParser):
 
     def __init__(self):
-        super(_MediaWikiNodeTableParser, self).__init__()
+        super().__init__()
         self._rows = []
         self._row_data = None
         self._column_data = None
