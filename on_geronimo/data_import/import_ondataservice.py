@@ -166,6 +166,11 @@ def import_accesspoint(data):
     main_ip = data["on_olsrd_mainip"]
     if not main_ip:
         return
+    # fill some default values
+    for key, default_value in {
+                "on_ipv6_mainip": "",
+            }.items():
+        data.setdefault(key, default_value)
     node, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
     for key_from, key_to in {
                 "sys_board": "device_board",
