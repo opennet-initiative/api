@@ -1,4 +1,5 @@
 from django.core.exceptions import SuspiciousOperation
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework import mixins
@@ -23,6 +24,34 @@ class DetailView(mixins.RetrieveModelMixin,
     # make this an uninstanceable class
     class Meta:
         abstract = True
+
+
+class AccessPointMixin:
+    """ allow the selection of an accesspoint with either its IPv4 or IPv6 address """
+
+    # allow multiple primary keys for selecting an accesspoint
+    # These keys must be used as pattern names in the URL specification.
+    lookup_fields = ("main_ipv6", "main_ip")
+
+    def get_accesspoint(self):
+        key = self.lookup_field
+        value = self.kwargs[self.lookup_field]
+        if value is None:
+            raise Http404
+        obj = get_object_or_404(AccessPoint.objects, **{key: value})
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    @property
+    def lookup_field(self):
+        for lookup_field in self.lookup_fields:
+            if self.kwargs.get(lookup_field) is not None:
+                break
+        return lookup_field
+
+    @property
+    def lookup_kwarg(self):
+        return self.lookup_field
 
 
 class GeoJSONListAPIView(generics.ListAPIView):
@@ -164,7 +193,7 @@ class AccessPointList(GeoJSONListAPIView):
     queryset = AccessPoint.objects.all()
 
 
-class AccessPointDetail(DetailView):
+class AccessPointDetail(AccessPointMixin, DetailView):
     """Liefert die Details eines WLAN Accesspoints des Opennets"""
 
     queryset = AccessPoint.objects.all()
@@ -221,15 +250,14 @@ class AccessPointLinksList(GeoJSONListAPIView):
     queryset = RoutingLink.objects.all()
 
 
-class AccessPointLinkDetail(generics.ListAPIView):
+class AccessPointLinkDetail(AccessPointMixin, generics.ListAPIView):
     """Alle Links zu diesem WLAN Accesspoints des Opennets"""
 
     serializer_class = RoutingLinkSerializer
     filter_backends = (OnlineStatusFilter, )
 
     def get_queryset(self):
-        ip = self.kwargs["pk"]
-        ap = get_object_or_404(AccessPoint, main_ip=ip)
+        ap = self.get_accesspoint()
         return ap.get_links()
 
 
@@ -275,7 +303,8 @@ class NetworkInterfaceAccessPoint(DetailView):
         return Response(self.serializer_class(interface.accesspoint).data)
 
 
-class AccessPointInterfacesDetail(mixins.ListModelMixin,
+class AccessPointInterfacesDetail(AccessPointMixin,
+                                  mixins.ListModelMixin,
                                   generics.GenericAPIView):
     """Alle Interfaces eines Accesspoints des Opennets"""
 
@@ -285,10 +314,5 @@ class AccessPointInterfacesDetail(mixins.ListModelMixin,
         return self.list(request, *args, **kwargs)
 
     def get_queryset(self):
-        ip = self.kwargs["pk"]
-        ap = get_object_or_404(AccessPoint, main_ip=ip)
+        ap = self.get_accesspoint()
         return ap.interfaces
-
-    def retrieve(self, request, ip_address=None):
-        ap = get_object_or_404(AccessPoint, main_ip=ip_address)
-        return Response(self.serializer_class(ap.interfaces).data)
