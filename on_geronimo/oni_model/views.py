@@ -15,7 +15,6 @@ from .serializer import (AccessPointSerializer, AccessPointSiteSerializer, Routi
 
 
 class DetailView(mixins.RetrieveModelMixin,
-                 mixins.UpdateModelMixin,
                  generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
@@ -277,7 +276,6 @@ class NetworkInterfaceAccessPoint(DetailView):
 
 
 class AccessPointInterfacesDetail(mixins.ListModelMixin,
-                                  mixins.CreateModelMixin,
                                   generics.GenericAPIView):
     """Alle Interfaces eines Accesspoints des Opennets"""
 
