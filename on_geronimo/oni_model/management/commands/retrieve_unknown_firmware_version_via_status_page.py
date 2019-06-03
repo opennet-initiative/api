@@ -11,14 +11,23 @@ from on_geronimo.oni_model.models import AccessPoint
 
 VERSION_05 = re.compile(
     br'<h2><a id="content" name="content">Opennet[ -]Firmware [Vv]ersion ([^ ]+)')
+AIROS_IDENTIFIER_MAP = {
+    b"/110411.1153/login.css": "opennet0.2.sdk",
+    b"/110622.1735/login.css": "opennet0.4.sdk",
+    b"/110904.1324/login.css": "opennet0.4.sdk",
+    b"/111102.1143/login.css": "opennet0.5.sdk",
+    # real version string: oni_v0.1.9634.120804.0933
+    b"/120803.2222/login.css": "opennet0.6.sdk",
+    # real version string: XM.v5.5.8.0xFF.v29
+    b"/140123.1659/login.css": "opennet0.7.sdk",
+}
 
 
-def parse_firmware_version_via_status_page(host, timeout=5):
+def _retrieve_body_from_url(url, timeout):
     ctx = ssl.SSLContext()
     ctx.check_hostname = False
     try:
-        response = urllib.request.urlopen("http://{}/cgi-bin/luci".format(host), timeout=timeout,
-                                          context=ctx)
+        response = urllib.request.urlopen(url, timeout=timeout, context=ctx)
     except urllib.error.HTTPError:
         # not found or some other failure
         return None
@@ -28,12 +37,21 @@ def parse_firmware_version_via_status_page(host, timeout=5):
     except socket.timeout:
         # SSL connection timeout
         return None
-    body = response.read()
-    match = VERSION_05.search(body)
-    if match:
-        return match.groups()[0].decode()
-    else:
-        return None
+    return response.read()
+
+
+def parse_firmware_version_via_status_page(host, timeout=5):
+    luci_status_body = _retrieve_body_from_url("http://{}/cgi-bin/luci".format(host), timeout)
+    if luci_status_body:
+        match = VERSION_05.search(luci_status_body)
+        if match:
+            return match.groups()[0].decode()
+    airos_login_body = _retrieve_body_from_url("http://{}/login.cgi".format(host), timeout)
+    if airos_login_body:
+        for match_key, version in AIROS_IDENTIFIER_MAP.items():
+            if match_key in airos_login_body:
+                return version
+    return None
 
 
 class Command(BaseCommand):
