@@ -288,7 +288,7 @@ class AccessPointInterfacesList(generics.ListAPIView):
 class NetworkInterfaceDetail(DetailView):
     """Ein Interface mit einer spezifischen IP"""
 
-    lookup_field = "ip_address"
+    lookup_field = "addresses__address"
     queryset = EthernetNetworkInterface.objects.all()
     serializer_class = EthernetNetworkInterfaceSerializer
 
@@ -298,8 +298,8 @@ class NetworkInterfaceAccessPoint(DetailView):
 
     serializer_class = AccessPointSerializer
 
-    def retrieve(self, request, ip_address=None):
-        interface = get_object_or_404(EthernetNetworkInterface, addresses__address=ip_address)
+    def retrieve(self, request, **kwargs):
+        interface = get_object_or_404(EthernetNetworkInterface, **kwargs)
         return Response(self.serializer_class(interface.accesspoint).data)
 
 
