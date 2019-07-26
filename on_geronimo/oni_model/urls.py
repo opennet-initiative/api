@@ -4,7 +4,7 @@ from django.views.decorators.cache import cache_page
 from . import views
 
 
-ap_path_prefix = r"^v1/accesspoint/(?P<main_ip>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|(?P<main_ipv6>[0-9a-fA-F:]+))"
+ap_path_prefix = r"^v1/accesspoint/((?P<main_ip>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))|(?P<main_ipv6>[0-9a-fA-F:]+))"
 iface_path_prefix = r"^v1/interface/(?P<ip_address>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))"
 
 
