@@ -22,7 +22,7 @@ class TestImportWiki(unittest.TestCase):
     HTML_TABLE_FOOTER = "</table>"
 
     def setUp(self):  # noqa: N802
-        self.parser = import_wiki._MediaWikiNodeTableParser()
+        self.parser = import_wiki.AccessPointTable()
 
     def test_full_node_details(self):
         html_node = """
@@ -31,15 +31,21 @@ class TestImportWiki(unittest.TestCase):
             <td> 17:10:04 11.01.15</td>
             <td>Fährstraße Gehlsdorf</td><td>Omni 5dBi</td>
             <td>TP-Link WR1043ND</td>
-            <td>Martin Brettschneider</td>
+            <td>Martin</td>
             <td>olsr.on-i.de</td>
             <td>N54.102187 E12.118521</td></tr><tr>"""
         self.parser.feed(self.HTML_TABLE_HEADER + html_node + self.HTML_TABLE_FOOTER)
         rows = self.parser._rows
         self.assertEqual(len(rows), 1)
-        self.assertListEqual(rows[0], ["AP1.248", "17:10:04 11.01.15", "Fährstraße Gehlsdorf",
-                                       "Omni 5dBi", "TP-Link WR1043ND", "Martin Brettschneider",
-                                       "olsr.on-i.de", "N54.102187 E12.118521"])
+        self.assertDictEqual(rows[0], {
+            "main_ip": "AP1.248",
+            "post_address": "Fährstraße Gehlsdorf",
+            "antenna": "Omni 5dBi",
+            "device": "TP-Link WR1043ND",
+            "owner": "Martin",
+            "notes": "olsr.on-i.de",
+            "latlon": "N54.102187 E12.118521",
+        })
 
     def test_dump_table(self):
         '''parsing a dumped ONI table'''
@@ -50,7 +56,7 @@ class TestImportWiki(unittest.TestCase):
         self.assertGreater(len(rows), 0)
         nodes = {}
         for row in rows:
-            ap_id = row[0]
+            ap_id = row["main_ip"]
             nodes[ap_id] = row
         self.assertIn("AP1.239", nodes.keys())
 
