@@ -4,8 +4,13 @@ from django.views.decorators.cache import cache_page
 from . import views
 
 
-ap_path_prefix = r"^v1/accesspoint/((?P<main_ip>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))|(?P<main_ipv6>[0-9a-fA-F:]+))"
-iface_path_prefix = r"^v1/interface/(?P<addresses__address>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))"
+REGEX_PATTERNS = {
+    "ipv4": r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})",
+    "ipv6": r"[0-9a-fA-F:]+",
+}
+ap_path_prefix = (r"^v1/accesspoint/((?P<main_ip>{ipv4})|(?P<main_ipv6>{ipv6}))"
+                  .format(**REGEX_PATTERNS))
+iface_path_prefix = r"^v1/interface/(?P<addresses__address>{ipv4})".format(**REGEX_PATTERNS)
 
 
 urlpatterns = [
