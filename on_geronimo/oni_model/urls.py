@@ -10,7 +10,7 @@ REGEX_PATTERNS = {
 }
 ap_path_prefix = (r"^v1/accesspoint/((?P<main_ip>{ipv4})|(?P<main_ipv6>{ipv6}))"
                   .format(**REGEX_PATTERNS))
-iface_path_prefix = r"^v1/interface/(?P<addresses__address>{ipv4})".format(**REGEX_PATTERNS)
+iface_path_prefix = r"^v1/interface/(?P<addresses__address>{ipv4}|{ipv6})".format(**REGEX_PATTERNS)
 
 
 urlpatterns = [
