@@ -1,5 +1,11 @@
+import os
 import unittest
+
 from on_geronimo.data_import import import_wiki
+
+
+IMPORT_WIKI_SAMPLE_FILE = os.getenv("IMPORT_WIKI_SAMPLE_FILE",
+                                    os.path.join(os.path.dirname(__file__), "wiki_nodes.html"))
 
 
 class TestImportWiki(unittest.TestCase):
@@ -37,9 +43,8 @@ class TestImportWiki(unittest.TestCase):
 
     def test_dump_table(self):
         '''parsing a dumped ONI table'''
-        f = open("wiki_nodes.html", encoding="UTF-8")
-        content = f.read()
-        f.close()
+        with open(IMPORT_WIKI_SAMPLE_FILE, encoding="UTF-8") as f:
+            content = f.read()
         self.parser.feed(content)
         rows = self.parser._rows
         self.assertGreater(len(rows), 0)

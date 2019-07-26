@@ -1,12 +1,18 @@
+import os
 import unittest
+
 import on_geronimo.data_import.import_olsr as olsr
+
+
+IMPORT_OLSR_SAMPLE_FILE = os.getenv("IMPORT_OLSR_SAMPLE_FILE",
+                                    os.path.join(os.path.dirname(__file__), "olsr.txt"))
 
 
 class OLSRTestcase(unittest.TestCase):
 
     def test_parser_dump(self):
-        f = open("olsr.txt", encoding="ascii")
-        lines = f.read().splitlines()
+        with open(IMPORT_OLSR_SAMPLE_FILE, encoding="ascii") as f:
+            lines = f.read().splitlines()
         tables = olsr._txtinfo_parser(lines, ("routes", "hna", "topology", "mid", "links"))
         self.assertEqual(len(tables), 5)
         self.assertGreater(len(tables["routes"]), 0)
@@ -14,7 +20,6 @@ class OLSRTestcase(unittest.TestCase):
         self.assertGreater(len(tables["topology"]), 0)
         self.assertGreater(len(tables["mid"]), 0)
         self.assertGreater(len(tables["links"]), 0)
-        f.close()
 
 
 if __name__ == "__main__":
