@@ -5,7 +5,7 @@ import on_geronimo.data_import.import_olsr as olsr
 
 
 IMPORT_OLSR_SAMPLE_FILE = os.getenv("IMPORT_OLSR_SAMPLE_FILE",
-                                    os.path.join(os.path.dirname(__file__), "olsr.txt"))
+                                    os.path.join(os.path.dirname(__file__), "assets", "olsr.txt"))
 
 
 class OLSRTestcase(unittest.TestCase):
