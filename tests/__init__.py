@@ -4,6 +4,7 @@ import os
 from django.test import TestCase
 
 from on_geronimo.data_import.import_olsr import import_routes_from_olsr_data
+from on_geronimo.data_import.import_ondataservice import import_from_ondataservice
 from on_geronimo.data_import.import_wiki import import_parsed_wiki_accesspoints, AccessPointTable
 
 
@@ -46,6 +47,12 @@ class TestBase(TestCase):
             empty_tables()
         data = _read_file_content(IMPORT_OLSR_SAMPLE_FILE)
         import_routes_from_olsr_data(data)
+
+    @staticmethod
+    def import_from_ondataservice(clear_before=False):
+        if clear_before:
+            empty_tables()
+        import_from_ondataservice(db_file=IMPORT_ONDATASERVICE_SAMPLE_FILE)
 
     @staticmethod
     def import_from_wiki(clear_before=False):
