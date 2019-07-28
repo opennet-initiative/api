@@ -4,6 +4,7 @@ import os
 from django.test import TestCase
 
 from on_geronimo.data_import.import_olsr import import_routes_from_olsr_data
+from on_geronimo.data_import.import_wiki import import_parsed_wiki_accesspoints, AccessPointTable
 
 
 TEST_ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
@@ -45,3 +46,12 @@ class TestBase(TestCase):
             empty_tables()
         data = _read_file_content(IMPORT_OLSR_SAMPLE_FILE)
         import_routes_from_olsr_data(data)
+
+    @staticmethod
+    def import_from_wiki(clear_before=False):
+        if clear_before:
+            empty_tables()
+        parser = AccessPointTable()
+        data = _read_file_content(IMPORT_WIKI_SAMPLE_FILE)
+        parser.feed(data)
+        import_parsed_wiki_accesspoints(parser.get_parsed_items())

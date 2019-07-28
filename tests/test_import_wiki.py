@@ -1,11 +1,13 @@
 import unittest
 
 from on_geronimo.data_import import import_wiki
+import on_geronimo.oni_model.models as models
+from on_geronimo.oni_model.sites import SiteUpdater
 
-from . import IMPORT_WIKI_SAMPLE_FILE
+from . import IMPORT_WIKI_SAMPLE_FILE, TestBase
 
 
-class TestImportWiki(unittest.TestCase):
+class TestImportWikiSnippets(unittest.TestCase):
 
     HTML_TABLE_HEADER = """
         <table ><tr><th>Nr.</th>
@@ -42,20 +44,22 @@ class TestImportWiki(unittest.TestCase):
             "latlon": "N54.102187 E12.118521",
         })
 
-    def test_dump_table(self):
-        '''parsing a dumped ONI table'''
-        with open(IMPORT_WIKI_SAMPLE_FILE, encoding="UTF-8") as f:
-            content = f.read()
-        parser = import_wiki.AccessPointTable()
-        parser.feed(content)
-        rows = parser._rows
-        self.assertGreater(len(rows), 0)
-        nodes = {}
-        for row in rows:
-            ap_id = row["main_ip"]
-            nodes[ap_id] = row
-        self.assertIn("AP1.239", nodes.keys())
 
+class WikiImportDumpTest(TestBase):
 
-if __name__ == "__main__":
-    unittest.main()
+    @classmethod
+    def setUpClass(cls):
+        cls.import_from_wiki(clear_before=True)
+        super().setUpClass()
+
+    def test_parsed_counts(self):
+        self.assertEqual(models.AccessPoint.objects.all().count(), 409)
+        self.assertEqual(models.EthernetNetworkInterface.objects.all().count(), 0)
+        self.assertEqual(models.NetworkInterfaceAddress.objects.all().count(), 0)
+        self.assertEqual(models.WifiNetworkInterfaceAttributes.objects.all().count(), 0)
+        self.assertEqual(models.RoutingLink.objects.all().count(), 0)
+        self.assertEqual(models.InterfaceRoutingLink.objects.all().count(), 0)
+
+    def test_assembled_sites(self):
+        SiteUpdater().update_sites()
+        self.assertEqual(models.AccessPointSite.objects.all().count(), 21)
