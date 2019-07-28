@@ -345,6 +345,9 @@ class NetworkInterfaceAddress(models.Model):
                  family=family,
                  netmask_prefixlen=address_obj.network.prefixlen)
 
+    def __str__(self):
+        return "Address({})".format(self.address)
+
 
 class WifiNetworkInterfaceAttributes(models.Model):
     """Eine der WLAN-Schnittstellen eines APs"""
