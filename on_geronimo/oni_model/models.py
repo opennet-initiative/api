@@ -312,8 +312,9 @@ class EthernetNetworkInterface(models.Model):
                  addresses__netmask_prefixlen=address_obj.network.prefixlen)
 
     def __str__(self):
-        return "Interface {} of AP {}".format(
-            " / ".join(addr.address for addr in self.addresses.all()), self.accesspoint.main_ip)
+        return ('EthernetNetworkInterface(ap="{}", name="{}", addresses=({}))'
+                .format(self.accesspoint, self.if_name,
+                        ", ".join(addr.address for addr in self.addresses.all())))
 
 
 class NetworkInterfaceAddress(models.Model):
@@ -368,6 +369,10 @@ class WifiNetworkInterfaceAttributes(models.Model):
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1, null=True)
     wifi_crypt = StatusField(choices_name="CRYPT_CHOICES", null=True)
     wifi_vaps_enabled = models.NullBooleanField(default=False)
+
+    def __str__(self):
+        return ('WifiNetworkInterfaceAttributes(interface="{}", wifi_ssid="{}", wifi_mode="{}")'
+                .format(self.interface, self.wifi_ssid, self.wifi_mode))
 
 
 class RoutingLink(models.Model):
