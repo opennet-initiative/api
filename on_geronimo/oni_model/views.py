@@ -239,7 +239,7 @@ class ExcludeSite2SiteLinks(BaseFilterBackend):
         return queryset
 
 
-class AccessPointLinksList(GeoJSONListAPIView):
+class RoutingLinkList(GeoJSONListAPIView):
     """Liefert eine Liste aller Links zwischen Accesspoints des Opennets"""
 
     serializer_class = RoutingLinkSerializer
