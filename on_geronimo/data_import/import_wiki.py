@@ -139,10 +139,15 @@ def get_node_by_main_ip_candidates(candidates):
     return (main_ip, node)
 
 
-@transaction.atomic
 def import_accesspoints_from_wiki():
     # helper function for retrieving column data
-    for node_values in _parse_nodes():
+    wiki_accesspoint_descriptions = _parse_nodes()
+    import_parsed_wiki_accesspoints(wiki_accesspoint_descriptions)
+
+
+@transaction.atomic
+def import_parsed_wiki_accesspoints(node_descriptions):
+    for node_values in node_descriptions:
         # maybe more than one IP is given (e.g. for servers)
         main_ip_candidates = node_values["main_ip"].split()
         main_ip, node = get_node_by_main_ip_candidates(main_ip_candidates)

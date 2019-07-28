@@ -138,10 +138,15 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
                 address_object.save()
 
 
-@transaction.atomic
 def import_routes_from_olsr(txtinfo_url="http://localhost:2006"):
     url = "%s/%s" % (txtinfo_url.rstrip("/"), "all")
-    topology_lines = urllib.request.urlopen(url).read().decode("ascii").splitlines()
+    olsr_data = urllib.request.urlopen(url).read().decode("ascii")
+    import_routes_from_olsr_data(olsr_data)
+
+
+@transaction.atomic
+def import_routes_from_olsr_data(content):
+    topology_lines = content.splitlines()
     tables = _txtinfo_parser(topology_lines, ("routes", "hna", "topology", "mid", "links"))
     # first "MID" then "Routes" - otherwise secondary IPs are used for nodes
     parse_hna_and_mid_for_alternatives(tables["mid"], tables["hna"])
