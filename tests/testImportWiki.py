@@ -1,11 +1,8 @@
-import os
 import unittest
 
 from on_geronimo.data_import import import_wiki
 
-
-IMPORT_WIKI_SAMPLE_FILE = os.getenv("IMPORT_WIKI_SAMPLE_FILE", os.path.join(
-    os.path.dirname(__file__), "assets", "wiki_nodes.html"))
+from . import IMPORT_WIKI_SAMPLE_FILE
 
 
 class TestImportWiki(unittest.TestCase):
