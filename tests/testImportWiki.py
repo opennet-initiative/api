@@ -21,9 +21,6 @@ class TestImportWiki(unittest.TestCase):
         <th>Position</th></tr><tr>"""
     HTML_TABLE_FOOTER = "</table>"
 
-    def setUp(self):  # noqa: N802
-        self.parser = import_wiki.AccessPointTable()
-
     def test_full_node_details(self):
         html_node = """
             <td><a style='color:white; text-decoration:none; background-color:#000000;
@@ -34,8 +31,9 @@ class TestImportWiki(unittest.TestCase):
             <td>Martin</td>
             <td>olsr.on-i.de</td>
             <td>N54.102187 E12.118521</td></tr><tr>"""
-        self.parser.feed(self.HTML_TABLE_HEADER + html_node + self.HTML_TABLE_FOOTER)
-        rows = self.parser._rows
+        parser = import_wiki.AccessPointTable()
+        parser.feed(self.HTML_TABLE_HEADER + html_node + self.HTML_TABLE_FOOTER)
+        rows = parser._rows
         self.assertEqual(len(rows), 1)
         self.assertDictEqual(rows[0], {
             "main_ip": "AP1.248",
@@ -51,8 +49,9 @@ class TestImportWiki(unittest.TestCase):
         '''parsing a dumped ONI table'''
         with open(IMPORT_WIKI_SAMPLE_FILE, encoding="UTF-8") as f:
             content = f.read()
-        self.parser.feed(content)
-        rows = self.parser._rows
+        parser = import_wiki.AccessPointTable()
+        parser.feed(content)
+        rows = parser._rows
         self.assertGreater(len(rows), 0)
         nodes = {}
         for row in rows:
