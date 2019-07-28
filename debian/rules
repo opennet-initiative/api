@@ -8,3 +8,6 @@ export DH_VERBOSE = 1
 	PYBUILD_DESTDIR=debian/python3-on-geronimo \
 		dh $@ --package python3-on-geronimo --with python3 --buildsystem=pybuild
 	dh $@ --package on-geronimo-api --package on-freifunk-api
+
+override_dh_auto_test:
+	PYBUILD_SYSTEM=custom PYBUILD_TEST_ARGS="python3 manage.py test" dh_auto_test
