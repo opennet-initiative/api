@@ -25,7 +25,9 @@ urlpatterns = [
     url(iface_path_prefix + "/accesspoint/$", views.NetworkInterfaceAccessPoint.as_view(),
         name="interface-accesspoint"),
     url(r"^v1/link/$", cache_page(150)(views.RoutingLinkList.as_view()), name="link-list"),
-    url(r"^v1/link/(?P<pk>\d+)$", views.AccessPointLinkList.as_view(), name="link-details"),
+    url(r"^v1/link/(?P<pk>\d+)$", views.RoutingLinkDetailByID.as_view(), name="link-detail-id"),
+    url(r"^v1/link/(?P<peer1>{ipv4}|{ipv6})-(?P<peer2>{ipv4}|{ipv6})$".format(**REGEX_PATTERNS),
+        views.RoutingLinkDetailByPeers.as_view(), name="link-detail-peers"),
     url(r"^v1/site/$", views.AccessPointSiteList.as_view(), name="site-list"),
     url(r"^v1/site/(?P<pk>\d+)$", views.AccessPointSiteDetail.as_view(), name="site-details"),
 ]

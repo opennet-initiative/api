@@ -1,4 +1,5 @@
 from django.core.exceptions import SuspiciousOperation
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
@@ -24,6 +25,17 @@ class DetailView(mixins.RetrieveModelMixin,
     # make this an uninstanceable class
     class Meta:
         abstract = True
+
+
+class DetailViewByFilterMixin:
+    """ Allow retrieval of an object via a filter instead of direct 'kwarg'-based selection """
+
+    def get_object(self):
+        # see rest_framework.generics.GenericAPIView.get_object
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = get_object_or_404(queryset)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 class AccessPointMixin:
@@ -146,6 +158,35 @@ class FirmwareVersionFilter(BaseFilterBackend):
         return queryset
 
 
+class AccessPointPeerFilter(BaseFilterBackend):
+    """ filter objects related to multiple accesspoints
+
+    Parameters:
+        * accesspoint_peer_kwargs: a list of "kwarg" names referring to an AccessPoint object
+        * accesspoint_peer_reference_field: Depending on the queryset type, this field name is
+          used for filtering the wanted objects
+          (e.g. for a RoutingLink it could be "endpoints__interface__accesspoint")
+    """
+
+    def filter_queryset(self, request, queryset, view):
+        peer_addresses = [view.kwargs.get(field) for field in view.accesspoint_peer_kwargs]
+        if None in peer_addresses:
+            return queryset.none()
+        peers = []
+        for ap_address in peer_addresses:
+            try:
+                peer = AccessPoint.objects.get(Q(main_ip=ap_address) | Q(main_ipv6=ap_address))
+                peers.append(peer)
+            except AccessPoint.DoesNotExist:
+                # at least one of the peers was not found
+                return queryset.none()
+        if len(peers) != len(view.accesspoint_peer_kwargs):
+            return queryset.none()
+        for peer in peers:
+            queryset = queryset.filter(**{view.accesspoint_peer_reference_field: peer})
+        return queryset
+
+
 class LinkAccessPointInBBoxFilter(InBBoxFilter):
     """ filter links based on a bounding box
 
@@ -248,6 +289,22 @@ class RoutingLinkList(GeoJSONListAPIView):
     geojson_serializer_extra_fields = {"quality", "wifi_ssid", "is_wireless"}
     filter_backends = (OnlineStatusFilter, LinkAccessPointInBBoxFilter, ExcludeSite2SiteLinks)
     queryset = RoutingLink.objects.all()
+
+
+class RoutingLinkDetailByID(DetailView):
+    """ Liefert die Inhalte einer Verbindung zwischen zwei APs basierend auf der Link-ID """
+
+    queryset = RoutingLink.objects.all()
+    serializer_class = RoutingLinkSerializer
+
+
+class RoutingLinkDetailByPeers(DetailViewByFilterMixin, RoutingLinkDetailByID):
+    """ Liefert die Inhalte einer Verbindung zwischen zwei APs basierend auf deren IPs """
+
+    filter_backends = (AccessPointPeerFilter, )
+
+    accesspoint_peer_kwargs = {"peer1", "peer2"}
+    accesspoint_peer_reference_field = "endpoints__interface__accesspoint"
 
 
 class AccessPointLinkList(AccessPointMixin, generics.ListAPIView):
