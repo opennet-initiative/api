@@ -1,8 +1,9 @@
 import html.parser
+import logging
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-import sys
 
 from django.contrib.gis.geos import Point
 from django.core.exceptions import ObjectDoesNotExist
@@ -134,7 +135,7 @@ def get_node_by_main_ip_candidates(candidates):
             pass
     # No match found? Create a new node by using the first candidate.
     main_ip = candidate_ips[0]
-    print("Failed to find an existing AccessPoint with this main IP: {0}".format(main_ip))
+    logging.info("Failed to find an existing AccessPoint with this main IP: %s", main_ip)
     node, created = on_geronimo.oni_model.models.AccessPoint.objects.get_or_create(main_ip=main_ip)
     return (main_ip, node)
 
@@ -167,7 +168,7 @@ def import_parsed_wiki_accesspoints(node_descriptions):
             elif node.post_address == "Webserver":
                 pass
             else:
-                print("Ignoring empty position of node %s: %s" % (main_ip, latlon))
+                logging.warning("Ignoring empty position of node %s: %s", main_ip, latlon)
         else:
             lat_replace = lambda text: text.replace("N", "+").replace("S", "-")
             lon_replace = lambda text: text.replace("E", "+").replace("W", "-")
@@ -177,8 +178,7 @@ def import_parsed_wiki_accesspoints(node_descriptions):
                 lat = float(lat_replace(lat))
             except ValueError:
                 # mehr oder weniger als zwei Elemente, bzw. falsches Format
-                print("Failed to parse position (%s) of node %s" % (latlon, main_ip),
-                      file=sys.stderr)
+                logging.warning("Failed to parse position (%s) of node %s", latlon, main_ip)
                 lat, lon = None, None
             if lat and lon:
                 node.position = Point(lon, lat)

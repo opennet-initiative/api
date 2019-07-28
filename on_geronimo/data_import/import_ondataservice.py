@@ -7,6 +7,7 @@
 
 import datetime
 import ipaddress
+import logging
 import re
 import sqlite3
 import sys
@@ -50,7 +51,7 @@ def _parse_nodes_data(conn):
         try:
             import_accesspoint(data)
         except ValueError:
-            print("Failed to update node %s: %s" % (node, data))
+            logging.error("Failed to update node %s: %s", node, data)
             raise
     # add network interfaces
     ifaces_columns = _get_table_meta(conn, "ifaces")
@@ -60,7 +61,7 @@ def _parse_nodes_data(conn):
         try:
             import_network_interface(main_ip, data)
         except ValueError:
-            print("Failed to update interface %s: %s" % (iface, data))
+            logging.error("Failed to update interface %s: %s", iface, data)
             raise
 
 
@@ -236,8 +237,8 @@ def import_network_interface(main_ip, data):
                 and not address_obj.is_multicast):
             addresses.append(address_obj)
     if not addresses:
-        print("Skipping network interface without IP: {} -> {}".format(main_ip, data["if_name"]),
-              file=sys.stderr)
+        logging.warning("Skipping network interface without IP: %s -> %s",
+                        main_ip, data["if_name"])
         return
     try:
         node = AccessPoint.objects.get(main_ip=main_ip)
@@ -345,8 +346,7 @@ def import_from_ondataservice(db_file="/var/run/olsrd/ondataservice.db"):
     try:
         conn = sqlite3.connect(db_file)
     except sqlite3.OperationalError as err_msg:
-        print("Failed to open ondataservice database (%s): %s" % (db_file, err_msg),
-              file=sys.stderr)
+        logging.error("Failed to open ondataservice database (%s): %s", db_file, err_msg)
     else:
         _parse_nodes_data(conn)
         conn.close()

@@ -1,5 +1,6 @@
 import datetime
 import ipaddress
+import logging
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -58,19 +59,19 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
             if interface is None:
                 ap, created = AccessPoint.objects.get_or_create(main_ip=ip_address)
                 if created:
-                    print("Created new AP %s" % ip_address)
+                    logging.info("Created new AP %s", ip_address)
                 interface = EthernetNetworkInterface.objects.create(accesspoint=ap)
                 address_object = NetworkInterfaceAddress.create_with_ipaddress(
                     interface,
                     ipaddress.ip_interface("{}/{:d}".format(ip_address, NETMASK_PREFIXLEN)))
-                print("Created new NetworkInterface %s" % ip_address)
+                logging.info("Created new NetworkInterface %s", ip_address)
                 ap.save()
                 interface.save()
                 address_object.save()
             interfaces.append(interface)
         linker, created = interfaces[0].get_or_create_link_to(interfaces[1])
         if created:
-            print("Created new RoutingLink %s <-> %s" % (last_hop_ip, destination_ip))
+            logging.info("Created new RoutingLink %s <-> %s", last_hop_ip, destination_ip)
         for interface, qual in zip(interfaces, qualities):
             link_info = InterfaceRoutingLink.objects.filter(routing_link=linker,
                                                             interface=interface)[0]
@@ -101,12 +102,13 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
         found_interface = None
         for interface in EthernetNetworkInterface.objects.filter(addresses__address=main_ip):
             if interface.accesspoint.main_ip != main_ip:
-                print("Removing duplicate Network Interface: %s" % str(interface))
+                logging.warning("Removing duplicate Network Interface: %s", interface)
                 interface.delete()
             else:
                 if found_interface:
                     # wir machen erstmal nichts mit diesem Konflikt
-                    print("Removing duplicate APs: %s and %s" % (found_interface, interface))
+                    logging.warning("Removing duplicate APs: %s and %s",
+                                    found_interface, interface)
                     # remove both
                     interface.delete()
                     found_interface.delete()
@@ -115,11 +117,11 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
         if not found_interface:
             ap, created = AccessPoint.objects.get_or_create(main_ip=main_ip)
             if created:
-                print("Created new AP %s" % main_ip)
+                logging.info("Created new AP %s", main_ip)
             interface = EthernetNetworkInterface.objects.create(accesspoint=ap)
             address_object = NetworkInterfaceAddress.create_with_ipaddress(
                 interface, ipaddress.ip_interface("{}/{:d}".format(main_ip, NETMASK_PREFIXLEN)))
-            print("Created new NetworkInterface %s" % main_ip)
+            logging.info("Created new NetworkInterface %s", main_ip)
             ap.save()
             interface.save()
             address_object.save()
@@ -133,7 +135,7 @@ def parse_hna_and_mid_for_alternatives(mid_table, hna_table):
                 address_object = NetworkInterfaceAddress.create_with_ipaddress(
                     interface,
                     ipaddress.ip_interface("{}/{:d}".format(ip_address, NETMASK_PREFIXLEN)))
-                print("Created new NetworkInterface %s" % ip_address)
+                logging.info("Created new NetworkInterface %s", ip_address)
                 interface.save()
                 address_object.save()
 

@@ -2,6 +2,7 @@ import asyncio
 import collections
 import contextlib
 import json
+import logging
 import ssl
 import sys
 import urllib
@@ -110,8 +111,8 @@ async def retrieve_ondataservice_worker(incoming_queue, results, failures, stdou
                 else:
                     continue
             except OndataserviceParseError as exc:
-                print("Failed to parse ondataservice data for {}: {}"
-                      .format(accesspoint.main_ip, exc))
+                logging.error("Failed to parse ondataservice data for %s: %s",
+                              accesspoint.main_ip, exc)
                 failures.append("parse")
                 incoming_queue.task_done()
                 break
@@ -119,15 +120,15 @@ async def retrieve_ondataservice_worker(incoming_queue, results, failures, stdou
                 # some kind of connection error
                 pass
             else:
-                print("Finished downloading ondataservice dataset via http from: {}"
-                      .format(accesspoint.main_ip), file=stdout)
+                logging.info("Finished downloading ondataservice dataset via http from: %s",
+                             accesspoint.main_ip)
                 await results.put(OndataserviceResult(accesspoint, node_data, interfaces_data))
                 incoming_queue.task_done()
                 # the download finished successfully - go for the next item
                 break
         else:
-            print("Failed to download ondataservice dataset via http from {}"
-                  .format(accesspoint.main_ip), file=stderr)
+            logging.error("Failed to download ondataservice dataset via http from %s",
+                          accesspoint.main_ip)
             failures.append("download")
             incoming_queue.task_done()
 
@@ -157,9 +158,10 @@ def import_from_ondataservice_via_http(parallel_count=20, dry_run=False, stdout=
                     break
                 else:
                     if dry_run:
-                        print("{}: {}".format(item.accesspoint_data["on_olsr_mainip"],
-                                              " | ".join(" ".join(iface["ip_addr"].split()[:1])
-                                                         for iface in item.interfaces_data)))
+                        logging.info("%s: %s",
+                                     item.accesspoint_data["on_olsr_mainip"],
+                                     " | ".join(" ".join(iface["ip_addr"].split()[:1])
+                                                for iface in item.interfaces_data))
                     else:
                         import_accesspoint(item.accesspoint_data)
                         for iface_data in item.interfaces_data:
@@ -175,10 +177,10 @@ def import_from_ondataservice_via_http(parallel_count=20, dry_run=False, stdout=
         asyncio.gather(injection_task)
     loop.run_until_complete(retrieve_from_all())
     loop.close()
-    print("Successes: {:d}".format(len(results)))
-    print("Download failures: {:d}".format(failures.count("download")))
-    print("No connect: {:d}".format(failures.count("no connect")))
-    print("Parse failures: {:d}".format(failures.count("parse")))
+    logging.info("Successes: %d", len(results))
+    logging.info("Download failures: %d", failures.count("download"))
+    logging.info("No connect: %d", failures.count("no connect"))
+    logging.info("Parse failures: %d", failures.count("parse"))
 
 
 if __name__ == "__main__":
