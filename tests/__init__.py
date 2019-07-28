@@ -6,6 +6,8 @@ from django.test import TestCase
 from on_geronimo.data_import.import_olsr import import_routes_from_olsr_data
 from on_geronimo.data_import.import_ondataservice import import_from_ondataservice
 from on_geronimo.data_import.import_wiki import import_parsed_wiki_accesspoints, AccessPointTable
+import on_geronimo.oni_model.models as models
+from on_geronimo.oni_model.sites import SiteUpdater
 
 
 TEST_ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
@@ -62,3 +64,12 @@ class TestBase(TestCase):
         data = _read_file_content(IMPORT_WIKI_SAMPLE_FILE)
         parser.feed(data)
         import_parsed_wiki_accesspoints(parser.get_parsed_items())
+
+    @classmethod
+    def import_from_all_sources(cls, clear_before=False):
+        if clear_before:
+            empty_tables()
+        cls.import_from_olsr(clear_before=False)
+        cls.import_from_wiki(clear_before=False)
+        cls.import_from_ondataservice(clear_before=False)
+        SiteUpdater().update_sites()
