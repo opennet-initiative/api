@@ -35,7 +35,7 @@ class AccessPointMixin:
 
     def get_accesspoint(self):
         key = self.lookup_field
-        value = self.kwargs[self.lookup_field]
+        value = self.kwargs.get(self.lookup_field)
         if value is None:
             raise Http404
         obj = get_object_or_404(AccessPoint.objects, **{key: value})
