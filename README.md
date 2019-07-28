@@ -46,7 +46,7 @@ make virtualenv-update
 
 * `./manage.py import_wiki`
 * `./manage.py import_olsr http://192.168.2.76:2006`
-* `./manage.py import_ondataservice examples/ondataservice.db`
+* `./manage.py import_ondataservice tests/assets/ondataservice.db`
 
 
 = URL-Beispiele =
