@@ -10,6 +10,7 @@ except ImportError:
     # GeoManager was removed in Django 2.0. The usual manager should be sufficient now.
     GeoManager = models.Manager
 import django.contrib.gis.geos.linestring
+from django.utils import timezone
 from model_utils.fields import StatusField
 from model_utils import Choices
 
@@ -35,7 +36,7 @@ class AliveBaseManager(models.Manager):
 
     def _filter_by_age(self, queryset, timedelta_minutes):
         """ bei Listen-Darstellugen filtern wir nach dem Alter der letzten Erreichbarkeit """
-        limit_timestamp = datetime.datetime.now() - datetime.timedelta(
+        limit_timestamp = timezone.now() - datetime.timedelta(
             minutes=abs(timedelta_minutes))
         if timedelta_minutes < 0:
             # liefere Objekte zurück, die sich vor weniger als "timedelta_minutes" gemeldet haben

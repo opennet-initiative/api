@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 
 from django.db import transaction
+from django.utils import timezone
 
 from on_geronimo.oni_model.models import (
     AccessPoint, EthernetNetworkInterface, InterfaceRoutingLink, NetworkInterfaceAddress)
@@ -83,7 +84,7 @@ def parse_topology_for_links(topology_table, neighbour_link_table):
             interface = EthernetNetworkInterface.objects.filter(
                 addresses__address=ip_address).first()
             ap = interface.accesspoint
-            ap.lastseen_timestamp = datetime.datetime.now(datetime.timezone.utc)
+            ap.lastseen_timestamp = timezone.now()
             ap.save()
 
 
