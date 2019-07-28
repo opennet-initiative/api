@@ -1,5 +1,6 @@
 import logging
 import os
+import warnings
 
 from django.test import TestCase
 
@@ -21,6 +22,8 @@ IMPORT_WIKI_SAMPLE_FILE = os.getenv("IMPORT_WIKI_SAMPLE_FILE",
 
 # minimize logging output for all tests by default
 logging.getLogger().setLevel(logging.ERROR)
+# strict failure in case of some warnings (e.g. when using native timestamps)
+warnings.simplefilter("error", category=RuntimeWarning)
 
 
 def _read_file_content(filename):
