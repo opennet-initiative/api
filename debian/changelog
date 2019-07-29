@@ -1,3 +1,9 @@
+on-geronimo (1.13.0-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Lars Kruse <devel@sumpfralle.de>  Mon, 29 Jul 2019 05:21:32 +0200
+
 on-geronimo (1.12.1-1) unstable; urgency=medium
 
   * New upstream release
