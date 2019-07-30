@@ -76,6 +76,8 @@ WSGI_APPLICATION = "on_geronimo.wsgi.application"
 
 # allow requests from different sites (e.g. map.on-i.de)
 CORS_ORIGIN_ALLOW_ALL = True
+# explicitly force browsers to trust our Content-Type header
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 
 # Internationalization
