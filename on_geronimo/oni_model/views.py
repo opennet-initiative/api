@@ -301,7 +301,7 @@ class RoutingLinkDetailByID(DetailView):
 class RoutingLinkDetailByPeers(DetailViewByFilterMixin, RoutingLinkDetailByID):
     """ Liefert die Inhalte einer Verbindung zwischen zwei APs basierend auf deren IPs """
 
-    filter_backends = (AccessPointPeerFilter, )
+    filter_backends = (OnlineStatusFilter, AccessPointPeerFilter)
 
     accesspoint_peer_kwargs = {"peer1", "peer2"}
     accesspoint_peer_reference_field = "endpoints__interface__accesspoint"
