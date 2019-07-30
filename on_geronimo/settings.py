@@ -30,12 +30,14 @@ INSTALLED_APPS = (
     "django.contrib.gis",
     "rest_framework",
     "rest_framework_gis",
+    "corsheaders",
     "on_geronimo.oni_model",
 )
 
 MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -71,6 +73,9 @@ TEMPLATES = [
 ROOT_URLCONF = "on_geronimo.urls"
 
 WSGI_APPLICATION = "on_geronimo.wsgi.application"
+
+# allow requests from different sites (e.g. map.on-i.de)
+CORS_ORIGIN_ALLOW_ALL = True
 
 
 # Internationalization
