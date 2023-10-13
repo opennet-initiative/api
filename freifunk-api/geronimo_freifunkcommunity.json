@@ -41,12 +41,7 @@
     }
   ],
   '"'nodeMaps'"': [
-    {
-      '"'url'"': '"'${COMMUNITY_NODELIST}'"',
-      '"'interval'"': '"'10'"',
-      '"'technicalType'"': '"'nodelist'"',
-      '"'mapType'"': '"'list/status'"'
-    },
+    ${COMMUNITY_NODELIST_ROSTOCK_JSON}
     {
       '"'url'"': '"'${COMMUNITY_GEOMAP}'"',
       '"'interval'"': '"'10'"',

@@ -13,7 +13,8 @@
 # - generates community api json file for city
 # - output to stdout, errors to stderr
 # - default city key is "rostock"
-# - ready all needed values from cfg file
+# - read all needed values from cfg file
+#
 # usage: geronimo_freifunkcommunity.sh --batch
 # - generates all community api json files
 # - uses city list as in cfg file
@@ -43,7 +44,7 @@ COMMUNITY_LIST_LAT=54.0914
 COMMUNITY_LIST_LON=12.1151
 COMMUNITY_LIST_NODES=300
 COMMUNITY_LIST_SOCIAL_NUM=10
-DATEISO=$(date "+%FT%T%Z")
+DATEISO=$(date "+%FT%T%:::z")
 
 # retrieve requested key via input
 [ $# -gt 0 ] && COMMUNITY_LIST_KEY="$1"
@@ -54,7 +55,8 @@ if [ "$COMMUNITY_LIST_KEY" = "--batch" ]; then
     for KEY in "${!COMMUNITY_LIST[@]}"
     do
         echo -n "Processing '$KEY'.."
-	"$0" "$KEY" > "$HOME/$JSON_NAME$KEY.json"
+        # start this script again but with city name as parameter
+        "$0" "$KEY" > "$HOME/$JSON_NAME$KEY.json"
         echo " done."
     done
     exit 0
@@ -73,13 +75,26 @@ COMMUNITY_LIST_LON="${COMMUNITY_LIST_ARRAY[2]}"
 COMMUNITY_LIST_NODES="${COMMUNITY_LIST_ARRAY[3]}"
 COMMUNITY_LIST_SOCIAL_NUM="${COMMUNITY_LIST_ARRAY[4]}"
 
-# workaround: nodelist only for one city (rostock)
-[ "$COMMUNITY_LIST_KEY" != "rostock" ] && COMMUNITY_NODELIST=""
+# workaround: nodelist only for one city (rostock). Do not show this for other cities. 
+#             Especially have no empty url else this results in validation error by API tool.
+if [ "$COMMUNITY_LIST_KEY" == "rostock" ]; then
+    COMMUNITY_NODELIST_ROSTOCK_JSON='{
+      "url": "'${COMMUNITY_NODELIST}'",
+      "interval": "10",
+      "technicalType": "nodelist",
+      "mapType": "list/status"
+    },'
+else
+    COMMUNITY_NODELIST_ROSTOCK_JSON=""
+fi
 
 # process json template, replace variables via eval
 OUTPUT="$JSON_TMP/$JSON_NAME$COMMUNITY_LIST_KEY.json"
+echo "" > $OUTPUT  # empty file
 while read -r LINE; do
-   eval echo "$LINE"
-done < "$HOME/$JSON" | jq "."
+   eval echo "$LINE" >> $OUTPUT  # append output
+done < "$HOME/$JSON" 
+
+jq "." $OUTPUT
 
 exit 0
