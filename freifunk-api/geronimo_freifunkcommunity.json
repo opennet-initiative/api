@@ -19,7 +19,7 @@
     '"'phone'"': '"'${COMMUNITY_CONT_PHONE}'"',
     '"'irc'"': '"'${COMMUNITY_CONT_IRC}'"',
     '"'ml'"': '"'${COMMUNITY_CONT_ML}'"',
-    '"'twitter'"': '"'${COMMUNITY_CONT_TWIT}'"'
+    '"'mastodon'"': '"'${COMMUNITY_CONT_MAST}'"'
   },
   '"'metacommunity'"': '"'${COMMUNITY_META}'"',
   '"'state'"': {
