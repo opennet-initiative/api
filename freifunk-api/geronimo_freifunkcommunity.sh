@@ -30,6 +30,9 @@ JSON=geronimo_freifunkcommunity.json
 # get current script dir
 HOME="$(dirname "$(readlink -f "$0")")"
 
+# write final generated json in this directory
+OUTDIR="$HOME/out"
+
 # prepare array
 declare -A COMMUNITY_LIST
 
@@ -54,10 +57,11 @@ DATEISO=$(date "+%FT%T%:::z")
 if [ "$COMMUNITY_LIST_KEY" = "--batch" ]; then
     for KEY in "${!COMMUNITY_LIST[@]}"
     do
-        echo -n "Processing '$KEY'.."
+        echo "Processing '$KEY'..."
+        OUTFILENAME="$OUTDIR/$JSON_NAME$KEY.json"
         # start this script again but with city name as parameter
-        "$0" "$KEY" > "$HOME/$JSON_NAME$KEY.json"
-        echo " done."
+        "$0" "$KEY" > "$OUTFILENAME"
+        echo "Wrote file '$OUTFILENAME'"
     done
     exit 0
 fi
