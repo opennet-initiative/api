@@ -4,12 +4,14 @@
   '"'location'"': {
     '"'city'"': '"'${COMMUNITY_LIST_NAME}'"',
     '"'country'"': '"'${COMMUNITY_COUNTRY}'"',
-    '"'lat'"': ${COMMUNITY_LIST_LAT},
-    '"'lon'"': ${COMMUNITY_LIST_LON},
     '"'address'"': {
-      '"'Name'"': '"'${COMMUNITY_ADDR_NAME}'"',
-      '"'Street'"': '"'${COMMUNITY_ADDR_STREET}'"',
-      '"'Zipcode'"': '"'${COMMUNITY_ADDR_ZIP}'"'
+      '"'name'"': '"'${COMMUNITY_ADDR_NAME}'"',
+      '"'street'"': '"'${COMMUNITY_ADDR_STREET}'"',
+      '"'zipcode'"': '"'${COMMUNITY_ADDR_ZIP}'"'
+    },
+    '"'geoCode'"': {
+      '"'lat'"': ${COMMUNITY_LIST_LAT},
+      '"'lon'"': ${COMMUNITY_LIST_LON}
     }
   },
   '"'contact'"': {
