@@ -19,16 +19,17 @@ Alle Informationen werden in einer Datenbank dauerhaft gespeichert.
 ```shell
 apt install python3-django-filters python3-django-model-utils python3-djangorestframework-gis \
 	libsqlite3-mod-spatialite spatialite-bin
-git clone git@dev.opennet-initiative.de:on_geronimo.git
-cd on_geronimo
+git clone git@github.com:opennet-initiative/api.git
+cd api/on_geronimo
 ```
 
 ### Via virtualenv/pip
 
 ```shell
-apt install python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin
-git clone git@dev.opennet-initiative.de:on_geronimo.git
-cd on_geronimo
+# getestet mit Debian12
+apt install python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin wget
+git clone git@github.com:opennet-initiative/api.git
+cd api
 make virtualenv-update
 . build/venv/bin/activate
 ```

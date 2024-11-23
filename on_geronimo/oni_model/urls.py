@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 from django.views.decorators.cache import cache_page
 
 from . import views
@@ -14,20 +14,20 @@ iface_path_prefix = r"^v1/interface/(?P<addresses__address>{ipv4}|{ipv6})".forma
 
 
 urlpatterns = [
-    url(r"^v1/accesspoint/$", views.AccessPointList.as_view(), name="accesspoint-list"),
-    url(ap_path_prefix + "$", views.AccessPointDetail.as_view(), name="accesspoint-details"),
-    url(ap_path_prefix + "/interfaces/$", views.AccessPointInterfacesDetail.as_view(),
+    re_path(r"^v1/accesspoint/$", views.AccessPointList.as_view(), name="accesspoint-list"),
+    re_path(ap_path_prefix + "$", views.AccessPointDetail.as_view(), name="accesspoint-details"),
+    re_path(ap_path_prefix + "/interfaces/$", views.AccessPointInterfacesDetail.as_view(),
         name="accesspoint-interfaces"),
-    url(ap_path_prefix + "/links/$", views.AccessPointLinkList.as_view(),
+    re_path(ap_path_prefix + "/links/$", views.AccessPointLinkList.as_view(),
         name="accesspoint-links"),
-    url(r"^v1/interface/$", views.AccessPointInterfacesList.as_view(), name="interface-list"),
-    url(iface_path_prefix + "$", views.NetworkInterfaceDetail.as_view(), name="interface-details"),
-    url(iface_path_prefix + "/accesspoint/$", views.NetworkInterfaceAccessPoint.as_view(),
+    re_path(r"^v1/interface/$", views.AccessPointInterfacesList.as_view(), name="interface-list"),
+    re_path(iface_path_prefix + "$", views.NetworkInterfaceDetail.as_view(), name="interface-details"),
+    re_path(iface_path_prefix + "/accesspoint/$", views.NetworkInterfaceAccessPoint.as_view(),
         name="interface-accesspoint"),
-    url(r"^v1/link/$", cache_page(150)(views.RoutingLinkList.as_view()), name="link-list"),
-    url(r"^v1/link/(?P<pk>\d+)$", views.RoutingLinkDetailByID.as_view(), name="link-detail-id"),
-    url(r"^v1/link/(?P<peer1>{ipv4}|{ipv6})-(?P<peer2>{ipv4}|{ipv6})$".format(**REGEX_PATTERNS),
+    re_path(r"^v1/link/$", cache_page(150)(views.RoutingLinkList.as_view()), name="link-list"),
+    re_path(r"^v1/link/(?P<pk>\d+)$", views.RoutingLinkDetailByID.as_view(), name="link-detail-id"),
+    re_path(r"^v1/link/(?P<peer1>{ipv4}|{ipv6})-(?P<peer2>{ipv4}|{ipv6})$".format(**REGEX_PATTERNS),
         views.RoutingLinkDetailByPeers.as_view(), name="link-detail-peers"),
-    url(r"^v1/site/$", views.AccessPointSiteList.as_view(), name="site-list"),
-    url(r"^v1/site/(?P<pk>\d+)$", views.AccessPointSiteDetail.as_view(), name="site-details"),
+    re_path(r"^v1/site/$", views.AccessPointSiteList.as_view(), name="site-list"),
+    re_path(r"^v1/site/(?P<pk>\d+)$", views.AccessPointSiteDetail.as_view(), name="site-details"),
 ]
