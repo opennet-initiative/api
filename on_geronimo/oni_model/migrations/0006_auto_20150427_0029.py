@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 import datetime
 import model_utils.fields
-from django.utils.timezone import utc
+import datetime
 
 
 class Migration(migrations.Migration):
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='accesspoint',
             name='timestamp',
-            field=models.DateField(default=datetime.datetime(2015, 4, 27, 0, 29, 39, 760918, tzinfo=utc), auto_now=True),
+            field=models.DateField(default=datetime.datetime(2015, 4, 27, 0, 29, 39, 760918, tzinfo=datetime.UTC), auto_now=True),
             preserve_default=False,
         ),
         migrations.AlterField(

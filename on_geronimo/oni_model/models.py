@@ -185,7 +185,7 @@ class AccessPoint(models.Model):
     device_memory_free = models.IntegerField(null=True)
 
     system_kernel = models.TextField(null=True)
-    system_watchdog_enabled = models.NullBooleanField()
+    system_watchdog_enabled = models.BooleanField(null=True, blank=True)
     # TODO: ab Django 1.8 gibt es DurationField
 #   system_uptime = models.DurationField(null=True)
     system_uptime = models.IntegerField(null=True)
@@ -203,24 +203,24 @@ class AccessPoint(models.Model):
     opennet_install_timestamp = models.DateField(null=True)
     opennet_packages = models.TextField(null=True)
     opennet_id = models.TextField(null=True)
-    olsrd_running = models.NullBooleanField()
+    olsrd_running = models.BooleanField(null=True, blank=True)
     olsrd_main_ip = models.TextField(null=True)
 
-    opennet_captive_portal_enabled = models.NullBooleanField()
+    opennet_captive_portal_enabled = models.BooleanField(null=True, blank=True)
     opennet_captive_portal_name = models.TextField(null=True)
 
     opennet_certificate_cn = models.TextField(null=True)
-    opennet_vpn_internet_enabled = models.NullBooleanField()
+    opennet_vpn_internet_enabled = models.BooleanField(null=True, blank=True)
     opennet_vpn_internet_connections = models.TextField(null=True)
     opennet_vpn_internet_autosearch = models.TextField(null=True)
     opennet_services_sorting = StatusField(null=True, choices_name="SERVICES_SORTING_CHOICES")
     opennet_vpn_internet_gateways = models.TextField(null=True)
     opennet_vpn_internet_blacklist = models.TextField(null=True)
 
-    opennet_service_relay_connected = models.NullBooleanField()
-    opennet_service_relay_enabled = models.NullBooleanField()
+    opennet_service_relay_connected = models.BooleanField(null=True, blank=True)
+    opennet_service_relay_enabled = models.BooleanField(null=True, blank=True)
 
-    opennet_vpn_mesh_connected = models.NullBooleanField()
+    opennet_vpn_mesh_connected = models.BooleanField(null=True, blank=True)
     opennet_vpn_mesh_connections = models.TextField(null=True)
     opennet_vpn_mesh_gateways = models.TextField(null=True)
     opennet_vpn_mesh_gateway_names = models.TextField(null=True)
@@ -372,7 +372,7 @@ class WifiNetworkInterfaceAttributes(models.Model):
     wifi_noise = models.SmallIntegerField(null=True)
     wifi_bitrate = models.DecimalField(max_digits=6, decimal_places=1, null=True)
     wifi_crypt = StatusField(choices_name="CRYPT_CHOICES", null=True)
-    wifi_vaps_enabled = models.NullBooleanField(default=False)
+    wifi_vaps_enabled = models.BooleanField(null=False, blank=True)
 
     def __str__(self):
         return ('WifiNetworkInterfaceAttributes(interface="{}", wifi_ssid="{}", wifi_mode="{}")'
