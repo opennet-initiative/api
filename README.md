@@ -23,11 +23,15 @@ git clone git@github.com:opennet-initiative/api.git
 cd api/on_geronimo
 ```
 
+### Via Docker
+
+Siehe [Dockerfile](Dockerfile)
+
 ### Via virtualenv/pip
 
 ```shell
 # getestet mit Debian12
-apt install python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin wget
+apt install --yes python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin libsqlite3-mod-spatialite wget git
 git clone git@github.com:opennet-initiative/api.git
 cd api
 make virtualenv-update
@@ -40,6 +44,7 @@ make virtualenv-update
 ./manage.py migrate
 ./manage.py runserver
 ```
+
 ## Manueller Datenimport
 
 * `./manage.py import_wiki`
