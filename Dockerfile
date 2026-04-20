@@ -15,11 +15,12 @@ FROM debian:12
 
 EXPOSE 8000
 
+RUN apt update && \
+  apt install --yes python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin libsqlite3-mod-spatialite wget git
+
 COPY . /api
 
-RUN apt update && \
-  apt install --yes python3-venv python3-pip libgeos++-dev libproj-dev gdal-bin spatialite-bin libsqlite3-mod-spatialite wget git && \
-  cd api && \
+RUN cd api && \
   make virtualenv-update
 
 ENV PATH="/api/build/venv/bin:$PATH"
